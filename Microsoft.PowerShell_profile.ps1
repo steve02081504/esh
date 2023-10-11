@@ -54,15 +54,13 @@ function sudo {
 . $PSScriptRoot/CHT2CHS.ps1
 
 #对于每个appLabel 创建一个函数用于启动
-$apkList = Show-apks
-$apkList | ForEach-Object {
+Show-apks | ForEach-Object {
 	$AppLabel = CHT2CHS($_.appLabel)
 	$Package = $_.package
 	New-Item -Path Function: -Name $AppLabel -Value {
 		Start-apk -apkSignOrName $Package
 	}
 }
-Remove-Variable apkList
 
 #clear screen#恢复光标位置
 Write-Host -NoNewline "${VirtualTerminal.RestoreCursor}${VirtualTerminal.ClearScreenDown}${VirtualTerminal.Colors.Green}E-Shell"
