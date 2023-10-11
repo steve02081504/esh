@@ -34,3 +34,20 @@ ${VirtualTerminal.ResetColors} = ${VirtualTerminal.Escape} + '39m'
 ${VirtualTerminal.ResetStyles} = ${VirtualTerminal.Escape} + '23m'
 ${VirtualTerminal.Colors.Reset} = ${VirtualTerminal.ResetColors}
 ${VirtualTerminal.Styles.Reset} = ${VirtualTerminal.ResetStyles}
+
+#保存当前光标位置
+${VirtualTerminal.SaveCursor} = ${VirtualTerminal.Escape} + 's'
+#恢复光标位置
+${VirtualTerminal.RestoreCursor} = ${VirtualTerminal.Escape} + 'u'
+#清除从光标到行尾的内容
+${VirtualTerminal.ClearLine} = ${VirtualTerminal.Escape} + 'K'
+#清除从光标到行首的内容
+${VirtualTerminal.ClearLineLeft} = ${VirtualTerminal.Escape} + '1K'
+#清除整行
+${VirtualTerminal.ClearLineAll} = ${VirtualTerminal.Escape} + '2K'
+#清除从光标到屏幕底部的内容
+${VirtualTerminal.ClearScreenDown} = ${VirtualTerminal.Escape} + 'J'
+#清除从屏幕顶部到光标的内容
+${VirtualTerminal.ClearScreenUp} = ${VirtualTerminal.Escape} + '1J'
+#清除整屏
+${VirtualTerminal.ClearScreenAll} = ${VirtualTerminal.Escape} + '2J'
