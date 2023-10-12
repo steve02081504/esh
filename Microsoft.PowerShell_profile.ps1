@@ -44,9 +44,6 @@ function prompt {
 	}
 }
 
-#remove alias "rm" as it is conflict with linux submode's /usr/bin/rm
-Remove-Item -Path Alias:rm
-
 #import appx with -UseWindowsPowerShell to avoid [Operation is not supported on this platform. (0x80131539)]
 Import-Module Appx -UseWindowsPowerShell
 
