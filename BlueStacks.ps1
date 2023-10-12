@@ -9,18 +9,20 @@ function Install-apk{
 function Show-apks{
 	#读取C:\ProgramData\BlueStacks_nxt\Engine\Pie64\AppCache\AppCache.json
 	$AppCache = Get-Content -Path "C:\ProgramData\BlueStacks_nxt\Engine\Pie64\AppCache\AppCache.json" -Raw | ConvertFrom-Json
-	#{
-	#	"activity": "jp.co.cygames.activity.OverrideUnityActivity",
-	#	"appLabel": "公主連結R",
-	#	"iconFileName": "tw.sonet.princessconnect.png",
-	#	"installDate": "22.01.2023",
-	#	"isFullScreen": false,
-	#	"isHomeApp": false,
-	#	"orientation": "",
-	#	"package": "tw.sonet.princessconnect",
-	#	"versionCode": 78,
-	#	"versionName": "3.8.0"
-	#}
+	<#
+	{
+		"activity": "jp.co.cygames.activity.OverrideUnityActivity",
+		"appLabel": "公主連結R",
+		"iconFileName": "tw.sonet.princessconnect.png",
+		"installDate": "22.01.2023",
+		"isFullScreen": false,
+		"isHomeApp": false,
+		"orientation": "",
+		"package": "tw.sonet.princessconnect",
+		"versionCode": 78,
+		"versionName": "3.8.0"
+	}
+	#>
 	$apkList = @()
 	$AppCache | ForEach-Object {
 		$AppLabel = $_.appLabel

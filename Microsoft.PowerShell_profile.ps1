@@ -19,8 +19,30 @@ If ($ImSudo){
 $env:PYTHONIOENCODING="utf-8"
 Invoke-Expression "$(thefuck --alias fk)"
 
+. $PSScriptRoot/linux.ps1
+
 #set prompt same as cmd
-function prompt {"$PWD>"}
+function prompt {
+	if ($PWD.Path.StartsWith($HOME)) {
+		$shortPath = '~' + $PWD.Path.Substring($HOME.Length)
+	}
+	elseif ($PWD.Path.StartsWith(${MSYS.RootPath})) {
+		$shortPath = '/' + $PWD.Path.Substring(${MSYS.RootPath}.Length)
+		$shortPath = $shortPath.Replace('\','/')
+		if($shortPath.StartsWith('//')){
+			$shortPath = $shortPath.Substring(1)
+		}
+	}
+	else {
+		$shortPath = $PWD.Path
+	}
+	if(($shortPath -eq "~") -or ($shortPath -eq "/")){
+		"$shortPath >"
+	}
+	else{
+		"$shortPath>"
+	}
+}
 
 #remove alias "rm" as it is conflict with linux submode's /usr/bin/rm
 Remove-Item -Path Alias:rm
@@ -69,4 +91,5 @@ If ($ImSudo){
 }
 Write-Output " ${VirtualTerminal.Colors.Yellow}v1960.7.17"
 Write-Output "${VirtualTerminal.Styles.Italic}${VirtualTerminal.Colors.BrightMagenta}(c)${VirtualTerminal.Colors.Reset} E-tek Corporation.${VirtualTerminal.Styles.NoItalic} ${VirtualTerminal.Styles.Underline}All rights reserved${VirtualTerminal.Styles.NoUnderline}."
+Write-Output "Type '${VirtualTerminal.Colors.BrightYellow}fk${VirtualTerminal.Colors.Reset}' to fuck typos."
 Write-Output ""
