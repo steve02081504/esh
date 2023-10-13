@@ -181,8 +181,8 @@ function rm{
 Remove-Item -Path Alias:mv
 function mv{
 	param(
-		[string]$Path1,
-		[string]$Path2,
+		[string]$Path,
+		[string]$Destination,
 		#其余的参数
 		[Parameter(ValueFromRemainingArguments = $true)]
 		[string[]]$RemainingArguments
@@ -192,11 +192,11 @@ function mv{
 		#则转换为windows路径
 		$Path = LinuxPathToWindowsPath -Path $Path
 	}
-	if (IsLinuxPath -Path $Path2){
+	if (IsLinuxPath -Path $Destination){
 		#则转换为windows路径
-		$Path2 = LinuxPathToWindowsPath -Path $Path2
+		$Destination = LinuxPathToWindowsPath -Path $Destination
 	}
-	$IsLinuxBin= $Path1.Length -eq 0 -and $Path2.Length -eq 0
+	$IsLinuxBin= $Path.Length -eq 0 -and $Destination.Length -eq 0
 	if ($IsLinuxBin){
 		mv.exe @args
 		return
@@ -233,11 +233,11 @@ function mv{
 		}
 		$RemainingArguments = $RemainingArguments -join " "
 		$RemainingArguments = $RemainingArguments.Trim()
-		mv.exe $Path1 $Path2 $RemainingArguments
+		mv.exe $Path $Destination $RemainingArguments
 	}
 	else{
 		#否则调用Move-Item
-		Move-Item -Path $Path1 -Destination $Path2 $RemainingArguments
+		Move-Item -Path $Path -Destination $Destination $RemainingArguments
 	}
 }
 
@@ -245,8 +245,8 @@ function mv{
 Remove-Item -Path Alias:cp
 function cp{
 	param(
-		[string]$Path1,
-		[string]$Path2,
+		[string]$Path,
+		[string]$Destination,
 		#其余的参数
 		[Parameter(ValueFromRemainingArguments = $true)]
 		[string[]]$RemainingArguments
@@ -256,11 +256,11 @@ function cp{
 		#则转换为windows路径
 		$Path = LinuxPathToWindowsPath -Path $Path
 	}
-	if (IsLinuxPath -Path $Path2){
+	if (IsLinuxPath -Path $Destination){
 		#则转换为windows路径
-		$Path2 = LinuxPathToWindowsPath -Path $Path2
+		$Destination = LinuxPathToWindowsPath -Path $Destination
 	}
-	$IsLinuxBin= $Path1.Length -eq 0 -and $Path2.Length -eq 0
+	$IsLinuxBin= $Path.Length -eq 0 -and $Destination.Length -eq 0
 	if ($IsLinuxBin){
 		cp.exe @args
 		return
@@ -297,11 +297,11 @@ function cp{
 		}
 		$RemainingArguments = $RemainingArguments -join " "
 		$RemainingArguments = $RemainingArguments.Trim()
-		cp.exe $Path1 $Path2 $RemainingArguments
+		cp.exe $Path $Destination $RemainingArguments
 	}
 	else{
 		#否则调用Copy-Item
-		Copy-Item -Path $Path1 -Destination $Path2 $RemainingArguments
+		Copy-Item -Path $Path -Destination $Destination $RemainingArguments
 	}
 }
 
