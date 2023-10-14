@@ -140,7 +140,6 @@ Set-PSReadlineKeyHandler -Key Tab -ScriptBlock {
 	$BeforeCursor = $Line.Substring(0, $Cursor)
 	$Rest = $Line.Substring($Cursor)
 	$WordToComplete = $BeforeCursor.Split(" ")[-1]
-	$BeforeWord = $BeforeCursor.Substring($WordToComplete.Length)
 	#处理"
 	$HasQuote = $false
 	if ($WordToComplete.EndsWith('"')){
@@ -148,7 +147,6 @@ Set-PSReadlineKeyHandler -Key Tab -ScriptBlock {
 		while (-not $WordToComplete.StartsWith('"')){
 			$WordToComplete = $BeforeCursor.Substring(0, $BeforeCursor.Length - $WordToComplete.Length - 1).Split(" ")[-1] + " " + $WordToComplete
 		}
-		$BeforeWord = $BeforeCursor.Substring($WordToComplete.Length)
 		$WordToComplete = $WordToComplete.Substring(1, $WordToComplete.Length - 2)
 	}
 	#若当前单词以/开头
