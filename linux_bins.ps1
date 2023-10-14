@@ -19,6 +19,12 @@ function cd{
 		cd.exe @args
 		return
 	}
+	if($RemainingArguments -eq $null){
+		#若RemainingArguments是空的
+		#则调用Set-Location
+		Set-Location -Path $Path
+		return
+	}
 	$LinuxBinArguments = @("-l", "--login", "-p", "--physical", "-n", "--no-cdpath", "-P", "--ignore-pwd", "-@", "--stack", "--help", "--version")
 	$RemainingArguments | ForEach-Object{
 		$arg = $_
@@ -78,6 +84,12 @@ function ls{
 		ls.exe @args
 		return
 	}
+	if($RemainingArguments -eq $null){
+		#若RemainingArguments是空的
+		#则调用Get-ChildItem
+		Get-ChildItem -Path $Path
+		return
+	}
 	$LinuxBinArguments = @("-a", "--all", "-A", "--almost-all", "-b", "--escape", "-B", "--ignore-backups", "-c", "--time=ctime", "-C", "--format=vertical", "-d", "--directory", "-D", "--dired", "-f", "--format=across", "-F", "--classify", "-g", "--group-directories-first", "-G", "--no-group", "-h", "--human-readable", "-H", "--si", "-i", "--inode", "-I", "--ignore=", "-k", "--kibibytes", "-l", "--format=long", "-L", "--dereference", "-m", "--format=commas", "-n", "--numeric-uid-gid", "-N", "--literal", "-o", "-1", "--format=single-column", "-p", "--indicator-style=slash", "-q", "--hide-control-chars", "-Q", "--quote-name", "-r", "--reverse", "-R", "--recursive", "-s", "--size", "-S", "--sort=size", "-t", "--sort=time", "-T", "--tabsize=COLS", "-u", "--time=atime", "-U", "--sort=atime", "-v", "--sort=version", "-w", "--width=COLS", "-x", "--format=across", "-X", "--sort=extension", "-Z", "--context", "--help", "--version")
 	$RemainingArguments | ForEach-Object{
 		$arg = $_
@@ -135,6 +147,12 @@ function rm{
 	$IsLinuxBin= $Path.Length -eq 0
 	if ($IsLinuxBin){
 		rm.exe @args
+		return
+	}
+	if($RemainingArguments -eq $null){
+		#若RemainingArguments是空的
+		#则调用Remove-Item
+		Remove-Item -Path $Path
 		return
 	}
 	$LinuxBinArguments = @("-f", "--force", "-i", "--interactive", "-I", "--interactive=once", "--one-file-system", "--no-preserve-root", "--preserve-root", "-r", "-R", "--recursive", "--help", "--version")
@@ -201,6 +219,12 @@ function mv{
 		mv.exe @args
 		return
 	}
+	if($RemainingArguments -eq $null){
+		#若RemainingArguments是空的
+		#则调用Move-Item
+		Move-Item -Path $Path -Destination $Destination
+		return
+	}
 	$LinuxBinArguments = @("-b", "--backup", "-f", "--force", "-i", "--interactive", "-n", "--no-clobber", "-u", "--update", "-v", "--verbose", "--help", "--version")
 	$RemainingArguments | ForEach-Object{
 		$arg = $_
@@ -265,6 +289,12 @@ function cp{
 		cp.exe @args
 		return
 	}
+	if($RemainingArguments -eq $null){
+		#若RemainingArguments是空的
+		#则调用Copy-Item
+		Copy-Item -Path $Path -Destination $Destination
+		return
+	}
 	$LinuxBinArguments = @( "-a", "--archive", "-b", "--backup", "-f", "--force", "-i", "--interactive", "-l", "--link", "-L", "--dereference", "-n", "--no-clobber", "-P", "--no-dereference", "-p", "--preserve", "-R", "-r", "--recursive", "-s", "--symbolic-link", "-S", "--suffix=SUFFIX", "-t", "--target-directory=DIRECTORY", "-T", "--no-target-directory", "-u", "--update", "-v", "--verbose", "--help", "--version")
 	$RemainingArguments | ForEach-Object{
 		$arg = $_
@@ -320,6 +350,12 @@ function mkdir{
 	$IsLinuxBin= $Path.Length -eq 0
 	if ($IsLinuxBin){
 		mkdir.exe @args
+		return
+	}
+	if($RemainingArguments -eq $null){
+		#若RemainingArguments是空的
+		#则调用New-Item
+		New-Item -Path $Path -ItemType Directory
 		return
 	}
 	$LinuxBinArguments = @("-m", "--mode=MODE", "-p", "--parents", "-v", "--verbose", "--help", "--version")
@@ -379,6 +415,12 @@ function touch{
 		touch.exe @args
 		return
 	}
+	if($RemainingArguments -eq $null){
+		#若RemainingArguments是空的
+		#则调用New-Item
+		New-Item -Path $Path -ItemType File
+		return
+	}
 	$LinuxBinArguments = @( "-a", "--time=access", "-c", "--no-create", "-d", "--date=STRING", "-f", "--force", "-h", "--no-dereference", "-m", "--time=modification", "-r", "--reference=FILE", "-t", "--time=WORD", "-v", "--verbose", "--help", "--version")
 	$RemainingArguments | ForEach-Object{
 		$arg = $_
@@ -436,6 +478,12 @@ function cat{
 	$IsLinuxBin= $Path.Length -eq 0
 	if ($IsLinuxBin){
 		cat.exe @args
+		return
+	}
+	if($RemainingArguments -eq $null){
+		#若RemainingArguments是空的
+		#则调用Get-Content
+		Get-Content -Path $Path
 		return
 	}
 	$LinuxBinArguments = @( "-A", "--show-all", "-b", "--number-nonblank", "-e", "--show-ends", "-E", "--show-ends", "-n", "--number", "-s", "--squeeze-blank", "-t", "--show-tabs", "-T", "--show-tabs", "-u", "--unbuffered", "-v", "--show-nonprinting", "-w", "--width=COLS", "--help", "--version")

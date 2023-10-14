@@ -1,9 +1,30 @@
 . $PSScriptRoot/VirtualTerminal.ps1
-. $PSScriptRoot/Console.ps1
 #保存当前光标位置
 Write-Output "${VirtualTerminal.SaveCursor}E-Shell v1765.3.13"
 Write-Output "Loading..."
 Write-Output ""
+
+trap {
+	Write-Output ""
+	Write-Output "${VirtualTerminal.Colors.Red}Error: ${VirtualTerminal.Colors.Reset}$($_.Exception.Message)"
+}
+
+. $PSScriptRoot/Console.ps1
+
+function Max {
+	param(
+		[Parameter(ValueFromRemainingArguments = $true)]
+		[int[]]$RemainingArguments
+	)
+	$RemainingArguments | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum
+}
+function Min {
+	param(
+		[Parameter(ValueFromRemainingArguments = $true)]
+		[int[]]$RemainingArguments
+	)
+	$RemainingArguments | Measure-Object -Minimum | Select-Object -ExpandProperty Minimum
+}
 
 #set the title same as cmd
 $host.UI.RawUI.WindowTitle = "命令提示符"
@@ -21,28 +42,8 @@ Invoke-Expression "$(thefuck --alias fk)"
 
 . $PSScriptRoot/linux.ps1
 
-#set prompt same as cmd
-function prompt {
-	if ($PWD.Path.StartsWith($HOME)) {
-		$shortPath = '~' + $PWD.Path.Substring($HOME.Length)
-	}
-	elseif ($PWD.Path.StartsWith(${MSYS.RootPath})) {
-		$shortPath = '/' + $PWD.Path.Substring(${MSYS.RootPath}.Length)
-		$shortPath = $shortPath.Replace('\','/')
-		if($shortPath.StartsWith('//')){
-			$shortPath = $shortPath.Substring(1)
-		}
-	}
-	else {
-		$shortPath = $PWD.Path
-	}
-	if(($shortPath -eq "~") -or ($shortPath -eq "/")){
-		"$shortPath >"
-	}
-	else{
-		"$shortPath>"
-	}
-}
+#set prompt
+. $PSScriptRoot/prompt.ps1
 
 #import appx with -UseWindowsPowerShell to avoid [Operation is not supported on this platform. (0x80131539)]
 Import-Module Appx -UseWindowsPowerShell
