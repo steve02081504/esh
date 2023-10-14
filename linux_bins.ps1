@@ -79,15 +79,16 @@ function ls{
 		#则转换为windows路径
 		$Path = LinuxPathToWindowsPath -Path $Path
 	}
-	$IsLinuxBin= $Path.Length -eq 0
-	if ($IsLinuxBin){
-		ls.exe @args
-		return
-	}
-	if($RemainingArguments -eq $null){
+	$IsLinuxBin= $false
+	if($null -eq $RemainingArguments){
 		#若RemainingArguments是空的
 		#则调用Get-ChildItem
-		Get-ChildItem -Path $Path
+		if ($Path.Length -eq 0){
+			Get-ChildItem
+		}
+		else{
+			Get-ChildItem -Path $Path
+		}
 		return
 	}
 	$LinuxBinArguments = @("-a", "--all", "-A", "--almost-all", "-b", "--escape", "-B", "--ignore-backups", "-c", "--time=ctime", "-C", "--format=vertical", "-d", "--directory", "-D", "--dired", "-f", "--format=across", "-F", "--classify", "-g", "--group-directories-first", "-G", "--no-group", "-h", "--human-readable", "-H", "--si", "-i", "--inode", "-I", "--ignore=", "-k", "--kibibytes", "-l", "--format=long", "-L", "--dereference", "-m", "--format=commas", "-n", "--numeric-uid-gid", "-N", "--literal", "-o", "-1", "--format=single-column", "-p", "--indicator-style=slash", "-q", "--hide-control-chars", "-Q", "--quote-name", "-r", "--reverse", "-R", "--recursive", "-s", "--size", "-S", "--sort=size", "-t", "--sort=time", "-T", "--tabsize=COLS", "-u", "--time=atime", "-U", "--sort=atime", "-v", "--sort=version", "-w", "--width=COLS", "-x", "--format=across", "-X", "--sort=extension", "-Z", "--context", "--help", "--version")
@@ -122,11 +123,21 @@ function ls{
 		}
 		$RemainingArguments = $RemainingArguments -join " "
 		$RemainingArguments = $RemainingArguments.Trim()
-		ls.exe $Path $RemainingArguments
+		if ($Path.Length -eq 0){
+			ls.exe $RemainingArguments
+		}
+		else{
+			ls.exe $Path $RemainingArguments
+		}
 	}
 	else{
 		#否则调用Get-ChildItem
-		Get-ChildItem -Path $Path $RemainingArguments
+		if ($Path.Length -eq 0){
+			Get-ChildItem $RemainingArguments
+		}
+		else{
+			Get-ChildItem -Path $Path $RemainingArguments
+		}
 	}
 }
 
