@@ -1,7 +1,6 @@
 . $PSScriptRoot/VirtualTerminal.ps1
 #保存光标位置便于后面清除输出
-$CursorPos = $host.UI.RawUI.CursorPosition
-Write-Output "E-Shell v1765.3.13"
+Write-Output "${VirtualTerminal.SaveCursor}E-Shell v1765.3.13"
 Write-Output "Loading..."
 Write-Output ""
 
@@ -29,12 +28,7 @@ If ($ImSudo){
 . $PSScriptRoot/CHT2CHS.ps1
 . $PSScriptRoot/BlueStacks.ps1
 
-#回复光标位置
-$host.UI.RawUI.CursorPosition = $CursorPos
-Remove-Variable CursorPos
-Write-Host -NoNewline ${VirtualTerminal.ClearScreenDown}
-#
-Write-Host -NoNewline "${VirtualTerminal.Colors.Green}E-Shell"
+Write-Host -NoNewline "${VirtualTerminal.RestoreCursor}${VirtualTerminal.ClearScreenDown}${VirtualTerminal.Colors.Green}E-Shell"
 If ($ImSudo){
 	Write-Host -NoNewline "${VirtualTerminal.Colors.Cyan}(root)"
 }

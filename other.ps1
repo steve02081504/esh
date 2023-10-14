@@ -1,6 +1,8 @@
 function EShell {
 	pwsh.exe -NoProfileLoadTime -nologo
 }
+#设定别名esh
+Set-Alias esh EShell
 function sudo {
 	param(
 		[string]$Command
