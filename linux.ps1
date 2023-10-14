@@ -158,7 +158,7 @@ Set-PSReadlineKeyHandler -Key Tab -ScriptBlock {
 		}
 		$CursorOfBegin=$Cursor-$WordToComplete.Length
 		$CursorOfEnd=$Cursor-$CursorOfBegin+$WordAfterComplete.Length
-		[Microsoft.PowerShell.PSConsoleReadLine]::Replace($CursorOfBegin,$Cursor,$WordAfterComplete)
+		[Microsoft.PowerShell.PSConsoleReadLine]::Replace($CursorOfBegin,$WordToComplete.Length,$WordAfterComplete)
 		[Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition($CursorOfEnd)
 		[Microsoft.PowerShell.PSConsoleReadLine]::MenuComplete()
 		[Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$OriLine, [ref]$Cursor)
