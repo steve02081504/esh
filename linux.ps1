@@ -107,7 +107,6 @@ Set-PSReadlineKeyHandler -Key Enter -ScriptBlock {
 	$Cursor = $null
 	[Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$OriLine, [ref]$Cursor)
 	$Line = $OriLine.Trim()
-	Write-Host ""
 	#自行首获取可执行文件路径
 	$Executable = $Line.Split(" ")[0]
 	$Rest = $Line.Substring($Executable.Length).Trim()
@@ -119,6 +118,7 @@ Set-PSReadlineKeyHandler -Key Enter -ScriptBlock {
 	}
 	#若当前行以/开头
 	if ($Executable.StartsWith("/") -or $Executable.StartsWith("~")){
+		Write-Host ""
 		[Microsoft.PowerShell.PSConsoleReadLine]::CancelLine()
 		Write-Host "`b`b  "
 		#则转换为windows路径

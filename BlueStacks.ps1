@@ -73,3 +73,12 @@ function Start-apk {
 		. "C:\Program Files\BlueStacks_nxt\HD-Player.exe" --instance Pie64 --cmd launchApp --package "$apkSign"
 	}
 }
+
+#对于每个appLabel 创建一个函数用于启动
+Show-apks | ForEach-Object {
+	$AppLabel = CHT2CHS($_.appLabel)
+	$Package = $_.package
+	New-Item -Path Function: -Name $AppLabel -Value {
+		Start-apk -apkSignOrName $Package
+	}
+} | Out-Null

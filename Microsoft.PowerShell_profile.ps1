@@ -1,108 +1,40 @@
 . $PSScriptRoot/VirtualTerminal.ps1
-#保存当前光标位置
-Write-Output "${VirtualTerminal.SaveCursor}E-Shell v1765.3.13"
+#保存光标位置便于后面清除输出
+$CursorPos = $host.UI.RawUI.CursorPosition
+Write-Output "E-Shell v1765.3.13"
 Write-Output "Loading..."
 Write-Output ""
 
-trap {
-	Write-Output ""
-	Write-Output "${VirtualTerminal.Colors.Red}Error: ${VirtualTerminal.Colors.Reset}$($_.Exception.Message)"
-}
+. $PSScriptRoot/base.ps1
 
 . $PSScriptRoot/Console.ps1
-
-function Max {
-	param(
-		[Parameter(ValueFromRemainingArguments = $true)]
-		[int[]]$RemainingArguments
-	)
-	$RemainingArguments | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum
-}
-function Min {
-	param(
-		[Parameter(ValueFromRemainingArguments = $true)]
-		[int[]]$RemainingArguments
-	)
-	$RemainingArguments | Measure-Object -Minimum | Select-Object -ExpandProperty Minimum
-}
-
 #set the title same as cmd
 $host.UI.RawUI.WindowTitle = "命令提示符"
 Set-ConsoleIcon("$PSScriptRoot/img/cmd.ico")
-#as root?
-$ImSudo=([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] “Administrator”)
 #if as root
 If ($ImSudo){
 	$host.UI.RawUI.WindowTitle += "(root)"
 }
-
-#set thefuck as alias "fk"
-$env:PYTHONIOENCODING="utf-8"
-Invoke-Expression "$(thefuck --alias fk)"
 
 . $PSScriptRoot/linux.ps1
 
 #set prompt
 . $PSScriptRoot/prompt.ps1
 
-#import appx with -UseWindowsPowerShell to avoid [Operation is not supported on this platform. (0x80131539)]
-Import-Module Appx -UseWindowsPowerShell
+#一些耗时的后台任务
+. $PSScriptRoot/BackgroundLoading.ps1
 
-# https://github.com/ryanoasis/nerd-fonts/releases/latest/download/FiraCode.zip
-if (-not (Get-Module -ListAvailable -Name Terminal-Icons)) {
-	Install-Module -Name Terminal-Icons -Repository PSGallery
-}
-Import-Module -Name Terminal-Icons
+. $PSScriptRoot/other.ps1
 
-function EShell {
-	pwsh.exe -NoProfileLoadTime -nologo
-}
-function sudo {
-	param(
-		[string]$Command
-	)
-	if ([string]::IsNullOrWhiteSpace($Command)) {
-		# If the command is empty, open a new PowerShell shell with admin privileges
-		Start-Process -Wait -FilePath "wt.exe" -ArgumentList "pwsh.exe -NoProfileLoadTime -nologo" -Verb runas
-	} else {
-		# Otherwise, run the command as an admin
-		Start-Process -Wait -FilePath "wt.exe" -ArgumentList "$Command" -Verb runas
-	}
-}
-function mklink {
-	param(
-		[Parameter(ValueFromRemainingArguments = $true)]
-		[string[]]$RemainingArguments
-	)
-	#对于每个参数
-	$RemainingArguments = $RemainingArguments | ForEach-Object {
-		#若参数长度大于2且是linux路径
-		if (($_.Length -gt 2) -and (IsLinuxPath($_))) {
-			#转换为windows路径
-			LinuxPathToWindowsPath($_)
-		}
-		else{
-			$_
-		}
-	}
-	#调用cmd的mklink
-	. cmd /c mklink $RemainingArguments
-}
-
-. $PSScriptRoot/BlueStacks.ps1
 . $PSScriptRoot/CHT2CHS.ps1
+. $PSScriptRoot/BlueStacks.ps1
 
-#对于每个appLabel 创建一个函数用于启动
-Show-apks | ForEach-Object {
-	$AppLabel = CHT2CHS($_.appLabel)
-	$Package = $_.package
-	New-Item -Path Function: -Name $AppLabel -Value {
-		Start-apk -apkSignOrName $Package
-	}
-}
-
-#clear screen#恢复光标位置
-Write-Host -NoNewline "${VirtualTerminal.RestoreCursor}${VirtualTerminal.ClearScreenDown}${VirtualTerminal.Colors.Green}E-Shell"
+#回复光标位置
+$host.UI.RawUI.CursorPosition = $CursorPos
+Remove-Variable CursorPos
+Write-Host -NoNewline ${VirtualTerminal.ClearScreenDown}
+#
+Write-Host -NoNewline "${VirtualTerminal.Colors.Green}E-Shell"
 If ($ImSudo){
 	Write-Host -NoNewline "${VirtualTerminal.Colors.Cyan}(root)"
 }
