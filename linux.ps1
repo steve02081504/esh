@@ -120,6 +120,7 @@ Set-PSReadlineKeyHandler -Key Enter -ScriptBlock {
 	if ($Executable.StartsWith("/") -or $Executable.StartsWith("~")){
 		Write-Host ""
 		[Microsoft.PowerShell.PSConsoleReadLine]::CancelLine()
+		[Microsoft.PowerShell.PSConsoleReadLine]::AddToHistory($OriLine)
 		Write-Host "`b`b  "
 		#则转换为windows路径
 		$Executable = LinuxPathToWindowsPath -Path $Executable
