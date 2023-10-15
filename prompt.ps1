@@ -61,11 +61,13 @@ function prompt {
 		$prompt_str=PromptAddBlock $prompt_str $git_prompt_str
 	}
 	$gitRepoRoot = git rev-parse --show-toplevel 2> $null
-	$packageJson = Get-Content -Path package.json -Raw -ErrorAction SilentlyContinue
-	$npm_prompt_str = $null
-	if(($null -eq $packageJson) -and ($null -ne $gitRepoRoot)){
+	if(Test-Path package.json){
+		$packageJson = Get-Content -Path package.json -Raw -ErrorAction SilentlyContinue
+	}
+	elseif (($null -ne $gitRepoRoot) -and (Test-Path "$gitRepoRoot/package.json")){
 		$packageJson = Get-Content -Path "$gitRepoRoot/package.json" -Raw -ErrorAction SilentlyContinue
 	}
+	$npm_prompt_str = $null
 	if($null -ne $packageJson){
 		$packageJson = ConvertFrom-Json $packageJson
 		$npmRepoName = $packageJson.name

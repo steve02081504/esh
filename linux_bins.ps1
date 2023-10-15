@@ -1,5 +1,7 @@
 #让我们升级cd来让它可以处理linux路径
-Remove-Item -Path Alias:cd
+if (Test-Path -Path Alias:cd){
+	Remove-Item -Path Alias:cd
+}
 function cd{
 	param(
 		[string]$Path,
@@ -66,7 +68,9 @@ function cd{
 }
 
 #让我们升级ls来让它可以处理linux路径
-Remove-Item -Path Alias:ls
+if (Test-Path -Path Alias:ls){
+	Remove-Item -Path Alias:ls
+}
 function ls{
 	param(
 		[string]$Path,
@@ -86,8 +90,11 @@ function ls{
 		if ($Path.Length -eq 0){
 			Get-ChildItem
 		}
-		else{
+		elseif(Test-Path -Path $Path){
 			Get-ChildItem -Path $Path
+		}
+		else{
+			ls.exe $(WindowsPathToLinuxPath($Path))
 		}
 		return
 	}
@@ -142,7 +149,9 @@ function ls{
 }
 
 #让我们升级rm来让它可以处理linux路径
-Remove-Item -Path Alias:rm
+if (Test-Path -Path Alias:rm){
+	Remove-Item -Path Alias:rm
+}
 function rm{
 	param(
 		[string]$Path,
@@ -207,7 +216,9 @@ function rm{
 }
 
 #让我们升级mv来让它可以处理linux路径
-Remove-Item -Path Alias:mv
+if (Test-Path -Path Alias:mv){
+	Remove-Item -Path Alias:mv
+}
 function mv{
 	param(
 		[string]$Path,
@@ -277,7 +288,9 @@ function mv{
 }
 
 #让我们升级cp来让它可以处理linux路径
-Remove-Item -Path Alias:cp
+if (Test-Path -Path Alias:cp){
+	Remove-Item -Path Alias:cp
+}
 function cp{
 	param(
 		[string]$Path,
@@ -473,7 +486,9 @@ function touch{
 }
 
 #让我们升级cat来让它可以处理linux路径
-Remove-Item -Path Alias:cat
+if (Test-Path -Path Alias:cat){
+	Remove-Item -Path Alias:cat
+}
 function cat{
 	param(
 		[string]$Path,

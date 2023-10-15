@@ -44,7 +44,7 @@ function WindowsPathToLinuxPath{
 	else{
 		#否则根据盘符转换
 		$DriveLetter = $Path.Substring(0, 1)
-		$Path = $Path.Substring(2)
+		$Path = $Path.Substring(3)
 		$Path = "/${DriveLetter}/${Path}"
 	}
 	$Path = $Path.Replace("\", "/")

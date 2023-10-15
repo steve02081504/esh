@@ -78,7 +78,7 @@ function Start-apk {
 Show-apks | ForEach-Object {
 	$AppLabel = CHT2CHS($_.appLabel)
 	$Package = $_.package
-	New-Item -Path Function: -Name $AppLabel -Value {
+	New-Item -Force -Path Function: -Name "App.$AppLabel" -Value {
 		Start-apk -apkSignOrName $Package
 	}
 } | Out-Null
