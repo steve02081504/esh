@@ -19,7 +19,7 @@ function cd{
 		cd.exe @args
 		return
 	}
-	if($RemainingArguments -eq $null){
+	if($null -eq $RemainingArguments){
 		#若RemainingArguments是空的
 		#则调用Set-Location
 		Set-Location -Path $Path
@@ -157,10 +157,10 @@ function rm{
 	}
 	$IsLinuxBin= $Path.Length -eq 0
 	if ($IsLinuxBin){
-		rm.exe @args
+		rm.exe $RemainingArguments
 		return
 	}
-	if($RemainingArguments -eq $null){
+	if($null -eq $RemainingArguments){
 		#若RemainingArguments是空的
 		#则调用Remove-Item
 		Remove-Item -Path $Path
@@ -230,7 +230,7 @@ function mv{
 		mv.exe @args
 		return
 	}
-	if($RemainingArguments -eq $null){
+	if($null -eq $RemainingArguments){
 		#若RemainingArguments是空的
 		#则调用Move-Item
 		Move-Item -Path $Path -Destination $Destination
@@ -300,7 +300,7 @@ function cp{
 		cp.exe @args
 		return
 	}
-	if($RemainingArguments -eq $null){
+	if($null -eq $RemainingArguments){
 		#若RemainingArguments是空的
 		#则调用Copy-Item
 		Copy-Item -Path $Path -Destination $Destination
@@ -363,7 +363,7 @@ function mkdir{
 		mkdir.exe @args
 		return
 	}
-	if($RemainingArguments -eq $null){
+	if($null -eq $RemainingArguments){
 		#若RemainingArguments是空的
 		#则调用New-Item
 		New-Item -Path $Path -ItemType Directory
@@ -426,7 +426,7 @@ function touch{
 		touch.exe @args
 		return
 	}
-	if($RemainingArguments -eq $null){
+	if($null -eq $RemainingArguments){
 		#若RemainingArguments是空的
 		#则调用New-Item
 		New-Item -Path $Path -ItemType File
@@ -491,7 +491,7 @@ function cat{
 		cat.exe @args
 		return
 	}
-	if($RemainingArguments -eq $null){
+	if($null -eq $RemainingArguments){
 		#若RemainingArguments是空的
 		#则调用Get-Content
 		Get-Content -Path $Path
