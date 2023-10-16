@@ -24,4 +24,4 @@ function Format-Code {
 	}
 }
 
-Format-Code $PSScriptRoot
+Format-Code $PSScriptRoot/src

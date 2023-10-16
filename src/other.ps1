@@ -69,10 +69,12 @@ function shutdown {
 	)
 	if ($RemainingArguments.Length -eq 0) {
 		#默认为立即关机
-		$RemainingArguments = "/s /t 0"
+		shutdown.exe /s /t 0
 	}
-	#关机
-	shutdown.exe $RemainingArguments
+	else {
+		#关机
+		shutdown.exe $RemainingArguments
+	}
 }
 Set-Alias poweroff shutdown
 
