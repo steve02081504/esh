@@ -26,6 +26,7 @@ function PromptAddBlock {
 	}
 	return $prompt_str + $block_str
 }
+. $PSScriptRoot\ukagaka.ps1
 function global:prompt {
 	if ($PWD.Path.StartsWith($HOME)) {
 		$shortPath = '~' + $PWD.Path.Substring($HOME.Length)
@@ -83,6 +84,61 @@ function global:prompt {
 	}
 	if ($npm_prompt_str) {
 		$prompt_str = PromptAddBlock $prompt_str $npm_prompt_str
+	}
+	$ukagaka_prompt_str = $null
+	$ukagakaDescription = Test-Ukagaka-Directory $PWD.Path
+	if ($ukagakaDescription.Count -gt 0) {
+		switch ($x = $ukagakaDescription["type"]) {
+			"ghost" {
+				$ukagaka_prompt_str = " ${VirtualTerminal.Colors.Green}󰀆 $x"
+				if ($ukagakaDescription["name"]) {
+					$ukagaka_prompt_str = "$ukagaka_prompt_str $($ukagakaDescription[`"name`"])"
+					if ($ukagakaDescription["sakura.name"]) {
+						$ukagaka_prompt_str = "$ukagaka_prompt_str($($ukagakaDescription[`"sakura.name`"])"
+						if ($ukagakaDescription["kero.name"]) {
+							$ukagaka_prompt_str = "$ukagaka_prompt_str&$($ukagakaDescription[`"kero.name`"])"
+						}
+						$ukagaka_prompt_str = "$ukagaka_prompt_str)"
+					}
+				}
+				elseif ($ukagakaDescription["sakura.name"]) {
+					$ukagaka_prompt_str = "$ukagaka_prompt_str $($ukagakaDescription[`"sakura.name`"])"
+					if ($ukagakaDescription["kero.name"]) {
+						$ukagaka_prompt_str = "$ukagaka_prompt_str&$($ukagakaDescription[`"kero.name`"])"
+					}
+				}
+			}
+			"shell" {
+				$ukagaka_prompt_str = " ${VirtualTerminal.Colors.Green}󱓨 $x"
+				if ($ukagakaDescription["name"]) {
+					$ukagaka_prompt_str = "$ukagaka_prompt_str $($ukagakaDescription[`"name`"])"
+				}
+			}
+			"balloon" {
+				$ukagaka_prompt_str = " ${VirtualTerminal.Colors.Green}󰍡 $x"
+				if ($ukagakaDescription["name"]) {
+					$ukagaka_prompt_str = "$ukagaka_prompt_str $($ukagakaDescription[`"name`"])"
+				}
+			}
+			default {
+				$ukagaka_prompt_str = " ${VirtualTerminal.Colors.Green} $x"
+				if ($ukagakaDescription["name"]) {
+					$ukagaka_prompt_str = "$ukagaka_prompt_str $($ukagakaDescription[`"name`"])"
+				}
+			}
+		}
+		if ($ukagakaDescription["craftman"]) {
+			$ukagaka_prompt_str = PromptAddBlock $ukagaka_prompt_str " by $($ukagakaDescription[`"craftman`"])"
+		}
+		if ($ukagakaDescription["githubrepo"]) {
+			$ukagaka_prompt_str = PromptAddBlock $ukagaka_prompt_str " @ <$($ukagakaDescription[`"githubrepo`"])>"
+		}
+		elseif ($ukagakaDescription["craftmanurl"]) {
+			$ukagaka_prompt_str = PromptAddBlock $ukagaka_prompt_str " @ <$($ukagakaDescription[`"craftmanurl`"])>"
+		}
+	}
+	if ($ukagaka_prompt_str) {
+		$prompt_str = PromptAddBlock $prompt_str $ukagaka_prompt_str
 	}
 	$prompt_str = PromptNewlineCheck ($prompt_str)
 	"$prompt_str ${VirtualTerminal.Colors.Reset}>"
