@@ -1,5 +1,5 @@
-#as root?
-$ImSudo=([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] “Administrator”)
+﻿#as root?
+$ImSudo = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]“Administrator”)
 function Max {
 	param(
 		[Parameter(ValueFromRemainingArguments = $true)]
@@ -27,15 +27,15 @@ function cmd_args_convert {
 		#将参数转换为字符串
 		return $Arguments -join ' '
 	}
-	else{
-		if(($Arguments.IndexOf('"') -ge 0) -or ($Arguments.IndexOf(' ') -ge 0)){
-			$Arguments = '"'+$Arguments.Replace('"', '"""')+'"'
+	else {
+		if (($Arguments.IndexOf('"') -ge 0) -or ($Arguments.IndexOf(' ') -ge 0)) {
+			$Arguments = '"' + $Arguments.Replace('"','"""') + '"'
 		}
 		return $Arguments
 	}
 }
 function pwsh_args_convert {
-	param (
+	param(
 		$Arguments
 	)
 	#若参数是数组
@@ -47,10 +47,24 @@ function pwsh_args_convert {
 		#将参数转换为字符串
 		return $Arguments -join ' '
 	}
-	else{
-		if(($Arguments.IndexOf('"') -ge 0) -or ($Arguments.IndexOf(' ') -ge 0)){
-			$Arguments = '"'+$Arguments.Replace('"', '`"')+'"'
+	else {
+		if (($Arguments.IndexOf('"') -ge 0) -or ($Arguments.IndexOf(' ') -ge 0)) {
+			$Arguments = '"' + $Arguments.Replace('"','`"') + '"'
 		}
 		return $Arguments
+	}
+}
+function Test-Command {
+	param(
+		$Command
+	)
+	#检查命令是否存在
+	if (Get-Command $Command -ErrorAction SilentlyContinue) {
+		return $true
+	}
+	else {
+		#移除$error中的最后一个错误
+		$error.RemoveAt($error.Count - 1)
+		return $false
 	}
 }

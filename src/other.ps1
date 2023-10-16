@@ -1,5 +1,10 @@
-function EShell {
-	pwsh.exe -NoProfileLoadTime -nologo
+﻿function EShell {
+	if ($PSVersionTable.PSVersion -gt 7.3) {
+		pwsh.exe -NoProfileLoadTime -nologo
+	}
+	else {
+		pwsh.exe -nologo
+	}
 }
 #设定别名esh
 Set-Alias esh EShell
@@ -8,14 +13,30 @@ function sudo {
 		[Parameter(ValueFromRemainingArguments = $true)]
 		[string[]]$RemainingArguments
 	)
+	$pwshArguments = "-nologo"
+	if ($PSVersionTable.PSVersion -gt 7.3) {
+		$pwshArguments = "-NoProfileLoadTime -nologo"
+	}
 	if ($RemainingArguments.Length -eq 0) {
 		# If the command is empty, open a new PowerShell shell with admin privileges
-		Start-Process -Wait -FilePath "wt.exe" -ArgumentList "pwsh.exe -NoProfileLoadTime -nologo" -Verb runas
+		if (Test-Command wt.exe) {
+			Start-Process -Wait -FilePath "wt.exe" -ArgumentList "pwsh.exe $pwshArguments" -Verb runas
+		}
+		else {
+			Start-Process -Wait -FilePath "pwsh.exe" -ArgumentList $pwshArguments -Verb runas
+		}
 	} else {
 		# Otherwise, run the command as an admin
-		$Arguments = @("pwsh","-Command",$(pwsh_args_convert($RemainingArguments)))
-		$Arguments = (cmd_args_convert($Arguments)+'').Replace('"', '\"')
-		Start-Process -Wait -FilePath "wt.exe" -ArgumentList $Arguments -Verb runas
+		if (Test-Command wt.exe) {
+			$Arguments = @("pwsh","-Command",$(pwsh_args_convert ($RemainingArguments)))
+			$Arguments = cmd_args_convert ($Arguments)
+			Start-Process -Wait -FilePath "wt.exe" -ArgumentList $Arguments.Replace('"','\"') -Verb runas
+		}
+		else {
+			$Arguments = @("-Command",$(pwsh_args_convert ($RemainingArguments)))
+			$Arguments = cmd_args_convert ($Arguments)
+			Start-Process -Wait -FilePath "pwsh.exe" -ArgumentList "$pwshArguments $Arguments" -Verb runas
+		}
 	}
 }
 function mklink {
@@ -26,11 +47,11 @@ function mklink {
 	#对于每个参数
 	$RemainingArguments = $RemainingArguments | ForEach-Object {
 		#若参数长度大于2且是linux路径
-		if (($_.Length -gt 2) -and (IsLinuxPath($_))) {
+		if (($_.Length -gt 2) -and (IsLinuxPath ($_))) {
 			#转换为windows路径
-			LinuxPathToWindowsPath($_)
+			LinuxPathToWindowsPath ($_)
 		}
-		else{
+		else {
 			$_
 		}
 	}
@@ -46,7 +67,7 @@ function shutdown {
 		[Parameter(ValueFromRemainingArguments = $true)]
 		[string[]]$RemainingArguments
 	)
-	if($RemainingArguments.Length -eq 0){
+	if ($RemainingArguments.Length -eq 0) {
 		#默认为立即关机
 		$RemainingArguments = "/s /t 0"
 	}
@@ -56,7 +77,7 @@ function shutdown {
 Set-Alias poweroff shutdown
 
 function poweron {
-	Write-Host "This coputer is already on."
+	Write-Host "This computer is already powered on."
 }
 
 function clear-emptys {
@@ -73,11 +94,11 @@ function clear-emptys {
 	#对于每个参数
 	$paths = $paths | ForEach-Object {
 		#若参数是linux路径
-		if (IsLinuxPath($_)) {
+		if (IsLinuxPath ($_)) {
 			#转换为windows路径
-			LinuxPathToWindowsPath($_)
+			LinuxPathToWindowsPath ($_)
 		}
-		else{
+		else {
 			$_
 		}
 	}
@@ -103,21 +124,21 @@ function clear-emptys {
 	}
 }
 
-function dirsync{
+function dirsync {
 	param(
 		[Parameter(Mandatory = $true)]
-		[string] $source,
+		[string]$source,
 		[Parameter(ValueFromRemainingArguments = $true)]
 		[string[]]$paths
 	)
 	#对于每个参数
 	$paths = $paths | ForEach-Object {
 		#若参数是linux路径
-		if (IsLinuxPath($_)) {
+		if (IsLinuxPath ($_)) {
 			#转换为windows路径
-			LinuxPathToWindowsPath($_)
+			LinuxPathToWindowsPath ($_)
 		}
-		else{
+		else {
 			$_
 		}
 	}
@@ -131,15 +152,15 @@ function dirsync{
 	}
 }
 
-function reload{
+function reload {
 	& EShell
 	exit
 }
 
 function size_format {
-	param (
+	param(
 		[Parameter(Mandatory = $true)]
-		[double] $size
+		[double]$size
 	)
 	#若文件大小大于1GB
 	if ($size -gt 1GB) {
@@ -175,11 +196,11 @@ function fsize {
 	#对于每个参数
 	$paths = $paths | ForEach-Object {
 		#若参数是linux路径
-		if (IsLinuxPath($_)) {
+		if (IsLinuxPath ($_)) {
 			#转换为windows路径
-			LinuxPathToWindowsPath($_)
+			LinuxPathToWindowsPath ($_)
 		}
-		else{
+		else {
 			$_
 		}
 	}
@@ -189,13 +210,13 @@ function fsize {
 		if ((Test-Path $_) -and (Get-ChildItem $_ -Force | Measure-Object).Count -gt 0) {
 			#以表格形式输出文件夹下的大小
 			Get-ChildItem $_ -Force | ForEach-Object {
-				if($_.PSIsContainer){
+				if ($_.PSIsContainer) {
 					$size = (Get-ChildItem $_ -Recurse -Force | Measure-Object -Property Length -Sum).Sum
-					"{0,10} {1}" -f (size_format $size), $_.Name
+					"{0,10} {1}" -f (size_format $size),$_.Name
 				}
-				else{
+				else {
 					$size = $_.Length
-					"{0,10} {1}" -f (size_format $size), $_.Name
+					"{0,10} {1}" -f (size_format $size),$_.Name
 				}
 			}
 		}
@@ -203,7 +224,7 @@ function fsize {
 		elseif (Test-Path $_) {
 			#输出文件大小
 			$size = (Get-Item $_).Length
-			"{0,10} {1}" -f (size_format $size), $_
+			"{0,10} {1}" -f (size_format $size),$_
 		}
 	}
 }

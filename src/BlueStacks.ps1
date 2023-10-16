@@ -1,12 +1,12 @@
-function Install-apk{
-	Param(
-		[Parameter(Mandatory=$true)]
+﻿function global:Install-apk {
+	param(
+		[Parameter(Mandatory = $true)]
 		[string]$apkPath
 	)
 	. "C:\Program Files\BlueStacks_nxt\HD-Player.exe" --instance Pie64 --cmd installApk --filepath "$apkPath"
 }
 
-function Show-apks{
+function global:Show-apks {
 	#读取C:\ProgramData\BlueStacks_nxt\Engine\Pie64\AppCache\AppCache.json
 	$AppCache = Get-Content -Path "C:\ProgramData\BlueStacks_nxt\Engine\Pie64\AppCache\AppCache.json" -Raw | ConvertFrom-Json
 	<#
@@ -37,16 +37,16 @@ function Show-apks{
 		$Orientation = $_.orientation
 		$IconPath = "C:\Program Files\BlueStacks_nxt\Engine\Pie64\AppCache\$IconFileName"
 		$apk = @{
-			AppLabel = $AppLabel
-			Package = $Package
-			VersionName = $VersionName
-			VersionCode = $VersionCode
-			InstallDate = $InstallDate
-			IconFileName = $IconFileName
-			Activity = $Activity
-			IsFullScreen = $IsFullScreen
-			IsHomeApp = $IsHomeApp
-			Orientation = $Orientation
+			appLabel = $AppLabel
+			package = $Package
+			versionName = $VersionName
+			versionCode = $VersionCode
+			installDate = $InstallDate
+			iconFileName = $IconFileName
+			activity = $Activity
+			isFullScreen = $IsFullScreen
+			isHomeApp = $IsHomeApp
+			orientation = $Orientation
 			IconPath = $IconPath
 		}
 		$apkList += $apk
@@ -58,27 +58,27 @@ function Show-apks{
 	}
 }
 
-function Start-apk {
-	Param(
-		[Parameter(Mandatory=$true)]
+function global:Start-apk {
+	param(
+		[Parameter(Mandatory = $true)]
 		[string]$apkSignOrName
 	)
 	$apkList = Show-apks
-	$apkSign = $apkList | Where-Object {$_.AppLabel -eq $apkSignOrName -or $_.Package -eq $apkSignOrName} | Select-Object -First 1 -ExpandProperty Package
-	if($null -eq $apkSign){
+	$apkSign = $apkList | Where-Object { $_.appLabel -eq $apkSignOrName -or $_.package -eq $apkSignOrName } | Select-Object -First 1 -ExpandProperty Package
+	if ($null -eq $apkSign) {
 		Write-Host "${VirtualTerminal.Colors.Red}Error: ${VirtualTerminal.Colors.Reset}No such apk."
 		return
 	}
-	else{
+	else {
 		. "C:\Program Files\BlueStacks_nxt\HD-Player.exe" --instance Pie64 --cmd launchApp --package "$apkSign"
 	}
 }
 
 #对于每个appLabel 创建一个函数用于启动
 Show-apks | ForEach-Object {
-	$AppLabel = CHT2CHS($_.appLabel)
+	$AppLabel = CHT2CHS ($_.appLabel)
 	$Package = $_.package
-	New-Item -Force -Path Function: -Name "App.$AppLabel" -Value {
+	New-Item -Force -Path Function: -Name "global:App.$AppLabel" -Value {
 		Start-apk -apkSignOrName $Package
 	}
 } | Out-Null
