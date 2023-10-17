@@ -1,12 +1,11 @@
-﻿
-Register-EngineEvent PowerShell.OnIdle -Action {
+﻿Register-EngineEvent PowerShell.OnIdle -Action {
 	#先注销这个事件
 	Unregister-Event PowerShell.OnIdle
 	#保存光标位置便于后面清除输出
 	$CursorPos = $host.UI.RawUI.CursorPosition
 
 	#set thefuck as alias "fk"
-	if ((Get-Command "thefuck" -ErrorAction SilentlyContinue) -ne $null) {
+	if (Test-Command "thefuck") {
 		$env:PYTHONIOENCODING = "utf-8"
 		Invoke-Expression "$(thefuck --alias global:fk)"
 	}
@@ -23,7 +22,9 @@ Register-EngineEvent PowerShell.OnIdle -Action {
 	}
 
 	#import appx with -UseWindowsPowerShell to avoid [Operation is not supported on this platform. (0x80131539)]
-	Import-Module Appx -UseWindowsPowerShell 3> $null
+	if (Test-Command "powershell.exe") {
+		Import-Module Appx -UseWindowsPowerShell 3> $null
+	}
 
 	#回复光标位置
 	$host.UI.RawUI.CursorPosition = $CursorPos

@@ -97,7 +97,9 @@ Register-ArgumentCompleter -ParameterName "Path" -ScriptBlock $LinuxPathComplete
 Register-ArgumentCompleter -ParameterName "Destination" -ScriptBlock $LinuxPathCompleter
 Set-PSReadLineKeyHandler -Key Tab -Function MenuComplete
 
-. $PSScriptRoot/linux_bins.ps1
+if (Test-Command rm.exe) {
+	. $PSScriptRoot/linux_bins.ps1
+}
 
 #设置一个函数用于在powershell执行以/开头的命令时，自动转换为windows路径
 #设置触发器

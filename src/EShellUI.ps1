@@ -19,17 +19,12 @@ if ($ImSudo) {
 }
 
 
-if (Test-Command rm.exe) {
-	. $PSScriptRoot/linux.ps1
-}
-
-#set prompt
+. $PSScriptRoot/linux.ps1
 . $PSScriptRoot/prompt.ps1
+. $PSScriptRoot/other.ps1
 
 #一些耗时的后台任务
 . $PSScriptRoot/BackgroundLoading.ps1
-
-. $PSScriptRoot/other.ps1
 
 if ($Host.UI.SupportsVirtualTerminal -eq 0) {
 	$host.UI.RawUI.CursorPosition = $CursorPos
