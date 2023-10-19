@@ -13,17 +13,19 @@
 
 ## 快速开始
 
+将以下命令复制粘贴到powershell中以快速开始  
 注意：**这将清除你现在的powershell配置文件和已经安装的模块**
 
 ```powershell
 $PwshProFiles = Split-Path $PROFILE
-Remove-Item "$PwshProFiles" -Recurse -Force
-Invoke-WebRequest -Uri "https://github.com/steve02081504/my-powershell-profile/archive/refs/heads/master.zip“ -OutFile "Eshell.zip"
+Remove-Item $PwshProFiles -Recurse -Confirm -ErrorAction SilentlyContinue
+Invoke-WebRequest -Uri https://github.com/steve02081504/my-powershell-profile/archive/refs/heads/master.zip -OutFile Eshell.zip
 $ParentPath = Split-Path $PwshProFiles
-Expand-Archive -Path "Eshell.zip" -DestinationPath "$ParentPath" -Force
-Rename-Item "$ParentPath\my-powershell-profile-master" "PowerShell"
-Remove-Item "Eshell.zip" -Force
+Expand-Archive -Path Eshell.zip -DestinationPath $ParentPath -Force
+Rename-Item $ParentPath\my-powershell-profile-master PowerShell
+Remove-Item Eshell.zip -Force
 pwsh -NoProfileLoadTime -nologo && $(exit)
+
 ```
 
 ## 功能预览  
