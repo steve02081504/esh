@@ -46,8 +46,8 @@ function mklink {
 	)
 	#对于每个参数
 	$RemainingArguments = $RemainingArguments | ForEach-Object {
-		#若参数长度大于2且是linux路径
-		if (($_.Length -gt 2) -and (IsLinuxPath ($_))) {
+		#若参数长度不是2且是linux路径
+		if (($_.Length -ne 2) -and (IsLinuxPath ($_))) {
 			#转换为windows路径
 			LinuxPathToWindowsPath ($_)
 		}
@@ -80,6 +80,20 @@ Set-Alias poweroff shutdown
 
 function poweron {
 	Write-Host "This computer is already powered on."
+}
+function power {
+	param(
+		#off / on
+		[string]$action
+	)
+	switch ($action) {
+		"off" { poweroff }
+		"on" { poweron }
+		default {
+			Write-Host "I'm the storm that's approaching!!!!!!!!!!!!!!!!!!!!"
+			Write-Host "Approaching!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+		}
+	}
 }
 
 function clear-emptys {
@@ -229,4 +243,33 @@ function fsize {
 			"{0,10} {1}" -f (size_format $size),$_
 		}
 	}
+}
+
+function coffee { "
+    ( (
+     ) )
+  .______.
+  |      |]
+  \      /
+   `----'
+" }
+
+function Update-EShell {
+	#获取$PROFILE的父目录
+	$src = Split-Path $PROFILE
+	#删除旧的EShell
+	Remove-Item "$src\src" -Recurse -Force
+	#下载最新的EShell
+	Invoke-WebRequest -Uri "https://github.com/steve02081504/my-powershell-profile/archive/refs/heads/master.zip“ -OutFile "$src\master.zip"
+	#解压缩my-powershell-profile-master中的src文件夹到$PROFILE的父目录
+	Expand-Archive -Path "$src\master.zip" -DestinationPath "$src" -Force
+	#移动my-powershell-profile-master/src到src
+	Move-Item "$src\my-powershell-profile-master\src" "$src\src" -Force
+	#删除my-powershell-profile-master
+	Remove-Item "$src\my-powershell-profile-master" -Recurse -Force
+
+	#删除压缩包
+	Remove-Item "$src\master.zip" -Force
+	#重载EShell
+	reload
 }

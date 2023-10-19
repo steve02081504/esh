@@ -37,7 +37,13 @@ if ($ImSudo) {
 Write-Output " ${VirtualTerminal.Colors.Yellow}v1960.7.17"
 Write-Output "${VirtualTerminal.Styles.Italic}${VirtualTerminal.Colors.BrightMagenta}(c)${VirtualTerminal.Colors.Reset} E-tek Corporation.${VirtualTerminal.Styles.NoItalic} ${VirtualTerminal.Styles.Underline}All rights reserved${VirtualTerminal.Styles.NoUnderline}."
 
+$hints = @()
 if (Test-Command thefuck) {
-	Write-Output "Type '${VirtualTerminal.Colors.BrightYellow}fk${VirtualTerminal.Colors.Reset}' to fuck typos."
+	$hints += "Type '${VirtualTerminal.Colors.BrightYellow}fk${VirtualTerminal.Colors.Reset}' to fuck typos."
 }
+if (Test-Command coffee) {
+	$hints += "Type '${VirtualTerminal.Colors.BrightYellow}coffee${VirtualTerminal.Colors.Reset}' to get a cup of coffee."
+}
+Write-Output $(Get-Random $hints)
+
 Write-Output ""

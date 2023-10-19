@@ -10,13 +10,13 @@
 		if ($null -ne $gitRepoUid) {
 			$git_prompt_str = " ${VirtualTerminal.Colors.Cyan}$gitRepoUid"
 			if ($null -ne $gitRepoBranch) {
-				$git_prompt_str = "$git_prompt_str@$gitRepoBranch"
+				$git_prompt_str += "@$gitRepoBranch"
 			}
 		}
 		if ($gitChangedFileNum -gt 0) {
 			$git_prompt_str = "$git_prompt_str $gitChangedFileNum file"
 			if ($gitChangedFileNum -gt 1) {
-				$git_prompt_str = $git_prompt_str + "s"
+				$git_prompt_str += "s"
 			}
 		}
 		if ($git_prompt_str) {
@@ -48,7 +48,7 @@ function NpmPromptBuilder {
 	if ($null -ne $npmRepoName) {
 		$npm_prompt_str = " ${VirtualTerminal.Colors.Red} $npmRepoName"
 		if ($null -ne $npmRepoVersion) {
-			$npm_prompt_str = "$npm_prompt_str@$npmRepoVersion"
+			$npm_prompt_str += "@$npmRepoVersion"
 		}
 	}
 	if ($npm_prompt_str) {
@@ -69,38 +69,38 @@ function UkagakaPromptBuilder {
 			"ghost" {
 				$ukagaka_prompt_str = " ${VirtualTerminal.Colors.Green}󰀆 $x"
 				if ($ukagakaDescription["name"]) {
-					$ukagaka_prompt_str = "$ukagaka_prompt_str $($ukagakaDescription[`"name`"])"
+					$ukagaka_prompt_str += " $($ukagakaDescription[`"name`"])"
 					if ($ukagakaDescription["sakura.name"]) {
-						$ukagaka_prompt_str = "$ukagaka_prompt_str($($ukagakaDescription[`"sakura.name`"])"
+						$ukagaka_prompt_str += "($($ukagakaDescription[`"sakura.name`"])"
 						if ($ukagakaDescription["kero.name"]) {
-							$ukagaka_prompt_str = "$ukagaka_prompt_str&$($ukagakaDescription[`"kero.name`"])"
+							$ukagaka_prompt_str += "&$($ukagakaDescription[`"kero.name`"])"
 						}
-						$ukagaka_prompt_str = "$ukagaka_prompt_str)"
+						$ukagaka_prompt_str += ")"
 					}
 				}
 				elseif ($ukagakaDescription["sakura.name"]) {
-					$ukagaka_prompt_str = "$ukagaka_prompt_str $($ukagakaDescription[`"sakura.name`"])"
+					$ukagaka_prompt_str += " $($ukagakaDescription[`"sakura.name`"])"
 					if ($ukagakaDescription["kero.name"]) {
-						$ukagaka_prompt_str = "$ukagaka_prompt_str&$($ukagakaDescription[`"kero.name`"])"
+						$ukagaka_prompt_str += "&$($ukagakaDescription[`"kero.name`"])"
 					}
 				}
 			}
 			"shell" {
 				$ukagaka_prompt_str = " ${VirtualTerminal.Colors.Green}󱓨 $x"
 				if ($ukagakaDescription["name"]) {
-					$ukagaka_prompt_str = "$ukagaka_prompt_str $($ukagakaDescription[`"name`"])"
+					$ukagaka_prompt_str += " $($ukagakaDescription[`"name`"])"
 				}
 			}
 			"balloon" {
 				$ukagaka_prompt_str = " ${VirtualTerminal.Colors.Green}󰍡 $x"
 				if ($ukagakaDescription["name"]) {
-					$ukagaka_prompt_str = "$ukagaka_prompt_str $($ukagakaDescription[`"name`"])"
+					$ukagaka_prompt_str += " $($ukagakaDescription[`"name`"])"
 				}
 			}
 			default {
 				$ukagaka_prompt_str = " ${VirtualTerminal.Colors.Green} $x"
 				if ($ukagakaDescription["name"]) {
-					$ukagaka_prompt_str = "$ukagaka_prompt_str $($ukagakaDescription[`"name`"])"
+					$ukagaka_prompt_str += " $($ukagakaDescription[`"name`"])"
 				}
 			}
 		}

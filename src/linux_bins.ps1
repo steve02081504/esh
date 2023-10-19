@@ -63,7 +63,7 @@ function global:cd {
 	}
 	else {
 		#否则调用Set-Location
-		Set-Location -Path $Path $RemainingArguments
+		Invoke-Expression "Set-Location -Path $Path $RemainingArguments"
 	}
 }
 
@@ -139,12 +139,7 @@ function global:ls {
 	}
 	else {
 		#否则调用Get-ChildItem
-		if ($Path.Length -eq 0) {
-			Get-ChildItem $RemainingArguments
-		}
-		else {
-			Get-ChildItem -Path $Path $RemainingArguments
-		}
+		Invoke-Expression "Get-ChildItem $Path $RemainingArguments"
 	}
 }
 
@@ -211,7 +206,7 @@ function global:rm {
 	}
 	else {
 		#否则调用Remove-Item
-		Remove-Item -Path $Path $RemainingArguments
+		Invoke-Expression "Remove-Item -Path $Path $RemainingArguments"
 	}
 }
 
@@ -283,7 +278,7 @@ function global:mv {
 	}
 	else {
 		#否则调用Move-Item
-		Move-Item -Path $Path -Destination $Destination $RemainingArguments
+		Invoke-Expression "Move-Item -Path $Path -Destination $Destination $RemainingArguments"
 	}
 }
 
@@ -355,7 +350,7 @@ function global:cp {
 	}
 	else {
 		#否则调用Copy-Item
-		Copy-Item -Path $Path -Destination $Destination $RemainingArguments
+		Invoke-Expression "Copy-Item -Path $Path -Destination $Destination $RemainingArguments"
 	}
 }
 
@@ -418,7 +413,7 @@ function global:mkdir {
 	}
 	else {
 		#否则调用New-Item
-		New-Item -Path $Path -ItemType Directory $RemainingArguments
+		Invoke-Expression "New-Item -Path $Path -ItemType Directory $RemainingArguments"
 	}
 }
 
@@ -481,7 +476,7 @@ function global:touch {
 	}
 	else {
 		#否则调用New-Item
-		New-Item -Path $Path -ItemType File $RemainingArguments
+		Invoke-Expression "New-Item -Path $Path -ItemType File $RemainingArguments"
 	}
 }
 
@@ -548,6 +543,6 @@ function global:cat {
 	}
 	else {
 		#否则调用Get-Content
-		Get-Content -Path $Path $RemainingArguments
+		Invoke-Expression "Get-Content -Path $Path $RemainingArguments"
 	}
 }

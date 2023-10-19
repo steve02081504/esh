@@ -14,7 +14,7 @@
 		$LineArray = $Line -split ","
 		$Key = $LineArray[0].Trim()
 		$Value = $Line.Substring($LineArray[0].Length + 1).Trim()
-		$Description.Add($Key, $Value)
+		$Description.Add($Key,$Value)
 	}
 	$Description
 }
@@ -26,7 +26,7 @@ function Read-Ukagaka-Description-File {
 	$Content = Get-Content -Path $Path -Encoding UTF8
 	$Description = Get-Ukagaka-Description-File-HashTable -Content $Content
 	#若charset不是UTF-8或其大小写变体，则重新读取
-	if ($Description["charset"] && $Description["charset"] -notmatch "UTF-?8") {
+	if (($Description["charset"]) -and ($Description["charset"] -notmatch "UTF-?8")) {
 		$Content = Get-Content -Path $Path -Encoding $Description["charset"]
 		$Description = Get-Ukagaka-Description-File-HashTable -Content $Content
 	}
@@ -68,9 +68,9 @@ function Test-Ukagaka-Directory {
 		[Parameter(Mandatory = $true)]
 		[string]$Path
 	)
-	$result = Test-Ukagaka-Ghost-Directory -Path $Path
+	$result = Test-Ukagaka-Directory-Base -Path $Path
 	if (-not $result) {
-		Test-Ukagaka-Directory-Base -Path $Path
+		Test-Ukagaka-Ghost-Directory -Path $Path
 	}
 	else {
 		$result

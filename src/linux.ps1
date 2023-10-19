@@ -127,7 +127,7 @@ Set-PSReadLineKeyHandler -Key Enter -ScriptBlock {
 		#则转换为windows路径
 		$Executable = LinuxPathToWindowsPath -Path $Executable
 		#求值并输出
-		& $Executable $Rest | Write-Host
+		Invoke-Expression "$Executable $Rest *>&1" | Write-Host
 	}
 	else {
 		[Microsoft.PowerShell.PSConsoleReadLine]::AcceptLine()
