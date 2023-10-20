@@ -18,13 +18,14 @@
 
 ```powershell
 $PwshProFiles = Split-Path $PROFILE
-Remove-Item $PwshProFiles -Recurse -Confirm -ErrorAction SilentlyContinue
-Invoke-WebRequest -Uri https://github.com/steve02081504/my-powershell-profile/archive/refs/heads/master.zip -OutFile Eshell.zip
 $ParentPath = Split-Path $PwshProFiles
+Remove-Item $PwshProFiles -Confirm -ErrorAction SilentlyContinue
+Remove-Item $ParentPath\my-powershell-profile-master -Force -ErrorAction SilentlyContinue
+Invoke-WebRequest -Uri https://github.com/steve02081504/my-powershell-profile/archive/refs/heads/master.zip -OutFile Eshell.zip
 Expand-Archive -Path Eshell.zip -DestinationPath $ParentPath -Force
-Rename-Item $ParentPath\my-powershell-profile-master PowerShell
+Rename-Item $ParentPath\my-powershell-profile-master PowerShell -Force
 Remove-Item Eshell.zip -Force
-pwsh -NoProfileLoadTime -nologo && $(exit)
+pwsh -nologo $(if($PSVersionTable.PSVersion -gt 7.3){"-NoProfileLoadTime"}) && $(exit)
 
 ```
 

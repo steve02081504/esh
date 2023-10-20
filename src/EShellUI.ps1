@@ -3,9 +3,9 @@
 if ($Host.UI.SupportsVirtualTerminal -eq 0) {
 	$CursorPos = $host.UI.RawUI.CursorPosition
 }
-Write-Output "${VirtualTerminal.SaveCursor}E-Shell v1765.3.13"
-Write-Output "Loading..."
-Write-Output ""
+Write-Host "${VirtualTerminal.SaveCursor}E-Shell v1765.3.13"
+Write-Host "Loading..."
+Write-Host ""
 
 . $PSScriptRoot/base.ps1
 
@@ -18,6 +18,7 @@ if ($ImSudo) {
 	$host.UI.RawUI.WindowTitle += "(root)"
 }
 
+. $PSScriptRoot/CodePageFixer.ps1
 
 . $PSScriptRoot/linux.ps1
 . $PSScriptRoot/prompt.ps1
@@ -34,16 +35,9 @@ Write-Host -NoNewline "${VirtualTerminal.RestoreCursor}${VirtualTerminal.ClearSc
 if ($ImSudo) {
 	Write-Host -NoNewline "${VirtualTerminal.Colors.Cyan}(root)"
 }
-Write-Output " ${VirtualTerminal.Colors.Yellow}v1960.7.17"
-Write-Output "${VirtualTerminal.Styles.Italic}${VirtualTerminal.Colors.BrightMagenta}(c)${VirtualTerminal.Colors.Reset} E-tek Corporation.${VirtualTerminal.Styles.NoItalic} ${VirtualTerminal.Styles.Underline}All rights reserved${VirtualTerminal.Styles.NoUnderline}."
+Write-Host " ${VirtualTerminal.Colors.Yellow}v1960.7.17"
+Write-Host "${VirtualTerminal.Styles.Italic}${VirtualTerminal.Colors.BrightMagenta}(c)${VirtualTerminal.Colors.Reset} E-tek Corporation.${VirtualTerminal.Styles.NoItalic} ${VirtualTerminal.Styles.Underline}All rights reserved${VirtualTerminal.Styles.NoUnderline}."
 
-$hints = @()
-if (Test-Command thefuck) {
-	$hints += "Type '${VirtualTerminal.Colors.BrightYellow}fk${VirtualTerminal.Colors.Reset}' to fuck typos."
-}
-if (Test-Command coffee) {
-	$hints += "Type '${VirtualTerminal.Colors.BrightYellow}coffee${VirtualTerminal.Colors.Reset}' to get a cup of coffee."
-}
-Write-Output $(Get-Random $hints)
+. $PSScriptRoot/EShellUI.hints.ps1
 
-Write-Output ""
+Write-Host ""

@@ -64,7 +64,7 @@ function Test-Command {
 	}
 	else {
 		#移除$error中的最后一个错误
-		$error.RemoveAt($error.Count - 1)
+		$error.RemoveAt(0)
 		return $false
 	}
 }

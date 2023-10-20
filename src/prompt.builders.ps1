@@ -43,7 +43,7 @@ function NpmPromptBuilder {
 	if ($null -ne $packageJson) {
 		$packageJson = ConvertFrom-Json $packageJson
 		$npmRepoName = $packageJson.Name
-		$npmRepoVersion = $packageJson.version
+		$npmRepoVersion = $packageJson.Version
 	}
 	if ($null -ne $npmRepoName) {
 		$npm_prompt_str = " ${VirtualTerminal.Colors.Red} $npmRepoName"
