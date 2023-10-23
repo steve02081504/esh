@@ -10,11 +10,13 @@
 		Invoke-Expression "$(thefuck --alias global:fk)"
 	}
 
-	# https://github.com/ryanoasis/nerd-fonts/releases/latest/download/FiraCode.zip
-	if (-not (Get-Module -ListAvailable -Name Terminal-Icons)) {
-		Install-Module -Name Terminal-Icons -Repository PSGallery -Force
+	if ($Host.UI.SupportsVirtualTerminal) {
+		# https://github.com/ryanoasis/nerd-fonts/releases/latest/download/FiraCode.zip
+		if (-not (Get-Module -ListAvailable -Name Terminal-Icons)) {
+			Install-Module -Name Terminal-Icons -Repository PSGallery -Force
+		}
+		Import-Module -Name Terminal-Icons
 	}
-	Import-Module -Name Terminal-Icons
 
 	. $PSScriptRoot/CHT2CHS.ps1
 	if (Test-Path "C:\ProgramData\BlueStacks_nxt") {

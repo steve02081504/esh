@@ -31,6 +31,9 @@ pwsh -nologo $(if($PSVersionTable.PSVersion -gt 7.3){"-NoProfileLoadTime"}) && $
 
 ## 功能预览  
 
+最低兼容PS7.2.15和Windows 6.1.7601（自动纠正编码设置）
+![图片](https://github.com/steve02081504/my-powershell-profile/assets/31927825/e87b0407-f874-4d33-9a04-bda6f8c1658c)
+
 ### 提示符
 
 git提示符支持  

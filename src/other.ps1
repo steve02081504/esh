@@ -8,18 +8,24 @@ function sudo {
 		[Parameter(ValueFromRemainingArguments = $true)]
 		[string[]]$RemainingArguments
 	)
-	$pwshArguments = "$(if($PSVersionTable.PSVersion -gt 7.3){"-NoProfileLoadTime"}) -nologo"
+	$pwshArguments = "$(if($PSVersionTable.PSVersion -gt 7.3){`"-NoProfileLoadTime`"}) -nologo"
 	if ($RemainingArguments.Length -eq 0) {
+		if ($ImSudo) {
+			Write-Host "I already have ${VirtualTerminal.Styles.Blink}Super Power${VirtualTerminal.Styles.NoBlink}s."
+		}
 		# If the command is empty, open a new PowerShell shell with admin privileges
-		if (Test-Command wt.exe) {
+		elseif (Test-Command wt.exe) {
 			Start-Process -Wait -FilePath "wt.exe" -ArgumentList "pwsh.exe $pwshArguments" -Verb runas
 		}
 		else {
 			Start-Process -Wait -FilePath "pwsh.exe" -ArgumentList $pwshArguments -Verb runas
 		}
 	} else {
+		if ($ImSudo) {
+			Invoke-Expression "$RemainingArguments"
+		}
 		# Otherwise, run the command as an admin
-		if (Test-Command wt.exe) {
+		elseif (Test-Command wt.exe) {
 			$Arguments = @("pwsh","-Command",$(pwsh_args_convert ($RemainingArguments)))
 			$Arguments = cmd_args_convert ($Arguments)
 			Start-Process -Wait -FilePath "wt.exe" -ArgumentList $Arguments.Replace('"','\"') -Verb runas
@@ -76,14 +82,14 @@ function poweron {
 function power {
 	param(
 		#off / on
+		[ValidateSet("off","on")]
 		[string]$action
 	)
 	switch ($action) {
 		"off" { poweroff }
 		"on" { poweron }
 		default {
-			Write-Host "I'm the storm that's approaching!!!!!!!!!!!!!!!!!!!!"
-			Write-Host "Approaching!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+			Write-Host "I'm the storm that's ${VirtualTerminal.Styles.Blink}approaching!!!!!!!!!!!!!!!!!!!!`nApproaching!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!${VirtualTerminal.Styles.NoBlink}"
 		}
 	}
 }
@@ -249,26 +255,32 @@ function coffee { "
 function Update-SAO-lib {
 	#获取$PROFILE的父目录
 	$src = Split-Path $PROFILE
-	#下载最新的SAO-lib
-	Invoke-WebRequest -Uri "https://github.com/steve02081504/SAO-lib/raw/master/SAO-lib.txt" -OutFile "$src/data/SAO-lib.txt"
+	try {
+		#下载最新的SAO-lib
+		Invoke-WebRequest -Uri "https://github.com/steve02081504/SAO-lib/raw/master/SAO-lib.txt" -OutFile "$src/data/SAO-lib.txt"
+	}
+	catch {}
 }
 function Update-EShell {
 	Update-SAO-lib
 	#获取$PROFILE的父目录
 	$src = Split-Path $PROFILE
-	#下载最新的EShell
-	Invoke-WebRequest -Uri "https://github.com/steve02081504/my-powershell-profile/archive/refs/heads/master.zip" -OutFile "$src\master.zip"
-	#解压缩my-powershell-profile-master中的src文件夹到$PROFILE的父目录
-	Expand-Archive -Path "$src\master.zip" -DestinationPath "$src" -Force
-	#删除旧的EShell
-	Remove-Item "$src\src" -Recurse -Force
-	#移动my-powershell-profile-master/src到src
-	Move-Item "$src\my-powershell-profile-master\src" "$src\src" -Force
-	#删除my-powershell-profile-master
-	Remove-Item "$src\my-powershell-profile-master" -Recurse -Force
+	try {
+		#下载最新的EShell
+		Invoke-WebRequest -Uri "https://github.com/steve02081504/my-powershell-profile/archive/refs/heads/master.zip" -OutFile "$src\master.zip"
+		#解压缩my-powershell-profile-master中的src文件夹到$PROFILE的父目录
+		Expand-Archive -Path "$src\master.zip" -DestinationPath "$src" -Force
+		#删除旧的EShell
+		Remove-Item "$src\src" -Recurse -Force
+		#移动my-powershell-profile-master/src到src
+		Move-Item "$src\my-powershell-profile-master\src" "$src\src" -Force
+		#删除my-powershell-profile-master
+		Remove-Item "$src\my-powershell-profile-master" -Recurse -Force
 
-	#删除压缩包
-	Remove-Item "$src\master.zip" -Force
-	#重载EShell
-	reload
+		#删除压缩包
+		Remove-Item "$src\master.zip" -Force
+		#重载EShell
+		reload
+	}
+	catch {}
 }
