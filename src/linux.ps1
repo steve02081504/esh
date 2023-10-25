@@ -41,7 +41,7 @@ function WindowsPathToLinuxPath {
 	elseif ($Path.StartsWith($HOME)) {
 		$Path = "~" + $Path.Substring($HOME.Length)
 	}
-	else {
+	elseif ($Path.Substring(1,1) -eq ":") {
 		#否则根据盘符转换
 		$DriveLetter = $Path.Substring(0,1)
 		$Path = $Path.Substring(3)
@@ -113,7 +113,7 @@ Set-PSReadLineKeyHandler -Key Enter -ScriptBlock {
 	$Executable = $Line.Split(" ")[0]
 	$Rest = $Line.Substring($Executable.Length).Trim()
 	if ($Executable.StartsWith('"')) {
-		while (-not $Executable.EndsWith('"')) {
+		while ((-not $Executable.EndsWith('"')) -and ($Executable.Length -lt $Line.Length)) {
 			$Executable = $Executable + " " + $Line.Substring($Executable.Length + 1).Split(" ")[0]
 		}
 		$Rest = $Line.Substring($Executable.Length).Trim()

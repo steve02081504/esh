@@ -4,11 +4,22 @@ if (Test-Path -Path Alias:cd) {
 }
 function global:cd {
 	param(
-		[string]$Path,
 		#其余的参数
 		[Parameter(ValueFromRemainingArguments = $true)]
-		[string[]]$RemainingArguments
+		[System.Collections.ArrayList]$RemainingArguments
 	)
+	#从RemainingArguments中提取Path
+	$Path = $null
+	for ($i = 0; $i -lt $RemainingArguments.Count; $i++) {
+		$arg = $RemainingArguments[$i]
+		if ($arg.StartsWith("-")) {
+			continue
+		}
+		$Path = $arg
+		$RemainingArguments.RemoveAt($i)
+		break
+	}
+	[string[]]$RemainingArguments = @($RemainingArguments)
 	#若path是linux路径
 	if (IsLinuxPath -Path $Path) {
 		#则转换为windows路径
@@ -73,11 +84,22 @@ if (Test-Path -Path Alias:ls) {
 }
 function global:ls {
 	param(
-		[string]$Path,
 		#其余的参数
 		[Parameter(ValueFromRemainingArguments = $true)]
-		[string[]]$RemainingArguments
+		[System.Collections.ArrayList]$RemainingArguments
 	)
+	#从RemainingArguments中提取Path
+	$Path = $null
+	for ($i = 0; $i -lt $RemainingArguments.Count; $i++) {
+		$arg = $RemainingArguments[$i]
+		if ($arg.StartsWith("-")) {
+			continue
+		}
+		$Path = $arg
+		$RemainingArguments.RemoveAt($i)
+		break
+	}
+	[string[]]$RemainingArguments = @($RemainingArguments)
 	#若path是linux路径
 	if (IsLinuxPath -Path $Path) {
 		#则转换为windows路径
@@ -149,11 +171,22 @@ if (Test-Path -Path Alias:rm) {
 }
 function global:rm {
 	param(
-		[string]$Path,
 		#其余的参数
 		[Parameter(ValueFromRemainingArguments = $true)]
-		[string[]]$RemainingArguments
+		[System.Collections.ArrayList]$RemainingArguments
 	)
+	#从RemainingArguments中提取Path
+	$Path = $null
+	for ($i = 0; $i -lt $RemainingArguments.Count; $i++) {
+		$arg = $RemainingArguments[$i]
+		if ($arg.StartsWith("-")) {
+			continue
+		}
+		$Path = $arg
+		$RemainingArguments.RemoveAt($i)
+		break
+	}
+	[string[]]$RemainingArguments = @($RemainingArguments)
 	#若path是linux路径
 	if (IsLinuxPath -Path $Path) {
 		#则转换为windows路径
@@ -216,12 +249,33 @@ if (Test-Path -Path Alias:mv) {
 }
 function global:mv {
 	param(
-		[string]$Path,
-		[string]$Destination,
 		#其余的参数
 		[Parameter(ValueFromRemainingArguments = $true)]
-		[string[]]$RemainingArguments
+		[System.Collections.ArrayList]$RemainingArguments
 	)
+	#从RemainingArguments中提取Path
+	$Path = $null
+	for ($i = 0; $i -lt $RemainingArguments.Count; $i++) {
+		$arg = $RemainingArguments[$i]
+		if ($arg.StartsWith("-")) {
+			continue
+		}
+		$Path = $arg
+		$RemainingArguments.RemoveAt($i)
+		break
+	}
+	#从RemainingArguments中提取Destination
+	$Destination = ""
+	for ($i = 0; $i -lt $RemainingArguments.Count; $i++) {
+		$arg = $RemainingArguments[$i]
+		if ($arg.StartsWith("-")) {
+			continue
+		}
+		$Destination = $arg
+		$RemainingArguments.RemoveAt($i)
+		break
+	}
+	[string[]]$RemainingArguments = @($RemainingArguments)
 	#若path是linux路径
 	if (IsLinuxPath -Path $Path) {
 		#则转换为windows路径
@@ -288,12 +342,33 @@ if (Test-Path -Path Alias:cp) {
 }
 function global:cp {
 	param(
-		[string]$Path,
-		[string]$Destination,
 		#其余的参数
 		[Parameter(ValueFromRemainingArguments = $true)]
-		[string[]]$RemainingArguments
+		[System.Collections.ArrayList]$RemainingArguments
 	)
+	#从RemainingArguments中提取Path
+	$Path = $null
+	for ($i = 0; $i -lt $RemainingArguments.Count; $i++) {
+		$arg = $RemainingArguments[$i]
+		if ($arg.StartsWith("-")) {
+			continue
+		}
+		$Path = $arg
+		$RemainingArguments.RemoveAt($i)
+		break
+	}
+	#从RemainingArguments中提取Destination
+	$Destination = ""
+	for ($i = 0; $i -lt $RemainingArguments.Count; $i++) {
+		$arg = $RemainingArguments[$i]
+		if ($arg.StartsWith("-")) {
+			continue
+		}
+		$Destination = $arg
+		$RemainingArguments.RemoveAt($i)
+		break
+	}
+	[string[]]$RemainingArguments = @($RemainingArguments)
 	#若path是linux路径
 	if (IsLinuxPath -Path $Path) {
 		#则转换为windows路径
@@ -356,11 +431,22 @@ function global:cp {
 
 function global:mkdir {
 	param(
-		[string]$Path,
 		#其余的参数
 		[Parameter(ValueFromRemainingArguments = $true)]
-		[string[]]$RemainingArguments
+		[System.Collections.ArrayList]$RemainingArguments
 	)
+	#从RemainingArguments中提取Path
+	$Path = $null
+	for ($i = 0; $i -lt $RemainingArguments.Count; $i++) {
+		$arg = $RemainingArguments[$i]
+		if ($arg.StartsWith("-")) {
+			continue
+		}
+		$Path = $arg
+		$RemainingArguments.RemoveAt($i)
+		break
+	}
+	[string[]]$RemainingArguments = @($RemainingArguments)
 	#若path是linux路径
 	if (IsLinuxPath -Path $Path) {
 		#则转换为windows路径
@@ -419,11 +505,22 @@ function global:mkdir {
 
 function global:touch {
 	param(
-		[string]$Path,
 		#其余的参数
 		[Parameter(ValueFromRemainingArguments = $true)]
-		[string[]]$RemainingArguments
+		[System.Collections.ArrayList]$RemainingArguments
 	)
+	#从RemainingArguments中提取Path
+	$Path = $null
+	for ($i = 0; $i -lt $RemainingArguments.Count; $i++) {
+		$arg = $RemainingArguments[$i]
+		if ($arg.StartsWith("-")) {
+			continue
+		}
+		$Path = $arg
+		$RemainingArguments.RemoveAt($i)
+		break
+	}
+	[string[]]$RemainingArguments = @($RemainingArguments)
 	#若path是linux路径
 	if (IsLinuxPath -Path $Path) {
 		#则转换为windows路径
@@ -486,11 +583,22 @@ if (Test-Path -Path Alias:cat) {
 }
 function global:cat {
 	param(
-		[string]$Path,
 		#其余的参数
 		[Parameter(ValueFromRemainingArguments = $true)]
-		[string[]]$RemainingArguments
+		[System.Collections.ArrayList]$RemainingArguments
 	)
+	#从RemainingArguments中提取Path
+	$Path = $null
+	for ($i = 0; $i -lt $RemainingArguments.Count; $i++) {
+		$arg = $RemainingArguments[$i]
+		if ($arg.StartsWith("-")) {
+			continue
+		}
+		$Path = $arg
+		$RemainingArguments.RemoveAt($i)
+		break
+	}
+	[string[]]$RemainingArguments = @($RemainingArguments)
 	#若path是linux路径
 	if (IsLinuxPath -Path $Path) {
 		#则转换为windows路径
