@@ -55,6 +55,9 @@ rm、ls、cd、mv等常见文件操作命令支持linux和powershell两种风格
 linux路径支持（包括补全和索引command）  
 ![图片](https://github.com/steve02081504/my-powershell-profile/assets/31927825/cedc3d38-de89-4c9e-aa97-4bd5fb83dff5)
 
+自动检索AppData
+![图片](https://github.com/steve02081504/my-powershell-profile/assets/31927825/08eeaea8-5050-4378-91a2-45713b4b6915)
+
 ### 便捷指令
 
 `poweroff`或`power off`关机（`shutdown`也可以不带参数被调用）  

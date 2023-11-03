@@ -8,6 +8,9 @@ function IsLinuxPath {
 	if ($Path.StartsWith("/") -or $Path.StartsWith("~")) {
 		return $true
 	}
+	if (($PWD.Path -eq $env:USERPROFILE) -and $Path.StartsWith("./")) {
+		return $true
+	}
 	return $false
 }
 
@@ -16,13 +19,30 @@ function LinuxPathToWindowsPath {
 	param(
 		[string]$Path
 	)
+	if (($PWD.Path -eq $env:USERPROFILE) -and $Path.StartsWith("./")) {
+		$Path = "~" + $Path.Substring(1)
+	}
 	#若path以/（单个字母）/开头，则对应windows盘符
 	if ($Path -match "^/([a-zA-Z])/") {
 		$DriveLetter = $Matches[1]
 		return Join-Path -Path "${DriveLetter}:" -ChildPath $Path.Substring(3)
 	}
 	elseif ($Path.StartsWith("~")) {
-		return Join-Path -Path $HOME -ChildPath $Path.Substring(1)
+		$ResultPath = Join-Path -Path $HOME -ChildPath $Path.Substring(1)
+		if(-not (Test-path $ResultPath)){
+			if ($Path.StartsWith("~/.")){
+				# 检查appdata
+				$SubPath = $Path.Substring(3)
+				#对于appdata下的每一个目录
+				Get-ChildItem -Path "$env:USERPROFILE/AppData/" | ForEach-Object {
+					$TestPath = Join-Path -Path $_.FullName -ChildPath $SubPath
+					if (Test-Path -Path $TestPath) {
+						$ResultPath = $TestPath
+					}
+				}
+			}
+		}
+		return $ResultPath
 	}
 	else {
 		#否则根据msys的rootpath来转换
