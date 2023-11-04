@@ -2,16 +2,6 @@
 	#先注销这个事件
 	Unregister-Event PowerShell.OnIdle
 
-	#多打印两行以免光标偏移
-	$MyX = $host.UI.RawUI.CursorPosition.X
-	Write-Host ""
-	Write-Host ""
-	#移动到两行前
-	$host.UI.RawUI.CursorPosition = New-Object System.Management.Automation.Host.Coordinates $MyX,($host.UI.RawUI.CursorPosition.Y - 2)
-
-	#保存光标位置便于后面清除输出
-	$CursorPos = $host.UI.RawUI.CursorPosition
-
 	#set thefuck as alias "fk"
 	if (Test-Command "thefuck") {
 		$env:PYTHONIOENCODING = "utf-8"
@@ -35,9 +25,4 @@
 	if (Test-Command "powershell.exe") {
 		Import-Module Appx -UseWindowsPowerShell 3> $null
 	}
-
-	#回复光标位置
-	$host.UI.RawUI.CursorPosition = $CursorPos
-	Write-Host -NoNewline ${VirtualTerminal.ClearScreenDown}
-	Remove-Variable CursorPos
 } | Out-Null

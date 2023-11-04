@@ -67,6 +67,20 @@ function Test-Command {
 	}
 }
 
+#获取当前行
+Add-Member -InputObject $host.UI.RawUI -MemberType ScriptMethod -Name GetLineBuffer -Value {
+	param($LineIndex = $host.UI.RawUI.CursorPosition.Y)
+	if($LineIndex -lt 0) { $host.UI.RawUI.GetLineBuffer($host.UI.RawUI.CursorPosition.Y+$LineIndex) }
+	#GetBufferContents(System.Management.Automation.Host.Rectangle r)
+	$host.UI.RawUI.GetBufferContents([Management.Automation.Host.Rectangle]::new(0, $LineIndex-1, $host.UI.RawUI.BufferSize.Width, $LineIndex-1))
+}
+Add-Member -InputObject $host.UI.RawUI -MemberType ScriptMethod -Name GetLineText -Value {
+	param($LineIndex = $host.UI.RawUI.CursorPosition.Y)
+	$Line = $host.UI.RawUI.GetLineBuffer($LineIndex).Character -join ''
+	$Line = $Line.TrimEnd()
+	return $Line
+}
+
 #as root?
 $ImSudo = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]“Administrator”)
 $ImVSCodeExtension = $null -ne $psEditor

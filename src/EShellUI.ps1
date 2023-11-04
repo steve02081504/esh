@@ -2,14 +2,9 @@
 . $PSScriptRoot/VirtualTerminal.ps1
 
 if ($ImVSCodeExtension) { Clear-Host }
-#保存光标位置便于后面清除输出
-if ($Host.UI.SupportsVirtualTerminal -eq 0) {
-	$CursorPos = $host.UI.RawUI.CursorPosition
-}
-Write-Host "${VirtualTerminal.SaveCursor}E-Shell v1765.3.13"
+Write-Host "E-Shell v1765.3.13"
 Write-Host "Loading..."
 Write-Host ""
-
 
 . $PSScriptRoot/Console.ps1
 #set the title same as cmd
@@ -29,11 +24,12 @@ if ($ImSudo) {
 #一些耗时的后台任务
 . $PSScriptRoot/BackgroundLoading.ps1
 
-if ($Host.UI.SupportsVirtualTerminal -eq 0) {
-	$host.UI.RawUI.CursorPosition = $CursorPos
-	Remove-Variable CursorPos
-}
-Write-Host -NoNewline "${VirtualTerminal.RestoreCursor}${VirtualTerminal.ClearScreenDown}${VirtualTerminal.Colors.Green}E-Shell"
+$CursorPos = $host.UI.RawUI.CursorPosition
+$CursorPos.Y -= 3
+$host.UI.RawUI.CursorPosition = $CursorPos
+Remove-Variable CursorPos
+
+Write-Host -NoNewline "${VirtualTerminal.ClearScreenDown}${VirtualTerminal.Colors.Green}E-Shell"
 if ($ImSudo) {
 	Write-Host -NoNewline "${VirtualTerminal.Colors.Cyan}(root)"
 }
