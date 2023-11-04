@@ -1,0 +1,11 @@
+{
+	"terminal.integrated.defaultProfile.windows": "Eshell",
+	"terminal.integrated.profiles.windows": {
+		"Eshell": {
+			"path": ["pwsh.exe"],
+			"args": ["-nologo","-NoProfileLoadTime"],
+			"icon": "terminal",
+			"overrideName": true
+		}
+	}
+}

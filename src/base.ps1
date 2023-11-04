@@ -1,6 +1,4 @@
-﻿#as root?
-$ImSudo = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]“Administrator”)
-function Max {
+﻿function Max {
 	param(
 		[Parameter(ValueFromRemainingArguments = $true)]
 		[int[]]$RemainingArguments
@@ -68,3 +66,7 @@ function Test-Command {
 		return $false
 	}
 }
+
+#as root?
+$ImSudo = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]“Administrator”)
+$ImVSCodeExtension = Test-Command Test-ScriptExtent
