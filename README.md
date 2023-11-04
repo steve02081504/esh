@@ -29,10 +29,22 @@ pwsh -nologo $(if($PSVersionTable.PSVersion -gt 7.3){"-NoProfileLoadTime"}) && $
 
 ```
 
+如果你正在使用它，你可以这样更新：
+
+```powershell
+Update-Eshell
+
+```
+
+这将清除`src`文件夹和`data/SAO-lib.txt`并重新下载它
+
 ## 功能预览  
 
 最低兼容PS7.2.15和Windows 6.1.7601（自动纠正编码设置）
 ![图片](https://github.com/steve02081504/my-powershell-profile/assets/31927825/e87b0407-f874-4d33-9a04-bda6f8c1658c)
+
+支持VSCode的powershell扩展
+![图片](https://github.com/steve02081504/my-powershell-profile/assets/31927825/f32cdef8-a1fc-42f0-ad1b-64ad87f70a05)
 
 ### 提示符
 

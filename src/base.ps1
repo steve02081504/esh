@@ -69,4 +69,4 @@ function Test-Command {
 
 #as root?
 $ImSudo = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]“Administrator”)
-$ImVSCodeExtension = Test-Command Test-ScriptExtent
+$ImVSCodeExtension = $null -ne $psEditor

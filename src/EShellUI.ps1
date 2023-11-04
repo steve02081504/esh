@@ -1,7 +1,7 @@
 ﻿. $PSScriptRoot/base.ps1
 . $PSScriptRoot/VirtualTerminal.ps1
 
-if ($ImVSCodeExtension) {Clear-Host}
+if ($ImVSCodeExtension) { Clear-Host }
 #保存光标位置便于后面清除输出
 if ($Host.UI.SupportsVirtualTerminal -eq 0) {
 	$CursorPos = $host.UI.RawUI.CursorPosition
@@ -37,10 +37,11 @@ Write-Host -NoNewline "${VirtualTerminal.RestoreCursor}${VirtualTerminal.ClearSc
 if ($ImSudo) {
 	Write-Host -NoNewline "${VirtualTerminal.Colors.Cyan}(root)"
 }
+Write-Host -NoNewline " ${VirtualTerminal.Colors.Yellow}v1960.7.17"
 if ($ImVSCodeExtension) {
-	Write-Host -NoNewline "${VirtualTerminal.Colors.Magenta} For ${VirtualTerminal.Styles.Italic}VSCode PowerShell Extension${VirtualTerminal.Styles.NoItalic}"
+	Write-Host -NoNewline "${VirtualTerminal.Colors.Magenta} For ${VirtualTerminal.Styles.Italic}VSCode PowerShell Extension ${VirtualTerminal.Styles.NoItalic}v$($host.Version.ToString())"
 }
-Write-Host " ${VirtualTerminal.Colors.Yellow}v1960.7.17"
+Write-Host ""
 Write-Host "${VirtualTerminal.Styles.Italic}${VirtualTerminal.Colors.BrightMagenta}(c)${VirtualTerminal.Colors.Reset} E-tek Corporation.${VirtualTerminal.Styles.NoItalic} ${VirtualTerminal.Styles.Underline}All rights reserved${VirtualTerminal.Styles.NoUnderline}."
 
 . $PSScriptRoot/EShellUI.hints.ps1

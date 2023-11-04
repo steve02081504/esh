@@ -166,7 +166,20 @@ function dirsync {
 	}
 }
 
+if ($ImVSCodeExtension) {
+	function global:exit { #抠我退出键是吧
+		param(
+			[Parameter(ValueFromRemainingArguments = $true)]
+			$exitCode = 0
+		)
+		[System.Environment]::Exit($exitCode)
+	}
+}
+
 function reload {
+	if ($ImVSCodeExtension) {
+		Stop-Process -Id $PID
+	}
 	& EShell
 	exit
 }

@@ -29,8 +29,8 @@ function LinuxPathToWindowsPath {
 	}
 	elseif ($Path.StartsWith("~")) {
 		$ResultPath = Join-Path -Path $HOME -ChildPath $Path.Substring(1)
-		if(-not (Test-path $ResultPath)){
-			if ($Path.StartsWith("~/.")){
+		if (-not (Test-Path $ResultPath)) {
+			if ($Path.StartsWith("~/.")) {
 				# 检查appdata
 				$SubPath = $Path.Substring(3)
 				#对于appdata下的每一个目录
@@ -150,6 +150,13 @@ Set-PSReadLineKeyHandler -Key Enter -ScriptBlock {
 		Invoke-Expression "$Executable $Rest *>&1" | Write-Host
 	}
 	else {
+		if ($ImVSCodeExtension) {
+			if ($Line.StartsWith("exit")) {
+				#若当前行以exit开头，则退出vscode
+				Invoke-Expression "global:$Line"
+				return
+			}
+		}
 		[Microsoft.PowerShell.PSConsoleReadLine]::AcceptLine()
 	}
 }
