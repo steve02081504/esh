@@ -12,6 +12,10 @@ function global:cd {
 	$Path = $null
 	for ($i = 0; $i -lt $RemainingArguments.Count; $i++) {
 		$arg = $RemainingArguments[$i]
+		if (-not $arg) {
+			$RemainingArguments.RemoveAt($i)
+			continue
+		}
 		if ($arg.StartsWith("-")) {
 			continue
 		}
@@ -20,57 +24,135 @@ function global:cd {
 		break
 	}
 	[string[]]$RemainingArguments = @($RemainingArguments)
+	if (-not "$RemainingArguments") {
+		$RemainingArguments = @()
+	}
 	#若path是linux路径
 	if (IsLinuxPath -Path $Path) {
 		#则转换为windows路径
 		$Path = LinuxPathToWindowsPath -Path $Path
 	}
 	#调用原始的cd..?
-	#让我们根据RemainingArguments的风格来判断是调用cd.exe还是Set-Location
+	#让我们根据RemainingArguments的风格来判断是调用cd还是Set-Location
+	#cd是bash提供的内置命令，没有单独的可执行文件
+	#所以我们只能通过Set-Location来模拟cd的行为
 	$IsLinuxBin = $Path.Length -eq 0
-	if ($IsLinuxBin) {
-		cd.exe @args
+	function baseCD ($Path,[switch]$IsFollowSymbolicLink = $true) {
+		if ($Path.Length -eq 0) {
+			Set-Location ~
+		}
+		elseif ($IsFollowSymbolicLink) {
+			Set-Location -Path $Path
+		}
+		else {
+			#循环分割路径，检查每一级路径是否是符号链接
+			$PreviousPath = ""
+			while ($Path) {
+				$CurrentPath = Split-Path -Path $Path -Parent
+				$ChildPath = Split-Path -Path $Path -Leaf
+				$PreviousPath = Join-Path -Path $PreviousPath -ChildPath $CurrentPath
+				$Path = $ChildPath
+				#若是符号链接
+				if ((Get-Item -Path $PreviousPath).Attributes -band [System.IO.FileAttributes]::ReparsePoint) {
+					#则更新路径到符号链接的目标
+					$PreviousPath = (Get-Item -Path $PreviousPath).Target
+					continue
+				}
+			}
+			Set-Location -Path $Path
+		}
 		return
 	}
-	if ($null -eq $RemainingArguments) {
+	if ($RemainingArguments.Length -eq 0) {
 		#若RemainingArguments是空的
-		#则调用Set-Location
-		Set-Location -Path $Path
+		baseCD $Path
 		return
 	}
-	$LinuxBinArguments = @("-l","--login","-p","--physical","-n","--no-cdpath","-P","--ignore-pwd","-@","--stack","--help","--version")
-	$RemainingArguments | ForEach-Object {
-		$arg = $_
-		$LinuxBinArguments | ForEach-Object {
-			if ($_.Length -eq 2) {
-				if ($arg.StartsWith($_)) {
-					$IsLinuxBin = $true
+	#cd: usage: cd [-L|[-P [-e]] [-@]] [dir]
+	if (-not $IsLinuxBin) {
+		$LinuxBinArguments = @("-L","-P","-e","-@","--help","--version")
+		$RemainingArguments | ForEach-Object {
+			$arg = $_
+			$LinuxBinArguments | ForEach-Object {
+				if ($_.Length -eq 2) {
+					if ($arg.StartsWith($_)) {
+						$IsLinuxBin = $true
+					}
 				}
-			}
-			else {
-				if ($arg -eq $_) {
-					$IsLinuxBin = $true
+				else {
+					if ($arg -eq $_) {
+						$IsLinuxBin = $true
+					}
 				}
 			}
 		}
 	}
 	if ($IsLinuxBin) {
-		#若是linux的cd.exe
-		#则调用cd.exe
-		$Path = WindowsPathToLinuxPath ($Path)
-		$RemainingArguments = $RemainingArguments | ForEach-Object {
-			#若是有效的文件路径
-			if (Test-Path -Path $_) {
-				#则转换为linux路径
-				WindowsPathToLinuxPath ($_)
+		#cd是bash提供的内置命令，没有单独的可执行文件
+		#所以我们只能通过Set-Location来模拟cd的行为
+		foreach ($arg in $RemainingArguments) {
+			if ($arg -eq "-L") {
+				#-L的意思是跟随符号链接
+				#但是powershell的Set-Location默认就是跟随符号链接的
+				#所以我们不需要做任何事情
+			}
+			elseif ($arg -eq "-P") {
+				#-P的意思是不跟随符号链接
+				#由于PWD总能被确定，检查RemainingArguments中是否有-e是没有意义的
+				baseCD $Path -IsFollowSymbolicLink:$false
+				return
+			}
+			elseif ($arg -eq "-e") {
+				#单独的-e没有任何意义，无视（bash就是这样做的）
+			}
+			elseif ($arg -eq "-@") {
+				#-@的意思是显示扩展属性，我们直接不支持这个功能
+			}
+			elseif ($arg -eq "--help") {
+				@"
+cd: cd [-L|[-P [-e]] [-@]] [dir]
+    Change the shell working directory.
+
+    Change the current directory to DIR.  The default DIR is the value of the
+    HOME shell variable. If DIR is "-", it is converted to `$OLDPWD.
+
+    The variable CDPATH defines the search path for the directory containing
+    DIR.  Alternative directory names in CDPATH are separated by a colon (:).
+    A null directory name is the same as the current directory.  If DIR begins
+    with a slash (/), then CDPATH is not used.
+
+    If the directory is not found, and the shell option ``cdable_vars' is set,
+    the word is assumed to be  a variable name.  If that variable has a value,
+    its value is used for DIR.
+
+    Options:
+      -L        force symbolic links to be followed: resolve symbolic
+                links in DIR after processing instances of ``..'
+      -P        use the physical directory structure without following
+                symbolic links: resolve symbolic links in DIR before
+                processing instances of ``..'
+      -e        if the -P option is supplied, and the current working
+                directory cannot be determined successfully, exit with
+                a non-zero status
+      -@        on systems that support it, present a file with extended
+                attributes as a directory containing the file attributes
+
+    The default is to follow symbolic links, as if ``-L' were specified.
+    ``..' is processed by removing the immediately previous pathname component
+    back to a slash or the beginning of DIR.
+
+    Exit Status:
+    Returns 0 if the directory is changed, and if `$PWD is set successfully when
+    -P is used; non-zero otherwise.
+
+"@
+				return
 			}
 			else {
-				$_
+				Write-Host "bash: cd: ${arg}: invalid option`ncd: usage: cd [-L|[-P [-e]] [-@]] [dir]"
+				return
 			}
 		}
-		$RemainingArguments = $RemainingArguments -join " "
-		$RemainingArguments = $RemainingArguments.Trim()
-		cd.exe $Path $RemainingArguments
 	}
 	else {
 		#否则调用Set-Location

@@ -4,8 +4,10 @@
 
 	#set thefuck as alias "fk"
 	if (Test-Command "thefuck") {
-		$env:PYTHONIOENCODING = "utf-8"
-		Invoke-Expression "$(thefuck --alias global:fk)"
+		try {
+			$env:PYTHONIOENCODING = "utf-8"
+			Invoke-Expression "$(thefuck --alias global:fk)"
+		} catch {}
 	}
 
 	if ($Host.UI.SupportsVirtualTerminal) {
@@ -24,5 +26,13 @@
 	#import appx with -UseWindowsPowerShell to avoid [Operation is not supported on this platform. (0x80131539)]
 	if (Test-Command "powershell.exe") {
 		Import-Module Appx -UseWindowsPowerShell 3> $null
+	}
+
+	#vcpkg integrate powershell
+	if (Test-Command vcpkg) {
+		$presetPath = Split-Path $((Get-Command "vcpkg").source) -Parent
+		Import-Module "$presetPath/scripts/posh-vcpkg"
+		#take TabExpansion function to global
+		Rename-Item function:TabExpansion global:TabExpansion
 	}
 } | Out-Null

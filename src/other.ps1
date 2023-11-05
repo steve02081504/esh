@@ -297,3 +297,110 @@ function Update-EShell {
 	}
 	catch {}
 }
+
+function Update-All-Paks {
+	if (Test-Command pip) {
+		Write-Host "Updating python packages..."
+		pip-review --auto #pip install pip-review
+	}
+	if (Test-Command npm) {
+		Write-Host "Updating npm packages..."
+		npm update -g
+	}
+	if (Test-Command gem) {
+		Write-Host "Updating ruby gems..."
+		gem update
+	}
+	if (Test-Command cargo) {
+		Write-Host "Updating rust packages..."
+		cargo install-update -a #cargo install cargo-update
+	}
+	if (Test-Command go) {
+		Write-Host "Updating go packages..."
+		go get -u -v all
+	}
+	if (Test-Command brew) {
+		Write-Host "Updating brew packages..."
+		brew update
+		brew upgrade
+		brew cleanup
+	}
+	if (Test-Command choco) {
+		Write-Host "Updating choco packages..."
+		choco upgrade all -y
+	}
+	if (Test-Command winget) {
+		Write-Host "Updating winget packages..."
+		winget upgrade --all
+	}
+	if (Test-Command scoop) {
+		Write-Host "Updating scoop packages..."
+		scoop update *
+	}
+	if (Test-Command apt) {
+		Write-Host "Updating apt packages..."
+		apt update
+		apt upgrade
+		apt autoremove
+	}
+	if (Test-Command pacman) {
+		Write-Host "Updating pacman packages..."
+		pacman -Syu
+	}
+	if (Test-Command yay) {
+		Write-Host "Updating yay packages..."
+		yay -Syu
+	}
+	if (Test-Command pkg) {
+		Write-Host "Updating pkg packages..."
+		pkg update
+		pkg upgrade
+	}
+	if (Test-Command pkgin) {
+		Write-Host "Updating pkgin packages..."
+		pkgin update
+		pkgin upgrade
+	}
+	if (Test-Command pkg_add) {
+		Write-Host "Updating pkg_add packages..."
+		pkg_add -u
+	}
+	if (Test-Command pkgutil) {
+		Write-Host "Updating pkgutil packages..."
+		pkgutil --update
+	}
+	if (Test-Command port) {
+		Write-Host "Updating port packages..."
+		port selfupdate
+		port upgrade outdated
+	}
+	if (Test-Command fink) {
+		Write-Host "Updating fink packages..."
+		fink selfupdate
+		fink update-all
+	}
+	if (Test-Command nix) {
+		Write-Host "Updating nix packages..."
+		nix-channel --update
+		nix-env -u '*'
+	}
+	if (Test-Command flatpak) {
+		Write-Host "Updating flatpak packages..."
+		flatpak update
+	}
+	if (Test-Command snap) {
+		Write-Host "Updating snap packages..."
+		snap refresh
+	}
+	if (Test-Command vcpkg) {
+		Write-Host "Updating vcpkg packages..."
+		if (Test-Command git) {
+			$pathNow = $PWD
+			Set-Location $(Split-Path $((Get-Command "vcpkg").source) -Parent)
+			git pull
+			Set-Location $pathNow
+		}
+		vcpkg update
+		vcpkg upgrade --no-dry-run
+	}
+}
