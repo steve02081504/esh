@@ -340,101 +340,104 @@ function Copilot.Explain {
 }
 
 function Update-All-Paks {
+	function Update-HEAD($text) {
+		Write-Host "${VirtualTerminal.Colors.BrightMagenta}Updating $text...${VirtualTerminal.Colors.Reset}"
+	}
 	if (Test-Command pip) {
-		Write-Host "Updating python packages..."
+		Update-HEAD "pip packages"
 		pip-review --auto #pip install pip-review
 	}
 	if (Test-Command npm) {
-		Write-Host "Updating npm packages..."
+		Update-HEAD "npm packages"
 		npm update -g
 	}
 	if (Test-Command gem) {
-		Write-Host "Updating ruby gems..."
+		Update-HEAD "ruby gems"
 		gem update
 	}
 	if (Test-Command cargo) {
-		Write-Host "Updating rust packages..."
-		cargo install-update -a #cargo install cargo-update
+		Update-HEAD "cargo packages"
+		cargo install-update -a -g #cargo install cargo-update
 	}
 	if (Test-Command go) {
-		Write-Host "Updating go packages..."
+		Update-HEAD "go packages"
 		go get -u -v all
 	}
 	if (Test-Command brew) {
-		Write-Host "Updating brew packages..."
+		Update-HEAD "brew packages"
 		brew update
 		brew upgrade
 		brew cleanup
 	}
 	if (Test-Command choco) {
-		Write-Host "Updating choco packages..."
+		Update-HEAD "choco packages"
 		choco upgrade all -y
 	}
 	if (Test-Command winget) {
-		Write-Host "Updating winget packages..."
+		Update-HEAD "winget packages"
 		winget upgrade --all
 	}
 	if (Test-Command scoop) {
-		Write-Host "Updating scoop packages..."
+		Update-HEAD "scoop packages"
 		scoop update *
 	}
 	if (Test-Command apt) {
-		Write-Host "Updating apt packages..."
+		Update-HEAD "apt packages"
 		apt update
 		apt upgrade
 		apt autoremove
 	}
 	if (Test-Command pacman) {
-		Write-Host "Updating pacman packages..."
+		Update-HEAD "pacman packages"
 		pacman -Syu
 	}
 	if (Test-Command yay) {
-		Write-Host "Updating yay packages..."
+		Update-HEAD "yay packages"
 		yay -Syu
 	}
 	if (Test-Command pkg) {
-		Write-Host "Updating pkg packages..."
+		Update-HEAD "pkg packages"
 		pkg update
 		pkg upgrade
 	}
 	if (Test-Command pkgin) {
-		Write-Host "Updating pkgin packages..."
+		Update-HEAD "pkgin packages"
 		pkgin update
 		pkgin upgrade
 	}
 	if (Test-Command pkg_add) {
-		Write-Host "Updating pkg_add packages..."
+		Update-HEAD "pkg_add packages"
 		pkg_add -u
 	}
 	if (Test-Command pkgutil) {
-		Write-Host "Updating pkgutil packages..."
+		Update-HEAD "pkgutil packages"
 		pkgutil --update
 	}
 	if (Test-Command port) {
-		Write-Host "Updating port packages..."
+		Update-HEAD "port packages"
 		port selfupdate
 		port upgrade outdated
 	}
 	if (Test-Command fink) {
-		Write-Host "Updating fink packages..."
+		Update-HEAD "fink packages"
 		fink selfupdate
 		fink update-all
 	}
 	if (Test-Command nix) {
-		Write-Host "Updating nix packages..."
+		Update-HEAD "nix packages"
 		nix-channel --update
 		nix-env -u '*'
 	}
 	if (Test-Command flatpak) {
-		Write-Host "Updating flatpak packages..."
+		Update-HEAD "flatpak packages"
 		flatpak update
 	}
 	if (Test-Command snap) {
-		Write-Host "Updating snap packages..."
+		Update-HEAD "snap packages"
 		snap refresh
 	}
 	if (Test-Command vcpkg) {
-		Write-Host "Updating vcpkg packages..."
+		Update-HEAD "vcpkg packages"
 		if (Test-Command git) {
 			$pathNow = $PWD
 			Set-Location $(Split-Path $((Get-Command "vcpkg").source) -Parent)
@@ -443,5 +446,9 @@ function Update-All-Paks {
 		}
 		vcpkg update
 		vcpkg upgrade --no-dry-run
+	}
+	if (Test-Command gh) {
+		Update-HEAD "Github CLI Extensions"
+		gh extension upgrade --all
 	}
 }
