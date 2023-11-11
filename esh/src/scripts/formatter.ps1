@@ -23,5 +23,3 @@ function Format-Code {
 		}
 	}
 }
-
-Format-Code $PSScriptRoot/src

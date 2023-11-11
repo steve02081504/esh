@@ -1,7 +1,23 @@
-﻿#我的msys路径
-${MSYS.RootPath} = "E:\msys"
+﻿#查找$EshellUI.MSYS.RootPath是否是可用的msys路径
+if (-not $EshellUI.MSYS.RootPath -or -not (Test-Path -Path $EshellUI.MSYS.RootPath)) {
+	#若不是，则遍历所有盘符
+	$DriveLetters = Get-PSDrive -PSProvider FileSystem | ForEach-Object { $_.Name }
+	$DriveLetters | ForEach-Object {
+		#若该盘符下存在msys路径
+		if (Test-Path -Path "${_}:\msys64") {
+			#则设置为该路径
+			$EshellUI.MSYS.RootPath = "${_}:\msys64"
+		}
+		elseif (Test-Path -Path "${_}:\msys") {
+			#或者设置为该路径
+			$EshellUI.MSYS.RootPath = "${_}:\msys"
+		}
+	}
+}
 
-function IsLinuxPath {
+$EshellUI["PathHandler"] = @{}
+
+function global:IsLinuxPath {
 	param(
 		[string]$Path
 	)
@@ -15,7 +31,7 @@ function IsLinuxPath {
 }
 
 #一个函数以处理linux路径到windows路径的转换
-function LinuxPathToWindowsPath {
+function global:LinuxPathToWindowsPath {
 	param(
 		[string]$Path
 	)
@@ -46,17 +62,17 @@ function LinuxPathToWindowsPath {
 	}
 	else {
 		#否则根据msys的rootpath来转换
-		return Join-Path -Path ${MSYS.RootPath} -ChildPath $Path
+		return Join-Path -Path $EshellUI.MSYS.RootPath -ChildPath $Path
 	}
 }
-function WindowsPathToLinuxPath {
+function global:WindowsPathToLinuxPath {
 	param(
 		[string]$Path
 	)
 	#若path是rootpath的子目录
-	if ($Path.StartsWith(${MSYS.RootPath})) {
+	if ($Path.StartsWith($EshellUI.MSYS.RootPath)) {
 		#则转换为linux路径
-		$Path = $Path.Substring(${MSYS.RootPath}.Length)
+		$Path = $Path.Substring($EshellUI.MSYS.RootPath.Length)
 	}
 	elseif ($Path.StartsWith($HOME)) {
 		$Path = "~" + $Path.Substring($HOME.Length)
@@ -118,7 +134,7 @@ Register-ArgumentCompleter -ParameterName "Destination" -ScriptBlock $LinuxPathC
 Set-PSReadLineKeyHandler -Key Tab -Function MenuComplete
 
 if (Test-Command rm.exe) {
-	. $PSScriptRoot/linux_bins.ps1
+	. "$($EshellUI.Sources.Path)/src/commands/linux_bins.ps1"
 }
 
 #设置一个函数用于在powershell执行以/开头的命令时，自动转换为windows路径
@@ -150,7 +166,7 @@ Set-PSReadLineKeyHandler -Key Enter -ScriptBlock {
 		Invoke-Expression "$Executable $Rest *>&1" | Write-Host
 	}
 	else {
-		if ($ImVSCodeExtension) {
+		if ($EshellUI.Im.VSCodeExtension) {
 			if ($Line.StartsWith("exit")) {
 				#若当前行以exit开头，则退出vscode
 				Invoke-Expression "global:$Line"

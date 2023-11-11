@@ -1,4 +1,4 @@
-﻿function PromptNewlineCheck {
+﻿Add-Member -InputObject $EshellUI.Prompt -MemberType ScriptMethod -Name NewlineCheck -Value {
 	param(
 		[Parameter(Mandatory = $true)]
 		[string]$prompt_str
@@ -11,7 +11,8 @@
 	}
 	return $prompt_str
 }
-function PromptAddBlock {
+. "$($EshellUI.Sources.Path)/src/scripts/minmax.ps1"
+Add-Member -InputObject $EshellUI.Prompt -MemberType ScriptMethod -Name AddBlock -Value {
 	param(
 		[Parameter(Position = 0,Mandatory = $true)]
 		$prompt_str,

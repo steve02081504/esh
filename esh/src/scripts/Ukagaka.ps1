@@ -1,4 +1,4 @@
-﻿function Get-Ukagaka-Description-File-HashTable {
+﻿function global:Get-Ukagaka-Description-File-HashTable {
 	param(
 		[Parameter(Mandatory = $true)]
 		$Content
@@ -18,7 +18,7 @@
 	}
 	$Description
 }
-function Read-Ukagaka-Description-File {
+function global:Read-Ukagaka-Description-File {
 	param(
 		[Parameter(Mandatory = $true)]
 		[string]$Path
@@ -32,7 +32,7 @@ function Read-Ukagaka-Description-File {
 	}
 	$Description
 }
-function Test-Ukagaka-Directory-Base {
+function global:Test-Ukagaka-Directory-Base {
 	param(
 		[Parameter(Mandatory = $true)]
 		[string]$Path,
@@ -56,14 +56,14 @@ function Test-Ukagaka-Directory-Base {
 		}
 	}
 }
-function Test-Ukagaka-Ghost-Directory {
+function global:Test-Ukagaka-Ghost-Directory {
 	param(
 		[Parameter(Mandatory = $true)]
 		[string]$Path
 	)
 	Test-Ukagaka-Directory-Base -Path $Path -CheckPath "ghost/master/descript.txt"
 }
-function Test-Ukagaka-Directory {
+function global:Test-Ukagaka-Directory {
 	param(
 		[Parameter(Mandatory = $true)]
 		[string]$Path

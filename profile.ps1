@@ -1,1 +1,4 @@
-. $PSScriptRoot/src/EShellUI.ps1
+. $PSScriptRoot/esh/main.ps1
+
+$EshellUI.LoadVariables()
+$EshellUI.Start()

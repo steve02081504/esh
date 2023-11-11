@@ -1,4 +1,5 @@
 
 /Modules/*
 /Scripts/*
-/data/SAO-lib.txt
+/esh/data/SAO-lib.txt
+/esh/data/vars/MSYSRootPath.txt

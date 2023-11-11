@@ -6,7 +6,7 @@
 [hashtable]${global:CHS2CHT.data.alphas} = @{}
 [hashtable]${global:CHT2CHS.data.alphas} = @{}
 
-function CHS2CHT.base {
+function global:CHS2CHT.base {
 	param([string]$str)
 	[string]$Result = ""
 	for ($i = 0; $i -lt $str.Length; $i++) {

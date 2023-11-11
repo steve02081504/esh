@@ -7,9 +7,8 @@
 - clone后放置于`~/Documents/powershell`
 - 在windows terminal中将字体设置为[`FriaCode Nerd Font`](https://github.com/ryanoasis/nerd-fonts/releases/latest/download/FiraCode.zip)
 - 你或许想追加`-NoProfileLoadTime -nologo`到powershell启动参数中
-- 修改`src/linux.ps1`中的msys路径
+- 修改`$EshellUI.MSYS.RootPath`为你的msys2安装路径并`$EshellUI.SaveVariable()`
 - 视需要修改其他文件内容
-- 启动shell
 
 ## 快速开始
 
@@ -36,7 +35,7 @@ Update-Eshell
 
 ```
 
-这将清除`src`文件夹和`data/SAO-lib.txt`并重新下载它
+这将清除`esh/src`文件夹和`esh/data/SAO-lib.txt`并重新下载最新的esh和SAO-lib
 
 ## 功能预览  
 
@@ -57,7 +56,7 @@ npm提示符支持
 ukagaka提示符支持  
 ![图片](https://github.com/steve02081504/my-powershell-profile/assets/31927825/9c3620ca-f15d-4a7d-8e5a-b0d321e58aab)
 
-可以通过修改`src/prompt.builders`来便捷自定义提示符
+可以通过修改`esh/src/system/UI/prompt/builders`来便捷自定义提示符
 
 ### 命令
 
@@ -89,4 +88,4 @@ rm -rf superhavyrock
 
 ![图片](https://github.com/steve02081504/my-powershell-profile/assets/31927825/b0b3a4ed-f6fd-446e-a65b-602399bd0abe)
 
-由于我懒，`dirsync`等其他命令不做介绍，请自行查看`src/other`文件
+由于我懒，`dirsync`等其他命令不做介绍，请自行查看`$EshellUI.ProvidedFunctions()`
