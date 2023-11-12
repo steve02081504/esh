@@ -19,12 +19,13 @@ $EshellUI = @{
 			promptBackup = $function:prompt
 		}
 	}
+	BackgroundLoadingJobs = [System.Collections.ArrayList]@()
 }; @{
 	SaveVariables = {
 		if ($this.MSYS.RootPath) { Set-Content "$($this.Sources.Path)/data/vars/MSYSRootPath.txt" $this.MSYS.RootPath }
 	}
 	LoadVariables = {
-		try { $this.MSYS.RootPath = Get-Content "$($this.Sources.Path)/data/vars/MSYSRootPath.txt" -ErrorAction Stop } catch {}
+		$this.MSYS.RootPath = Get-Content "$($this.Sources.Path)/data/vars/MSYSRootPath.txt" -ErrorAction Ignore
 	}
 	Start = {
 		. $PSScriptRoot/system/base.ps1
@@ -83,6 +84,8 @@ $EshellUI = @{
 	Remove = {
 		$this.SaveVariables()
 		$function:prompt = $this.OtherData.BeforeEshLoaded.promptBackup
+		Unregister-Event PowerShell.OnIdle
+		Unregister-Event PowerShell.Exiting
 		$this.ProvidedFunctions() | ForEach-Object {
 			Remove-Item function:\$($_.Name)
 		}
@@ -97,6 +100,15 @@ $EshellUI = @{
 	Add-Member -InputObject $EshellUI -MemberType ScriptMethod -Name $_.Key -Value $_.Value -Force
 }
 #注册事件以在退出时保存数据
-Register-EngineEvent -SourceIdentifier PowerShell.Exiting -Action {
+Register-EngineEvent PowerShell.Exiting -Action {
 	$EshellUI.SaveVariables()
+} | Out-Null
+#注册事件以在空闲时执行后台任务
+Register-EngineEvent PowerShell.OnIdle -Action {
+	if ($EshellUI.BackgroundLoadingJobs.Count) {
+		#从$EshellUI.BackgroundLoadingJobs中取出一个任务并执行
+		$job = $EshellUI.BackgroundLoadingJobs[0]
+		$EshellUI.BackgroundLoadingJobs.RemoveAt(0)
+		$job.Invoke()
+	}
 } | Out-Null

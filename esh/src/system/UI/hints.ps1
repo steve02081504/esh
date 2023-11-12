@@ -31,4 +31,4 @@ $EshellUI.Hints.AddWithCommand("coffee","get a cup of coffee")
 $EshellUI.Hints.AddWithCommand("poweron","turn on this computer")
 $EshellUI.Hints.Add($(coffee))
 
-Get-Content "$($EshellUI.Sources.Path)/data/SAO-lib.txt" -ErrorAction SilentlyContinue -Encoding utf-8 | ForEach-Object { $EshellUI.Hints.Add($_) }
+Get-Content "$($EshellUI.Sources.Path)/data/SAO-lib.txt" -ErrorAction Ignore -Encoding utf-8 | ForEach-Object { $EshellUI.Hints.Add($_) }
