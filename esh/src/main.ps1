@@ -109,6 +109,10 @@ Register-EngineEvent PowerShell.OnIdle -Action {
 		#从$EshellUI.BackgroundLoadingJobs中取出一个任务并执行
 		$job = $EshellUI.BackgroundLoadingJobs[0]
 		$EshellUI.BackgroundLoadingJobs.RemoveAt(0)
+
+		$OriginalPref = $ProgressPreference # Default is 'Continue'
+		$ProgressPreference = "SilentlyContinue"
 		$job.Invoke()
+		$ProgressPreference = $OriginalPref
 	}
 } | Out-Null

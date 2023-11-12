@@ -33,6 +33,9 @@ function global:Update-All-Paks {
 	function Update-HEAD ($text) {
 		Write-Host "${VirtualTerminal.Colors.BrightMagenta}Updating $text...${VirtualTerminal.Colors.Reset}"
 	}
+	#Update Powershell Modules
+	Update-HEAD "Powershell Modules"
+	Update-Module -Name *
 	if (Test-Command pip) {
 		Update-HEAD "pip packages"
 		pip-review --auto #pip install pip-review
