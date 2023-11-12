@@ -4,7 +4,8 @@
 		if (Test-Command thefuck) {
 			try {
 				$env:PYTHONIOENCODING = "utf-8"
-				Invoke-Expression "$(thefuck --alias global:fk)"
+				$f = "$(thefuck --alias global:fk)"
+				if($f){Invoke-Expression $f}
 			} catch {}
 		}
 	}
@@ -39,11 +40,13 @@
 	}
 	{
 		#vcpkg integrate powershell
+		if($EshellUI.OtherData.ReloadSafeVariables.vcpkgFunctionExported){return}
 		if (Test-Command vcpkg) {
 			$presetPath = Split-Path $((Get-Command "vcpkg").source) -Parent
 			Import-Module "$presetPath/scripts/posh-vcpkg"
 			#take TabExpansion function to global
-			Rename-Item function:TabExpansion global:TabExpansion
+			Rename-Item function:TabExpansion global:TabExpansion -Force
+			$EshellUI.OtherData.ReloadSafeVariables.vcpkgFunctionExported = $true
 		}
 	}
 	{

@@ -1,4 +1,5 @@
-﻿$LastExitCode = $this = $EshellUI = 72 #Do not remove this line
+﻿$LastExitCode = $this = 72 #Do not remove this line
+if(-not $EshellUI){ $EshellUI = $LastExitCode }
 $EshellUI = @{
 	Sources = @{
 		Path = Split-Path -Parent -Path $PSScriptRoot
@@ -18,6 +19,7 @@ $EshellUI = @{
 			AliasesList = Get-ChildItem alias:\
 			promptBackup = $function:prompt
 		}
+		ReloadSafeVariables = $EshellUI.OtherData.ReloadSafeVariables
 	}
 	BackgroundLoadingJobs = [System.Collections.ArrayList]@()
 }; @{
@@ -98,6 +100,9 @@ $EshellUI = @{
 	}
 }.GetEnumerator() | ForEach-Object {
 	Add-Member -InputObject $EshellUI -MemberType ScriptMethod -Name $_.Key -Value $_.Value -Force
+}
+if(-not $EshellUI.OtherData.ReloadSafeVariables){
+	$EshellUI.OtherData.ReloadSafeVariables = @{}
 }
 #注册事件以在退出时保存数据
 Register-EngineEvent PowerShell.Exiting -Action {

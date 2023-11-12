@@ -68,7 +68,7 @@ ${CHSCHT.oridata.alphas}.Keys | ForEach-Object {
 		}
 	}
 }
-Remove-Variable -Name "CHSCHT.oridata.alphas"
+Remove-Variable -Name "CHSCHT.oridata.alphas" -Scope Global
 ${CHSCHT.oridata.words}.Keys | ForEach-Object {
 	$Key = $_
 	$Value = ${CHSCHT.oridata.words}[$Key].Trim()
@@ -81,4 +81,4 @@ ${CHSCHT.oridata.words}.Keys | ForEach-Object {
 		${CHS2CHT.data.words}.Add($S,$Value)
 	}
 }
-Remove-Variable -Name "CHSCHT.oridata.words"
+Remove-Variable -Name "CHSCHT.oridata.words" -Scope Global
