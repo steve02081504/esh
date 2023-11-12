@@ -21,20 +21,20 @@
 
 function global:Copilot {
 	try { Install-Copilot } catch { return }
-	gh copilot suggest -t shell @args
+	gh 'copilot' suggest -t shell @args
 }
 
 function global:Copilot.GitHub {
 	try { Install-Copilot } catch { return }
-	gh copilot suggest -t gh @args
+	gh 'copilot' suggest -t gh @args
 }
 
 function global:Copilot.Git {
 	try { Install-Copilot } catch { return }
-	gh copilot suggest -t git @args
+	gh 'copilot' suggest -t git @args
 }
 
 function global:Copilot.Explain {
 	try { Install-Copilot } catch { return }
-	gh copilot explain @args
+	gh 'copilot' explain @args
 }
