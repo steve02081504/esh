@@ -3,11 +3,8 @@
 }
 function Format-Code {
 	param(
-		[string]$path
+		[string]$path = "."
 	)
-	if ($path -eq $null) {
-		$path = "."
-	}
 	#若是目录
 	if (Test-Path $path -PathType Container) {
 		$files = Get-ChildItem -Path $path -Recurse -Include *.ps1

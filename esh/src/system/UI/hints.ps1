@@ -1,34 +1,27 @@
-﻿$EshellUI["Hints"] = @{
-	"Data" = @()
-}; @{
-	Add = {
-		param(
-			[string]$hint
-		)
-		$this.Data += $hint
-	}
-	AddWithCommand = {
+﻿$EshellUI.Hints = ValueEx @{
+	__value_type__ = [System.Collections.ArrayList]
+	"method:AddWithCommand" = {
 		param(
 			[string]$command,
 			[string]$hint,
-			[string]$check_command
+			[string]$check_command = $command
 		)
-		if (-not $check_command) { $check_command = $command }
 		if (Test-Command $check_command) {
 			$this.Add("Type '${VirtualTerminal.Colors.BrightYellow}$command${VirtualTerminal.Colors.Reset}' to $hint.")
 		}
 	}
-	PrintRandom = {
-		try { Write-Host $(Get-Random $this.Data) }
-		catch { $this.PrintRandom }
+	"method:GetRandom" = {
+		$this[$(Get-Random -Minimum 0 -Maximum $this.Count)]
 	}
-}.GetEnumerator() | ForEach-Object {
-	Add-Member -InputObject $EshellUI.Hints -MemberType ScriptMethod -Name $_.Key -Value $_.Value -Force
+	"method:PrintRandom" = {
+		try { Write-Host $this.GetRandom() }
+		catch { $this.PrintRandom() }
+	}
 }
 
-$EshellUI.Hints.AddWithCommand("fk","fuck typos","thefuck")
-$EshellUI.Hints.AddWithCommand("coffee","get a cup of coffee")
-$EshellUI.Hints.AddWithCommand("poweron","turn on this computer")
-$EshellUI.Hints.Add($(coffee))
+$EshellUI.Hints.AddWithCommand("fk","fuck typos","thefuck") | Out-Null
+$EshellUI.Hints.AddWithCommand("coffee","get a cup of coffee") | Out-Null
+$EshellUI.Hints.AddWithCommand("poweron","turn on this computer") | Out-Null
+$EshellUI.Hints.Add($(coffee)) | Out-Null
 
-Get-Content "$($EshellUI.Sources.Path)/data/SAO-lib.txt" -ErrorAction Ignore -Encoding utf-8 | ForEach-Object { $EshellUI.Hints.Add($_) }
+Get-Content "$($EshellUI.Sources.Path)/data/SAO-lib.txt" -ErrorAction Ignore -Encoding utf-8 | ForEach-Object { $EshellUI.Hints.Add($_) } | Out-Null

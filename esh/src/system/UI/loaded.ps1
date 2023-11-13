@@ -5,4 +5,4 @@
 }
 
 . $PSScriptRoot/logo.ps1
-$EshellUI.PrintLogo()
+$EshellUI.Logo.Print()

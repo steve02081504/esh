@@ -36,11 +36,8 @@ function global:Test-Ukagaka-Directory-Base {
 	param(
 		[Parameter(Mandatory = $true)]
 		[string]$Path,
-		[string]$CheckPath
+		[string]$CheckPath = "descript.txt"
 	)
-	if (-not $CheckPath) {
-		$CheckPath = "descript.txt"
-	}
 	$DescriptionPath = Join-Path -Path $Path -ChildPath $CheckPath
 	if (Test-Path -Path $DescriptionPath) {
 		Read-Ukagaka-Description-File -Path $DescriptionPath

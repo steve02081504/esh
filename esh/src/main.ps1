@@ -1,6 +1,8 @@
-﻿$LastExitCode = $this = 72 #Do not remove this line
-if(-not $EshellUI){ $EshellUI = $LastExitCode }
-$EshellUI = @{
+﻿$EshellUI ??= $LastExitCode = $this = 72 #Do not remove this line
+
+. $PSScriptRoot/scripts/ValueEx.ps1
+
+$EshellUI = ValueEx @{
 	Sources = @{
 		Path = Split-Path -Parent -Path $PSScriptRoot
 	}
@@ -12,6 +14,21 @@ $EshellUI = @{
 	MSYS = @{
 		RootPath = 'C:\msys64'
 	}
+	BackgroundLoadingJobs = @{
+		__value_type__ = [System.Collections.ArrayList]
+		"method:Pop" = {
+			$job = $this[0]
+			$this.RemoveAt(0)
+			$job
+		}
+		"method:PopAndRun" = {
+			$job = $this.Pop()
+			$OriginalPref = $ProgressPreference # Default is 'Continue'
+			$ProgressPreference = "SilentlyContinue"
+			$job.Invoke()
+			$ProgressPreference = $OriginalPref
+		}
+	}
 	OtherData = @{
 		BeforeEshLoaded = @{
 			FunctionList = Get-ChildItem function:\
@@ -19,17 +36,27 @@ $EshellUI = @{
 			AliasesList = Get-ChildItem alias:\
 			promptBackup = $function:prompt
 		}
-		ReloadSafeVariables = $EshellUI.OtherData.ReloadSafeVariables
+		ReloadSafeVariables = $EshellUI.OtherData.ReloadSafeVariables ?? @{}
 	}
-	BackgroundLoadingJobs = [System.Collections.ArrayList]@()
-}; @{
-	SaveVariables = {
+	"method:SaveVariables" = {
 		if ($this.MSYS.RootPath) { Set-Content "$($this.Sources.Path)/data/vars/MSYSRootPath.txt" $this.MSYS.RootPath }
 	}
-	LoadVariables = {
+	"method:LoadVariables" = {
 		$this.MSYS.RootPath = Get-Content "$($this.Sources.Path)/data/vars/MSYSRootPath.txt" -ErrorAction Ignore
 	}
-	Start = {
+	"method:Start" = {
+		$this.OtherData.BeforeEshLoaded.promptBackup = $function:prompt
+		#注册事件以在退出时保存数据
+		Register-EngineEvent PowerShell.Exiting -Action {
+			$EshellUI.SaveVariables()
+		} | Out-Null
+		#注册事件以在空闲时执行后台任务
+		Register-EngineEvent PowerShell.OnIdle -Action {
+			if ($EshellUI.BackgroundLoadingJobs.Count) {
+				$EshellUI.BackgroundLoadingJobs.PopAndRun()
+			}
+		} | Out-Null
+
 		. $PSScriptRoot/system/base.ps1
 		. $PSScriptRoot/scripts/VirtualTerminal.ps1
 
@@ -54,36 +81,36 @@ $EshellUI = @{
 
 		. $PSScriptRoot/system/UI/loaded.ps1
 	}
-	Reload = {
+	"method:Reload" = {
 		$this.SaveVariables()
 		$this.Remove()
 		. "$($this.Sources.Path)/main.ps1"
 		$EshellUI.LoadVariables()
 		$EshellUI.Start()
 	}
-	FormatSelf = {
+	"method:FormatSelf" = {
 		. $PSScriptRoot/scripts/formatter.ps1
 		Format-Code -Path $this.Sources.Path
 	}
-	ProvidedFunctions = {
+	"method:ProvidedFunctions" = {
 		$FunctionListNow = Get-ChildItem function:\
 		$FunctionListNow | ForEach-Object {
 			if ($this.OtherData.BeforeEshLoaded.FunctionList.Name -notcontains $_.Name) { $_ }
 		}
 	}
-	ProvidedVariables = {
+	"method:ProvidedVariables" = {
 		$VariableListNow = Get-ChildItem variable:\
 		$VariableListNow | ForEach-Object {
 			if ($this.OtherData.BeforeEshLoaded.VariableList.Name -notcontains $_.Name) { $_ }
 		}
 	}
-	ProvidedAliases = {
+	"method:ProvidedAliases" = {
 		$AliasesListNow = Get-ChildItem alias:\
 		$AliasesListNow | ForEach-Object {
 			if ($this.OtherData.BeforeEshLoaded.AliasesList.Name -notcontains $_.Name) { $_ }
 		}
 	}
-	Remove = {
+	"method:Remove" = {
 		$this.SaveVariables()
 		$function:prompt = $this.OtherData.BeforeEshLoaded.promptBackup
 		Unregister-Event PowerShell.OnIdle
@@ -98,26 +125,4 @@ $EshellUI = @{
 			Remove-Item alias:\$($_.Name)
 		}
 	}
-}.GetEnumerator() | ForEach-Object {
-	Add-Member -InputObject $EshellUI -MemberType ScriptMethod -Name $_.Key -Value $_.Value -Force
 }
-if(-not $EshellUI.OtherData.ReloadSafeVariables){
-	$EshellUI.OtherData.ReloadSafeVariables = @{}
-}
-#注册事件以在退出时保存数据
-Register-EngineEvent PowerShell.Exiting -Action {
-	$EshellUI.SaveVariables()
-} | Out-Null
-#注册事件以在空闲时执行后台任务
-Register-EngineEvent PowerShell.OnIdle -Action {
-	if ($EshellUI.BackgroundLoadingJobs.Count) {
-		#从$EshellUI.BackgroundLoadingJobs中取出一个任务并执行
-		$job = $EshellUI.BackgroundLoadingJobs[0]
-		$EshellUI.BackgroundLoadingJobs.RemoveAt(0)
-
-		$OriginalPref = $ProgressPreference # Default is 'Continue'
-		$ProgressPreference = "SilentlyContinue"
-		$job.Invoke()
-		$ProgressPreference = $OriginalPref
-	}
-} | Out-Null
