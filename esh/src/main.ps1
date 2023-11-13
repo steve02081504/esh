@@ -3,11 +3,13 @@
 $EshellUI ??= $LastExitCode = $this = 72 #Do not remove this line
 $EshellUI = ValueEx @{
 	Sources = @{
-		Path = Split-Path -Parent $PSScriptRoot
+		Path = Split-Path $PSScriptRoot
 	}
 	Im = @{
 		Sudo = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]“Administrator”)
-		VSCodeExtension = $null -ne $psEditor
+		VSCodeExtension = [bool]($psEditor)
+		WindowsPowerShell = (Split-Path $(Split-Path $PROFILE) -Leaf) -eq "WindowsPowerShell"
+		ISE = [bool]($psISE)
 	}
 
 	MSYS = @{
@@ -57,7 +59,6 @@ $EshellUI = ValueEx @{
 		} | Out-Null
 
 		. $PSScriptRoot/system/base.ps1
-		. $PSScriptRoot/scripts/VirtualTerminal.ps1
 
 		. $PSScriptRoot/system/UI/loading.ps1
 		. $PSScriptRoot/system/UI/title.ps1
@@ -68,15 +69,9 @@ $EshellUI = ValueEx @{
 
 		. $PSScriptRoot/system/UI/prompt/main.ps1
 
-		#一些耗时的后台任务
 		. $PSScriptRoot/system/BackgroundLoading.ps1
 
-		# 对于$PSScriptRoot/commands/others下的所有脚本，若其文件名为*.ps1，则加载之
-		Get-ChildItem "$PSScriptRoot/commands/others" | ForEach-Object {
-			if ($_.Extension -eq ".ps1") {
-				.$_.FullName
-			}
-		}
+		Get-ChildItem "$PSScriptRoot/commands" *.ps1 | ForEach-Object { .$_.FullName }
 
 		. $PSScriptRoot/system/UI/loaded.ps1
 	}

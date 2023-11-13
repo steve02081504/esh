@@ -44,7 +44,7 @@ function global:Test-Ukagaka-Directory-Base {
 	}
 	else {
 		#测试父目录直至根目录
-		$ParentPath = Split-Path $Path -Parent
+		$ParentPath = Split-Path $Path
 		if ($ParentPath) {
 			Test-Ukagaka-Directory-Base $ParentPath $CheckPath
 		}

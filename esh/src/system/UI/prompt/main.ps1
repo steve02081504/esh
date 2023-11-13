@@ -27,12 +27,7 @@ $EshellUI.Prompt = ValueEx @{
 		return $prompt_str
 	}
 	"method:AddBlock" = {
-		param(
-			[Parameter(Position = 0,Mandatory = $true)]
-			$prompt_str,
-			[Parameter(Position = 1,Mandatory = $true)]
-			[string]$block_str
-		)
+		param($prompt_str,$block_str)
 		$LastLineIndex = Max $prompt_str.LastIndexOf('`n') 0
 		$LastLine = $prompt_str.Substring($LastLineIndex)
 		#如果$LastLine + $block_str长度大于$Host.UI.RawUI.WindowSize.Width则换行
@@ -42,6 +37,9 @@ $EshellUI.Prompt = ValueEx @{
 		return $prompt_str + $block_str
 	}
 }
-. $PSScriptRoot/builders/main.ps1
+#遍历脚本所在文件夹
+Get-ChildItem $PSScriptRoot/builders *.ps1 | ForEach-Object {
+	.$_.FullName
+}
 
 function global:prompt { $EshellUI.Prompt.Get() }

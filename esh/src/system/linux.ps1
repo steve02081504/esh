@@ -105,7 +105,7 @@ $LinuxPathCompleter = {
 	#若windows路径不存在
 	if (-not (Test-Path $WindowsPath)) {
 		#测试其父目录是否存在
-		$ParentPath = Split-Path $WindowsPath -Parent
+		$ParentPath = Split-Path $WindowsPath
 		if (-not (Test-Path $ParentPath)) {
 			#若父目录不存在，则不补全
 			return
@@ -134,7 +134,7 @@ Register-ArgumentCompleter -ParameterName "Destination" -ScriptBlock $LinuxPathC
 Set-PSReadLineKeyHandler -Key Tab -Function MenuComplete
 
 if (Test-Command rm.exe) {
-	. "$($EshellUI.Sources.Path)/src/commands/linux_bins.ps1"
+	. "$($EshellUI.Sources.Path)/src/commands/special/linux_bins.ps1"
 }
 
 #设置一个函数用于在powershell执行以/开头的命令时，自动转换为windows路径

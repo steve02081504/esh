@@ -133,7 +133,7 @@ function global:Update-All-Paks {
 		Update-HEAD "vcpkg packages"
 		if (Test-Command git) {
 			$pathNow = $PWD
-			Set-Location $(Split-Path $((Get-Command "vcpkg").source) -Parent)
+			Set-Location $(Split-Path $((Get-Command "vcpkg").source))
 			git pull
 			Set-Location $pathNow
 		}

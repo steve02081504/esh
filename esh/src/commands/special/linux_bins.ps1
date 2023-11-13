@@ -1,5 +1,5 @@
 ﻿#让我们升级cd来让它可以处理linux路径
-if (Test-Path Alias:cd) {
+while (Test-Path Alias:cd) {
 	Remove-Item Alias:cd
 }
 function global:cd {
@@ -48,7 +48,7 @@ function global:cd {
 			#循环分割路径，检查每一级路径是否是符号链接
 			$PreviousPath = ""
 			while ($Path) {
-				$CurrentPath = Split-Path $Path -Parent
+				$CurrentPath = Split-Path $Path
 				$ChildPath = Split-Path $Path -Leaf
 				$PreviousPath = Join-Path $PreviousPath $CurrentPath
 				$Path = $ChildPath
@@ -161,7 +161,7 @@ cd: cd [-L|[-P [-e]] [-@]] [dir]
 }
 
 #让我们升级ls来让它可以处理linux路径
-if (Test-Path Alias:ls) {
+while (Test-Path Alias:ls) {
 	Remove-Item Alias:ls
 }
 function global:ls {
@@ -248,7 +248,7 @@ function global:ls {
 }
 
 #让我们升级rm来让它可以处理linux路径
-if (Test-Path Alias:rm) {
+while (Test-Path Alias:rm) {
 	Remove-Item Alias:rm
 }
 function global:rm {
@@ -326,7 +326,7 @@ function global:rm {
 }
 
 #让我们升级mv来让它可以处理linux路径
-if (Test-Path Alias:mv) {
+while (Test-Path Alias:mv) {
 	Remove-Item Alias:mv
 }
 function global:mv {
@@ -419,7 +419,7 @@ function global:mv {
 }
 
 #让我们升级cp来让它可以处理linux路径
-if (Test-Path Alias:cp) {
+while (Test-Path Alias:cp) {
 	Remove-Item Alias:cp
 }
 function global:cp {
@@ -660,7 +660,7 @@ function global:touch {
 }
 
 #让我们升级cat来让它可以处理linux路径
-if (Test-Path Alias:cat) {
+while (Test-Path Alias:cat) {
 	Remove-Item Alias:cat
 }
 function global:cat {

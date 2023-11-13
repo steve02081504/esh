@@ -2,7 +2,7 @@
 $EshellUI.Logo = ValueEx @{
 	"method:Print" = {
 		Write-Host -NoNewline "${VirtualTerminal.ClearScreenDown}${VirtualTerminal.Colors.Green}E-Shell"
-		if ($this.Im.Sudo) {
+		if ($EshellUI.Im.Sudo) {
 			Write-Host -NoNewline "${VirtualTerminal.Colors.Cyan}(root)"
 		}
 		Write-Host -NoNewline " ${VirtualTerminal.Colors.Yellow}v1960.7.17"

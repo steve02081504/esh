@@ -1,5 +1,5 @@
-﻿if (-not (Get-Module -ListAvailable -Name PowerShell-Beautifier)) {
-	Install-Module -Name PowerShell-Beautifier
+﻿if (-not (Get-Module -ListAvailable PowerShell-Beautifier)) {
+	Install-Module PowerShell-Beautifier
 }
 function Format-Code {
 	param(
