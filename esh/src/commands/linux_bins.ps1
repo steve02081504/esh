@@ -1,6 +1,6 @@
 ﻿#让我们升级cd来让它可以处理linux路径
-if (Test-Path -Path Alias:cd) {
-	Remove-Item -Path Alias:cd
+if (Test-Path Alias:cd) {
+	Remove-Item Alias:cd
 }
 function global:cd {
 	param(
@@ -28,9 +28,9 @@ function global:cd {
 		$RemainingArguments = @()
 	}
 	#若path是linux路径
-	if (IsLinuxPath -Path $Path) {
+	if (IsLinuxPath $Path) {
 		#则转换为windows路径
-		$Path = LinuxPathToWindowsPath -Path $Path
+		$Path = LinuxPathToWindowsPath $Path
 	}
 	#调用原始的cd..?
 	#让我们根据RemainingArguments的风格来判断是调用cd还是Set-Location
@@ -42,24 +42,24 @@ function global:cd {
 			Set-Location ~
 		}
 		elseif ($IsFollowSymbolicLink) {
-			Set-Location -Path $Path
+			Set-Location $Path
 		}
 		else {
 			#循环分割路径，检查每一级路径是否是符号链接
 			$PreviousPath = ""
 			while ($Path) {
-				$CurrentPath = Split-Path -Path $Path -Parent
-				$ChildPath = Split-Path -Path $Path -Leaf
-				$PreviousPath = Join-Path -Path $PreviousPath -ChildPath $CurrentPath
+				$CurrentPath = Split-Path $Path -Parent
+				$ChildPath = Split-Path $Path -Leaf
+				$PreviousPath = Join-Path $PreviousPath $CurrentPath
 				$Path = $ChildPath
 				#若是符号链接
-				if ((Get-Item -Path $PreviousPath).Attributes -band [System.IO.FileAttributes]::ReparsePoint) {
+				if ((Get-Item $PreviousPath).Attributes -band [System.IO.FileAttributes]::ReparsePoint) {
 					#则更新路径到符号链接的目标
-					$PreviousPath = (Get-Item -Path $PreviousPath).Target
+					$PreviousPath = (Get-Item $PreviousPath).Target
 					continue
 				}
 			}
-			Set-Location -Path $Path
+			Set-Location $Path
 		}
 		return
 	}
@@ -156,13 +156,13 @@ cd: cd [-L|[-P [-e]] [-@]] [dir]
 	}
 	else {
 		#否则调用Set-Location
-		Invoke-Expression "Set-Location -Path $Path $RemainingArguments"
+		Invoke-Expression "Set-Location $Path $RemainingArguments"
 	}
 }
 
 #让我们升级ls来让它可以处理linux路径
-if (Test-Path -Path Alias:ls) {
-	Remove-Item -Path Alias:ls
+if (Test-Path Alias:ls) {
+	Remove-Item Alias:ls
 }
 function global:ls {
 	param(
@@ -183,9 +183,9 @@ function global:ls {
 	}
 	[string[]]$RemainingArguments = @($RemainingArguments)
 	#若path是linux路径
-	if (IsLinuxPath -Path $Path) {
+	if (IsLinuxPath $Path) {
 		#则转换为windows路径
-		$Path = LinuxPathToWindowsPath -Path $Path
+		$Path = LinuxPathToWindowsPath $Path
 	}
 	$IsLinuxBin = $false
 	if ($null -eq $RemainingArguments) {
@@ -194,11 +194,11 @@ function global:ls {
 		if ($Path.Length -eq 0) {
 			Get-ChildItem
 		}
-		elseif (Test-Path -Path $Path) {
-			Get-ChildItem -Path $Path
+		elseif (Test-Path $Path) {
+			Get-ChildItem $Path
 		}
 		else {
-			ls.exe $(WindowsPathToLinuxPath ($Path))
+			ls.exe $(WindowsPathToLinuxPath $Path)
 		}
 		return
 	}
@@ -221,12 +221,12 @@ function global:ls {
 	if ($IsLinuxBin) {
 		#若是linux的ls.exe
 		#则调用ls.exe
-		$Path = WindowsPathToLinuxPath ($Path)
+		$Path = WindowsPathToLinuxPath $Path
 		$RemainingArguments = $RemainingArguments | ForEach-Object {
 			#若是有效的文件路径
-			if (Test-Path -Path $_) {
+			if (Test-Path $_) {
 				#则转换为linux路径
-				WindowsPathToLinuxPath ($_)
+				WindowsPathToLinuxPath $_
 			}
 			else {
 				$_
@@ -248,8 +248,8 @@ function global:ls {
 }
 
 #让我们升级rm来让它可以处理linux路径
-if (Test-Path -Path Alias:rm) {
-	Remove-Item -Path Alias:rm
+if (Test-Path Alias:rm) {
+	Remove-Item Alias:rm
 }
 function global:rm {
 	param(
@@ -270,9 +270,9 @@ function global:rm {
 	}
 	[string[]]$RemainingArguments = @($RemainingArguments)
 	#若path是linux路径
-	if (IsLinuxPath -Path $Path) {
+	if (IsLinuxPath $Path) {
 		#则转换为windows路径
-		$Path = LinuxPathToWindowsPath -Path $Path
+		$Path = LinuxPathToWindowsPath $Path
 	}
 	$IsLinuxBin = $Path.Length -eq 0
 	if ($IsLinuxBin) {
@@ -282,7 +282,7 @@ function global:rm {
 	if ($null -eq $RemainingArguments) {
 		#若RemainingArguments是空的
 		#则调用Remove-Item
-		Remove-Item -Path $Path
+		Remove-Item $Path
 		return
 	}
 	$LinuxBinArguments = @("-f","--force","-i","--interactive","-I","--interactive=once","--one-file-system","--no-preserve-root","--preserve-root","-r","-R","--recursive","--help","--version")
@@ -304,12 +304,12 @@ function global:rm {
 	if ($IsLinuxBin) {
 		#若是linux的rm.exe
 		#则调用rm.exe
-		$Path = WindowsPathToLinuxPath ($Path)
+		$Path = WindowsPathToLinuxPath $Path
 		$RemainingArguments = $RemainingArguments | ForEach-Object {
 			#若是有效的文件路径
-			if (Test-Path -Path $_) {
+			if (Test-Path $_) {
 				#则转换为linux路径
-				WindowsPathToLinuxPath ($_)
+				WindowsPathToLinuxPath $_
 			}
 			else {
 				$_
@@ -321,13 +321,13 @@ function global:rm {
 	}
 	else {
 		#否则调用Remove-Item
-		Invoke-Expression "Remove-Item -Path $Path $RemainingArguments"
+		Invoke-Expression "Remove-Item $Path $RemainingArguments"
 	}
 }
 
 #让我们升级mv来让它可以处理linux路径
-if (Test-Path -Path Alias:mv) {
-	Remove-Item -Path Alias:mv
+if (Test-Path Alias:mv) {
+	Remove-Item Alias:mv
 }
 function global:mv {
 	param(
@@ -359,13 +359,13 @@ function global:mv {
 	}
 	[string[]]$RemainingArguments = @($RemainingArguments)
 	#若path是linux路径
-	if (IsLinuxPath -Path $Path) {
+	if (IsLinuxPath $Path) {
 		#则转换为windows路径
-		$Path = LinuxPathToWindowsPath -Path $Path
+		$Path = LinuxPathToWindowsPath $Path
 	}
-	if (IsLinuxPath -Path $Destination) {
+	if (IsLinuxPath $Destination) {
 		#则转换为windows路径
-		$Destination = LinuxPathToWindowsPath -Path $Destination
+		$Destination = LinuxPathToWindowsPath $Destination
 	}
 	$IsLinuxBin = $Path.Length -eq 0 -and $Destination.Length -eq 0
 	if ($IsLinuxBin) {
@@ -375,7 +375,7 @@ function global:mv {
 	if ($null -eq $RemainingArguments) {
 		#若RemainingArguments是空的
 		#则调用Move-Item
-		Move-Item -Path $Path -Destination $Destination
+		Move-Item $Path -Destination $Destination
 		return
 	}
 	$LinuxBinArguments = @("-b","--backup","-f","--force","-i","--interactive","-n","--no-clobber","-u","--update","-v","--verbose","--help","--version")
@@ -397,12 +397,12 @@ function global:mv {
 	if ($IsLinuxBin) {
 		#若是linux的mv.exe
 		#则调用mv.exe
-		$Path = WindowsPathToLinuxPath ($Path)
+		$Path = WindowsPathToLinuxPath $Path
 		$RemainingArguments = $RemainingArguments | ForEach-Object {
 			#若是有效的文件路径
-			if (Test-Path -Path $_) {
+			if (Test-Path $_) {
 				#则转换为linux路径
-				WindowsPathToLinuxPath ($_)
+				WindowsPathToLinuxPath $_
 			}
 			else {
 				$_
@@ -414,13 +414,13 @@ function global:mv {
 	}
 	else {
 		#否则调用Move-Item
-		Invoke-Expression "Move-Item -Path $Path -Destination $Destination $RemainingArguments"
+		Invoke-Expression "Move-Item $Path -Destination $Destination $RemainingArguments"
 	}
 }
 
 #让我们升级cp来让它可以处理linux路径
-if (Test-Path -Path Alias:cp) {
-	Remove-Item -Path Alias:cp
+if (Test-Path Alias:cp) {
+	Remove-Item Alias:cp
 }
 function global:cp {
 	param(
@@ -452,13 +452,13 @@ function global:cp {
 	}
 	[string[]]$RemainingArguments = @($RemainingArguments)
 	#若path是linux路径
-	if (IsLinuxPath -Path $Path) {
+	if (IsLinuxPath $Path) {
 		#则转换为windows路径
-		$Path = LinuxPathToWindowsPath -Path $Path
+		$Path = LinuxPathToWindowsPath $Path
 	}
-	if (IsLinuxPath -Path $Destination) {
+	if (IsLinuxPath $Destination) {
 		#则转换为windows路径
-		$Destination = LinuxPathToWindowsPath -Path $Destination
+		$Destination = LinuxPathToWindowsPath $Destination
 	}
 	$IsLinuxBin = $Path.Length -eq 0 -and $Destination.Length -eq 0
 	if ($IsLinuxBin) {
@@ -468,7 +468,7 @@ function global:cp {
 	if ($null -eq $RemainingArguments) {
 		#若RemainingArguments是空的
 		#则调用Copy-Item
-		Copy-Item -Path $Path -Destination $Destination
+		Copy-Item $Path -Destination $Destination
 		return
 	}
 	$LinuxBinArguments = @("-a","--archive","-b","--backup","-f","--force","-i","--interactive","-l","--link","-L","--dereference","-n","--no-clobber","-P","--no-dereference","-p","--preserve","-R","-r","--recursive","-s","--symbolic-link","-S","--suffix=SUFFIX","-t","--target-directory=DIRECTORY","-T","--no-target-directory","-u","--update","-v","--verbose","--help","--version")
@@ -490,12 +490,12 @@ function global:cp {
 	if ($IsLinuxBin) {
 		#若是linux的cp.exe
 		#则调用cp.exe
-		$Path = WindowsPathToLinuxPath ($Path)
+		$Path = WindowsPathToLinuxPath $Path
 		$RemainingArguments = $RemainingArguments | ForEach-Object {
 			#若是有效的文件路径
-			if (Test-Path -Path $_) {
+			if (Test-Path $_) {
 				#则转换为linux路径
-				WindowsPathToLinuxPath ($_)
+				WindowsPathToLinuxPath $_
 			}
 			else {
 				$_
@@ -507,7 +507,7 @@ function global:cp {
 	}
 	else {
 		#否则调用Copy-Item
-		Invoke-Expression "Copy-Item -Path $Path -Destination $Destination $RemainingArguments"
+		Invoke-Expression "Copy-Item $Path -Destination $Destination $RemainingArguments"
 	}
 }
 
@@ -530,9 +530,9 @@ function global:mkdir {
 	}
 	[string[]]$RemainingArguments = @($RemainingArguments)
 	#若path是linux路径
-	if (IsLinuxPath -Path $Path) {
+	if (IsLinuxPath $Path) {
 		#则转换为windows路径
-		$Path = LinuxPathToWindowsPath -Path $Path
+		$Path = LinuxPathToWindowsPath $Path
 	}
 	$IsLinuxBin = $Path.Length -eq 0
 	if ($IsLinuxBin) {
@@ -542,7 +542,7 @@ function global:mkdir {
 	if ($null -eq $RemainingArguments) {
 		#若RemainingArguments是空的
 		#则调用New-Item
-		New-Item -Path $Path -ItemType Directory
+		New-Item $Path -ItemType Directory
 		return
 	}
 	$LinuxBinArguments = @("-m","--mode=MODE","-p","--parents","-v","--verbose","--help","--version")
@@ -564,12 +564,12 @@ function global:mkdir {
 	if ($IsLinuxBin) {
 		#若是linux的mkdir.exe
 		#则调用mkdir.exe
-		$Path = WindowsPathToLinuxPath ($Path)
+		$Path = WindowsPathToLinuxPath $Path
 		$RemainingArguments = $RemainingArguments | ForEach-Object {
 			#若是有效的文件路径
-			if (Test-Path -Path $_) {
+			if (Test-Path $_) {
 				#则转换为linux路径
-				WindowsPathToLinuxPath ($_)
+				WindowsPathToLinuxPath $_
 			}
 			else {
 				$_
@@ -581,7 +581,7 @@ function global:mkdir {
 	}
 	else {
 		#否则调用New-Item
-		Invoke-Expression "New-Item -Path $Path -ItemType Directory $RemainingArguments"
+		Invoke-Expression "New-Item $Path -ItemType Directory $RemainingArguments"
 	}
 }
 
@@ -604,9 +604,9 @@ function global:touch {
 	}
 	[string[]]$RemainingArguments = @($RemainingArguments)
 	#若path是linux路径
-	if (IsLinuxPath -Path $Path) {
+	if (IsLinuxPath $Path) {
 		#则转换为windows路径
-		$Path = LinuxPathToWindowsPath -Path $Path
+		$Path = LinuxPathToWindowsPath $Path
 	}
 	$IsLinuxBin = $Path.Length -eq 0
 	if ($IsLinuxBin) {
@@ -616,7 +616,7 @@ function global:touch {
 	if ($null -eq $RemainingArguments) {
 		#若RemainingArguments是空的
 		#则调用New-Item
-		New-Item -Path $Path -ItemType File
+		New-Item $Path -ItemType File
 		return
 	}
 	$LinuxBinArguments = @("-a","--time=access","-c","--no-create","-d","--date=STRING","-f","--force","-h","--no-dereference","-m","--time=modification","-r","--reference=FILE","-t","--time=WORD","-v","--verbose","--help","--version")
@@ -638,12 +638,12 @@ function global:touch {
 	if ($IsLinuxBin) {
 		#若是linux的touch.exe
 		#则调用touch.exe
-		$Path = WindowsPathToLinuxPath ($Path)
+		$Path = WindowsPathToLinuxPath $Path
 		$RemainingArguments = $RemainingArguments | ForEach-Object {
 			#若是有效的文件路径
-			if (Test-Path -Path $_) {
+			if (Test-Path $_) {
 				#则转换为linux路径
-				WindowsPathToLinuxPath ($_)
+				WindowsPathToLinuxPath $_
 			}
 			else {
 				$_
@@ -655,13 +655,13 @@ function global:touch {
 	}
 	else {
 		#否则调用New-Item
-		Invoke-Expression "New-Item -Path $Path -ItemType File $RemainingArguments"
+		Invoke-Expression "New-Item $Path -ItemType File $RemainingArguments"
 	}
 }
 
 #让我们升级cat来让它可以处理linux路径
-if (Test-Path -Path Alias:cat) {
-	Remove-Item -Path Alias:cat
+if (Test-Path Alias:cat) {
+	Remove-Item Alias:cat
 }
 function global:cat {
 	param(
@@ -682,9 +682,9 @@ function global:cat {
 	}
 	[string[]]$RemainingArguments = @($RemainingArguments)
 	#若path是linux路径
-	if (IsLinuxPath -Path $Path) {
+	if (IsLinuxPath $Path) {
 		#则转换为windows路径
-		$Path = LinuxPathToWindowsPath -Path $Path
+		$Path = LinuxPathToWindowsPath $Path
 	}
 	$IsLinuxBin = $Path.Length -eq 0
 	if ($IsLinuxBin) {
@@ -694,7 +694,7 @@ function global:cat {
 	if ($null -eq $RemainingArguments) {
 		#若RemainingArguments是空的
 		#则调用Get-Content
-		Get-Content -Path $Path
+		Get-Content $Path
 		return
 	}
 	$LinuxBinArguments = @("-A","--show-all","-b","--number-nonblank","-e","--show-ends","-E","--show-ends","-n","--number","-s","--squeeze-blank","-t","--show-tabs","-T","--show-tabs","-u","--unbuffered","-v","--show-nonprinting","-w","--width=COLS","--help","--version")
@@ -716,12 +716,12 @@ function global:cat {
 	if ($IsLinuxBin) {
 		#若是linux的cat.exe
 		#则调用cat.exe
-		$Path = WindowsPathToLinuxPath ($Path)
+		$Path = WindowsPathToLinuxPath $Path
 		$RemainingArguments = $RemainingArguments | ForEach-Object {
 			#若是有效的文件路径
-			if (Test-Path -Path $_) {
+			if (Test-Path $_) {
 				#则转换为linux路径
-				WindowsPathToLinuxPath ($_)
+				WindowsPathToLinuxPath $_
 			}
 			else {
 				$_
@@ -733,6 +733,6 @@ function global:cat {
 	}
 	else {
 		#否则调用Get-Content
-		Invoke-Expression "Get-Content -Path $Path $RemainingArguments"
+		Invoke-Expression "Get-Content $Path $RemainingArguments"
 	}
 }

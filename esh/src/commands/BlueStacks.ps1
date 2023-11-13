@@ -8,7 +8,7 @@
 
 function global:Show-apks {
 	#读取C:\ProgramData\BlueStacks_nxt\Engine\Pie64\AppCache\AppCache.json
-	$AppCache = Get-Content -Path "C:\ProgramData\BlueStacks_nxt\Engine\Pie64\AppCache\AppCache.json" -Raw | ConvertFrom-Json
+	$AppCache = Get-Content "C:\ProgramData\BlueStacks_nxt\Engine\Pie64\AppCache\AppCache.json" -Raw | ConvertFrom-Json
 	<#
 	{
 		"activity": "jp.co.cygames.activity.OverrideUnityActivity",
@@ -76,9 +76,9 @@ function global:Start-apk {
 
 #对于每个appLabel 创建一个函数用于启动
 Show-apks | ForEach-Object {
-	$AppLabel = CHT2CHS ($_.appLabel)
+	$AppLabel = CHT2CHS $_.appLabel
 	$Package = $_.package
-	New-Item -Force -Path Function: -Name "global:App.$AppLabel" -Value {
+	New-Item -Force Function: -Name "global:App.$AppLabel" -Value {
 		Start-apk -apkSignOrName $Package
 	}
 } | Out-Null

@@ -1,14 +1,14 @@
 ﻿#查找$EshellUI.MSYS.RootPath是否是可用的msys路径
-if (-not $EshellUI.MSYS.RootPath -or -not (Test-Path -Path $EshellUI.MSYS.RootPath)) {
+if (-not $EshellUI.MSYS.RootPath -or -not (Test-Path $EshellUI.MSYS.RootPath)) {
 	#若不是，则遍历所有盘符
 	$DriveLetters = Get-PSDrive -PSProvider FileSystem | ForEach-Object { $_.Name }
 	$DriveLetters | ForEach-Object {
 		#若该盘符下存在msys路径
-		if (Test-Path -Path "${_}:\msys64") {
+		if (Test-Path "${_}:\msys64") {
 			#则设置为该路径
 			$EshellUI.MSYS.RootPath = "${_}:\msys64"
 		}
-		elseif (Test-Path -Path "${_}:\msys") {
+		elseif (Test-Path "${_}:\msys") {
 			#或者设置为该路径
 			$EshellUI.MSYS.RootPath = "${_}:\msys"
 		}
@@ -41,18 +41,18 @@ function global:LinuxPathToWindowsPath {
 	#若path以/（单个字母）/开头，则对应windows盘符
 	if ($Path -match "^/([a-zA-Z])/") {
 		$DriveLetter = $Matches[1]
-		return Join-Path -Path "${DriveLetter}:" -ChildPath $Path.Substring(3)
+		return Join-Path "${DriveLetter}:" $Path.Substring(3)
 	}
 	elseif ($Path.StartsWith("~")) {
-		$ResultPath = Join-Path -Path $HOME -ChildPath $Path.Substring(1)
+		$ResultPath = Join-Path $HOME $Path.Substring(1)
 		if (-not (Test-Path $ResultPath)) {
 			if ($Path.StartsWith("~/.")) {
 				# 检查appdata
 				$SubPath = $Path.Substring(3)
 				#对于appdata下的每一个目录
-				Get-ChildItem -Path "$env:USERPROFILE/AppData/" | ForEach-Object {
-					$TestPath = Join-Path -Path $_.FullName -ChildPath $SubPath
-					if (Test-Path -Path $TestPath) {
+				Get-ChildItem "$env:USERPROFILE/AppData/" | ForEach-Object {
+					$TestPath = Join-Path $_.FullName $SubPath
+					if (Test-Path $TestPath) {
 						$ResultPath = $TestPath
 					}
 				}
@@ -62,7 +62,7 @@ function global:LinuxPathToWindowsPath {
 	}
 	else {
 		#否则根据msys的rootpath来转换
-		return Join-Path -Path $EshellUI.MSYS.RootPath -ChildPath $Path
+		return Join-Path $EshellUI.MSYS.RootPath $Path
 	}
 }
 function global:WindowsPathToLinuxPath {
@@ -97,35 +97,35 @@ $LinuxPathCompleter = {
 		[string]$fakeBoundParameter
 	)
 	#补全的前提是要补全的词语为linux路径
-	if (-not (IsLinuxPath -Path $wordToComplete)) {
+	if (-not (IsLinuxPath $wordToComplete)) {
 		return
 	}
 	#获取对应的windows路径
-	$WindowsPath = LinuxPathToWindowsPath -Path $wordToComplete
+	$WindowsPath = LinuxPathToWindowsPath $wordToComplete
 	#若windows路径不存在
-	if (-not (Test-Path -Path $WindowsPath)) {
+	if (-not (Test-Path $WindowsPath)) {
 		#测试其父目录是否存在
-		$ParentPath = Split-Path -Path $WindowsPath -Parent
-		if (-not (Test-Path -Path $ParentPath)) {
+		$ParentPath = Split-Path $WindowsPath -Parent
+		if (-not (Test-Path $ParentPath)) {
 			#若父目录不存在，则不补全
 			return
 		}
 		#若父目录存在，则根据后半段路径补全
-		$WordToComplete = Split-Path -Path $WindowsPath -Leaf
+		$WordToComplete = Split-Path $WindowsPath -Leaf
 		#遍历父目录下的所有文件和目录
-		Get-ChildItem ($ParentPath) | ForEach-Object {
+		Get-ChildItem $ParentPath | ForEach-Object {
 			#若文件或目录名以$WordToComplete开头
 			if ($_.Name -like "${WordToComplete}*") {
 				#输出其linux路径
-				WindowsPathToLinuxPath ($_.FullName)
+				WindowsPathToLinuxPath $_.FullName
 			}
 		}
 	}
 	else {
 		#若windows路径存在，则遍历其下的所有文件和目录
-		Get-ChildItem ($WindowsPath) | ForEach-Object {
+		Get-ChildItem $WindowsPath | ForEach-Object {
 			#输出其linux路径
-			WindowsPathToLinuxPath ($_.FullName)
+			WindowsPathToLinuxPath $_.FullName
 		}
 	}
 }
@@ -161,7 +161,7 @@ Set-PSReadLineKeyHandler -Key Enter -ScriptBlock {
 		[Microsoft.PowerShell.PSConsoleReadLine]::AddToHistory($OriLine)
 		Write-Host "`b`b  "
 		#则转换为windows路径
-		$Executable = LinuxPathToWindowsPath -Path $Executable
+		$Executable = LinuxPathToWindowsPath $Executable
 		#求值并输出
 		Invoke-Expression "$Executable $Rest *>&1" | Write-Host
 	}
@@ -198,7 +198,7 @@ Set-PSReadLineKeyHandler -Key Tab -ScriptBlock {
 	#若当前单词以/开头
 	if ($WordToComplete.StartsWith("/") -or $WordToComplete.StartsWith("~")) {
 		#则转换为windows路径
-		$WordAfterComplete = LinuxPathToWindowsPath ($WordToComplete) + '/'
+		$WordAfterComplete = LinuxPathToWindowsPath $WordToComplete + '/'
 		if ($HasQuote) {
 			$WordAfterComplete = '"' + $WordAfterComplete + '"'
 		}
@@ -214,7 +214,7 @@ Set-PSReadLineKeyHandler -Key Tab -ScriptBlock {
 		}
 		$CursorOfEnd = $OriLine.Length - $CursorOfBegin - $Rest.Length
 		$WordToComplete = $OriLine.Substring($CursorOfBegin,$CursorOfEnd)
-		$WordAfterComplete = WindowsPathToLinuxPath ($WordToComplete)
+		$WordAfterComplete = WindowsPathToLinuxPath $WordToComplete
 		[Microsoft.PowerShell.PSConsoleReadLine]::Replace($CursorOfBegin,$CursorOfEnd,$WordAfterComplete)
 		[Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition($CursorOfBegin + $WordAfterComplete.Length)
 	}

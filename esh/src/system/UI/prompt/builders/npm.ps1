@@ -4,12 +4,12 @@
 		[string]$prompt_str
 	)
 	if (Test-Path package.json) {
-		$packageJson = Get-Content -Path package.json -Raw -ErrorAction SilentlyContinue
+		$packageJson = Get-Content package.json -Raw -ErrorAction SilentlyContinue
 	}
 	elseif (Test-Command git) {
 		$gitRepoRoot = git rev-parse --show-toplevel 2>$null
 		if (($null -ne $gitRepoRoot) -and (Test-Path "$gitRepoRoot/package.json")) {
-			$packageJson = Get-Content -Path "$gitRepoRoot/package.json" -Raw -ErrorAction SilentlyContinue
+			$packageJson = Get-Content "$gitRepoRoot/package.json" -Raw -ErrorAction SilentlyContinue
 		}
 	}
 	$npm_prompt_str = $null

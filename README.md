@@ -20,8 +20,8 @@ $PwshProFiles = Split-Path $PROFILE
 $ParentPath = Split-Path $PwshProFiles
 Remove-Item $PwshProFiles -Confirm -ErrorAction Ignore
 Remove-Item $ParentPath/my-powershell-profile-master -Force -ErrorAction SilentlyContinue
-Invoke-WebRequest -Uri https://github.com/steve02081504/my-powershell-profile/archive/refs/heads/master.zip -OutFile Eshell.zip
-Expand-Archive -Path Eshell.zip -DestinationPath $ParentPath -Force
+Invoke-WebRequest https://github.com/steve02081504/my-powershell-profile/archive/refs/heads/master.zip -OutFile Eshell.zip
+Expand-Archive Eshell.zip $ParentPath -Force
 Rename-Item $ParentPath/my-powershell-profile-master PowerShell -Force
 Remove-Item Eshell.zip -Force
 pwsh -nologo $(if($PSVersionTable.PSVersion -gt 7.3){"-NoProfileLoadTime"}) && $(exit)

@@ -20,7 +20,7 @@
 			Add-Member -InputObject $ValueExed -MemberType ScriptMethod -Name $_.Key.Substring(7) -Value $_.Value -Force
 		}
 		elseif ($_.Value -is [hashtable]) {
-			$ValueExed[$_.Key] = ValueEx ($_.Value)
+			$ValueExed[$_.Key] = ValueEx $_.Value
 		}
 		else {
 			$ValueExed[$_.Key] = $_.Value

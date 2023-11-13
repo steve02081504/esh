@@ -2,7 +2,7 @@
 	$espath = $EshellUI.Sources.Path
 	try {
 		#下载最新的SAO-lib
-		Invoke-WebRequest -Uri "https://github.com/steve02081504/SAO-lib/raw/master/SAO-lib.txt" -OutFile "$espath/data/SAO-lib.txt"
+		Invoke-WebRequest "https://github.com/steve02081504/SAO-lib/raw/master/SAO-lib.txt" -OutFile "$espath/data/SAO-lib.txt"
 	}
 	catch {}
 }
@@ -12,9 +12,9 @@ function global:Update-EShell {
 	$datapath = "$espath/data"
 	try {
 		#下载最新的EShell
-		Invoke-WebRequest -Uri "https://github.com/steve02081504/my-powershell-profile/archive/refs/heads/master.zip" -OutFile "$datapath/master.zip"
+		Invoke-WebRequest "https://github.com/steve02081504/my-powershell-profile/archive/refs/heads/master.zip" -OutFile "$datapath/master.zip"
 		#解压缩my-powershell-profile-master中的src文件夹到$dataPath
-		Expand-Archive -Path "$datapath/master.zip" -DestinationPath "$datapath" -Force
+		Expand-Archive "$datapath/master.zip" "$datapath" -Force
 		#删除旧的src以确保干净
 		Remove-Item "$espath/src" -Recurse -Force
 		#更新文件

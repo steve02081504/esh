@@ -1,10 +1,9 @@
-﻿$EshellUI ??= $LastExitCode = $this = 72 #Do not remove this line
+﻿. $PSScriptRoot/scripts/ValueEx.ps1
 
-. $PSScriptRoot/scripts/ValueEx.ps1
-
+$EshellUI ??= $LastExitCode = $this = 72 #Do not remove this line
 $EshellUI = ValueEx @{
 	Sources = @{
-		Path = Split-Path -Parent -Path $PSScriptRoot
+		Path = Split-Path -Parent $PSScriptRoot
 	}
 	Im = @{
 		Sudo = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]“Administrator”)
@@ -73,7 +72,7 @@ $EshellUI = ValueEx @{
 		. $PSScriptRoot/system/BackgroundLoading.ps1
 
 		# 对于$PSScriptRoot/commands/others下的所有脚本，若其文件名为*.ps1，则加载之
-		Get-ChildItem -Path "$PSScriptRoot/commands/others" | ForEach-Object {
+		Get-ChildItem "$PSScriptRoot/commands/others" | ForEach-Object {
 			if ($_.Extension -eq ".ps1") {
 				.$_.FullName
 			}
@@ -90,7 +89,7 @@ $EshellUI = ValueEx @{
 	}
 	"method:FormatSelf" = {
 		. $PSScriptRoot/scripts/formatter.ps1
-		Format-Code -Path $this.Sources.Path
+		Format-Code $this.Sources.Path
 	}
 	"method:ProvidedFunctions" = {
 		$FunctionListNow = Get-ChildItem function:\

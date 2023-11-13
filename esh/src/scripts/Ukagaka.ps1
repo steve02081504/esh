@@ -23,11 +23,11 @@ function global:Read-Ukagaka-Description-File {
 		[Parameter(Mandatory = $true)]
 		[string]$Path
 	)
-	$Content = Get-Content -Path $Path -Encoding UTF8
+	$Content = Get-Content $Path -Encoding UTF8
 	$Description = Get-Ukagaka-Description-File-HashTable -Content $Content
 	#若charset不是UTF-8或其大小写变体，则重新读取
 	if (($Description["charset"]) -and ($Description["charset"] -notmatch "UTF-?8")) {
-		$Content = Get-Content -Path $Path -Encoding $Description["charset"]
+		$Content = Get-Content $Path -Encoding $Description["charset"]
 		$Description = Get-Ukagaka-Description-File-HashTable -Content $Content
 	}
 	$Description
@@ -38,15 +38,15 @@ function global:Test-Ukagaka-Directory-Base {
 		[string]$Path,
 		[string]$CheckPath = "descript.txt"
 	)
-	$DescriptionPath = Join-Path -Path $Path -ChildPath $CheckPath
-	if (Test-Path -Path $DescriptionPath) {
-		Read-Ukagaka-Description-File -Path $DescriptionPath
+	$DescriptionPath = Join-Path $Path $CheckPath
+	if (Test-Path $DescriptionPath) {
+		Read-Ukagaka-Description-File $DescriptionPath
 	}
 	else {
 		#测试父目录直至根目录
-		$ParentPath = Split-Path -Path $Path -Parent
+		$ParentPath = Split-Path $Path -Parent
 		if ($ParentPath) {
-			Test-Ukagaka-Directory-Base -Path $ParentPath -CheckPath $CheckPath
+			Test-Ukagaka-Directory-Base $ParentPath $CheckPath
 		}
 		else {
 			$null
@@ -58,16 +58,16 @@ function global:Test-Ukagaka-Ghost-Directory {
 		[Parameter(Mandatory = $true)]
 		[string]$Path
 	)
-	Test-Ukagaka-Directory-Base -Path $Path -CheckPath "ghost/master/descript.txt"
+	Test-Ukagaka-Directory-Base $Path "ghost/master/descript.txt"
 }
 function global:Test-Ukagaka-Directory {
 	param(
 		[Parameter(Mandatory = $true)]
 		[string]$Path
 	)
-	$result = Test-Ukagaka-Directory-Base -Path $Path
+	$result = Test-Ukagaka-Directory-Base $Path
 	if (-not $result) {
-		Test-Ukagaka-Ghost-Directory -Path $Path
+		Test-Ukagaka-Ghost-Directory $Path
 	}
 	else {
 		$result

@@ -7,9 +7,9 @@ function Format-Code {
 	)
 	#若是目录
 	if (Test-Path $path -PathType Container) {
-		$files = Get-ChildItem -Path $path -Recurse -Include *.ps1
+		$files = Get-ChildItem $path -Recurse -Include *.ps1
 		foreach ($file in $files) {
-			Format-Code -Path $file.FullName
+			Format-Code $file.FullName
 		}
 	}
 	#若是文件

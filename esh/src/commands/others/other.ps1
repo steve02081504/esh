@@ -12,9 +12,9 @@
 	#对于每个参数
 	$paths = $paths | ForEach-Object {
 		#若参数是linux路径
-		if (IsLinuxPath ($_)) {
+		if (IsLinuxPath $_) {
 			#转换为windows路径
-			LinuxPathToWindowsPath ($_)
+			LinuxPathToWindowsPath $_
 		}
 		else {
 			$_
@@ -52,9 +52,9 @@ function global:dirsync {
 	#对于每个参数
 	$paths = $paths | ForEach-Object {
 		#若参数是linux路径
-		if (IsLinuxPath ($_)) {
+		if (IsLinuxPath $_) {
 			#转换为windows路径
-			LinuxPathToWindowsPath ($_)
+			LinuxPathToWindowsPath $_
 		}
 		else {
 			$_
@@ -109,9 +109,9 @@ function global:fsize {
 	#对于每个参数
 	$paths = $paths | ForEach-Object {
 		#若参数是linux路径
-		if (IsLinuxPath ($_)) {
+		if (IsLinuxPath $_) {
 			#转换为windows路径
-			LinuxPathToWindowsPath ($_)
+			LinuxPathToWindowsPath $_
 		}
 		else {
 			$_

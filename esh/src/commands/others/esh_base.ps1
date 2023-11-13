@@ -28,13 +28,13 @@ function global:sudo {
 		}
 		# Otherwise, run the command as an admin
 		elseif (Test-Command wt.exe) {
-			$Arguments = @("pwsh","-Command",$(pwsh_args_convert ($RemainingArguments)))
-			$Arguments = cmd_args_convert ($Arguments)
+			$Arguments = @("pwsh","-Command",$(pwsh_args_convert $RemainingArguments))
+			$Arguments = cmd_args_convert $Arguments
 			Start-Process -Wait -FilePath "wt.exe" -ArgumentList $Arguments.Replace('"','\"') -Verb runas
 		}
 		else {
-			$Arguments = @("-Command",$(pwsh_args_convert ($RemainingArguments)))
-			$Arguments = cmd_args_convert ($Arguments)
+			$Arguments = @("-Command",$(pwsh_args_convert $RemainingArguments))
+			$Arguments = cmd_args_convert $Arguments
 			Start-Process -Wait -FilePath "pwsh.exe" -ArgumentList "$pwshArguments $Arguments" -Verb runas
 		}
 	}
@@ -47,9 +47,9 @@ function global:mklink {
 	#对于每个参数
 	$RemainingArguments = $RemainingArguments | ForEach-Object {
 		#若参数长度不是2且是linux路径
-		if (($_.Length -ne 2) -and (IsLinuxPath ($_))) {
+		if (($_.Length -ne 2) -and (IsLinuxPath $_)) {
 			#转换为windows路径
-			LinuxPathToWindowsPath ($_)
+			LinuxPathToWindowsPath $_
 		}
 		else {
 			$_
