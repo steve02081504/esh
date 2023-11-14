@@ -24,7 +24,7 @@ Invoke-WebRequest https://github.com/steve02081504/my-powershell-profile/archive
 Expand-Archive Eshell.zip $ParentPath -Force
 Rename-Item $ParentPath/my-powershell-profile-master PowerShell -Force
 Remove-Item Eshell.zip -Force
-pwsh -nologo $(if($PSVersionTable.PSVersion -gt 7.3){"-NoProfileLoadTime"}) && $(exit)
+. $PwshProFiles/esh/run.ps1
 
 ```
 
