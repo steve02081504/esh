@@ -36,6 +36,7 @@ $EshellUI = ValueEx @{
 			VariableList = Get-ChildItem variable:\
 			AliasesList = Get-ChildItem alias:\
 			promptBackup = $function:prompt
+			Errors = $Error
 		}
 		ReloadSafeVariables = $EshellUI.OtherData.ReloadSafeVariables ?? @{}
 	}
