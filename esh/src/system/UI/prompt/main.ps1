@@ -11,7 +11,7 @@ $EshellUI.Prompt = ValueEx @{
 		$EshellUI.Prompt.Builders.Keys | ForEach-Object {
 			$prompt_str = $EshellUI.Prompt.Builders[$_].Invoke($prompt_str)
 		}
-		$prompt_str += " ${VirtualTerminal.Colors.Reset}"
+		$prompt_str = "$prompt_str ${VirtualTerminal.Colors.Reset}"
 		0..$NestedPromptLevel | ForEach-Object { $prompt_str += ">" }
 		return $prompt_str
 	}
