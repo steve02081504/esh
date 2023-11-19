@@ -2,6 +2,10 @@
 
 $EshellUI ??= $LastExitCode = $this = 72 #Do not remove this line
 $EshellUI = ValueEx @{
+	State = @{
+		Started = $false
+		VariablesLoaded = $false
+	}
 	Sources = @{
 		Path = Split-Path $PSScriptRoot
 	}
@@ -10,6 +14,27 @@ $EshellUI = ValueEx @{
 		VSCodeExtension = [bool]($psEditor)
 		WindowsPowerShell = (Split-Path $(Split-Path $PROFILE) -Leaf) -eq "WindowsPowerShell"
 		ISE = [bool]($psISE)
+		FirstLoading = $EshellUI -eq $LastExitCode
+		InScope = $EshellUI -ne $global:EshellUI
+	}
+	"method:GetFromOf" = {
+		param($Invocation)
+		$FromProfile = ($Invocation.CommandOrigin -eq "Internal") -and (-not $Invocation.PSScriptRoot)
+		$FromOtherScript = ($Invocation.CommandOrigin -eq "Internal") -and ($Invocation.PSScriptRoot)
+		$MayFromCommand = ($Invocation.CommandOrigin -eq "Runspace") -and (-not $Invocation.PSScriptRoot)
+		$FromFileExplorer = $MayFromCommand -and ($Invocation.HistoryId -eq 1)
+		$FromCommand = $MayFromCommand -and (-not $FromFileExplorer)
+		return @{
+			Profile = $FromProfile
+			OtherScript = $FromOtherScript
+			Command = $FromCommand
+			FileExplorer = $FromFileExplorer
+		}
+	}
+	"method:Init" = {
+		param($Invocation)
+		$this.Im.From = $this.GetFromOf($Invocation)
+		$this.Invocation = $Invocation
 	}
 
 	MSYS = @{
@@ -45,6 +70,7 @@ $EshellUI = ValueEx @{
 	}
 	"method:LoadVariables" = {
 		$this.MSYS.RootPath = Get-Content "$($this.Sources.Path)/data/vars/MSYSRootPath.txt" -ErrorAction Ignore
+		$this.State.VariablesLoaded = $true
 	}
 	"method:Start" = {
 		$this.OtherData.BeforeEshLoaded.promptBackup = $function:prompt
@@ -72,9 +98,11 @@ $EshellUI = ValueEx @{
 
 		. $PSScriptRoot/system/BackgroundLoading.ps1
 
-		Get-ChildItem "$PSScriptRoot/commands" *.ps1 | ForEach-Object { .$_.FullName }
+		Get-ChildItem "$PSScriptRoot/commands" *.ps1 | ForEach-Object { . $_.FullName }
 
 		. $PSScriptRoot/system/UI/loaded.ps1
+
+		$this.State.Started = $true
 	}
 	"method:Reload" = {
 		$this.SaveVariables()
@@ -82,10 +110,6 @@ $EshellUI = ValueEx @{
 		. "$($this.Sources.Path)/main.ps1"
 		$EshellUI.LoadVariables()
 		$EshellUI.Start()
-	}
-	"method:FormatSelf" = {
-		. $PSScriptRoot/scripts/formatter.ps1
-		Format-Code $this.Sources.Path
 	}
 	"method:ProvidedFunctions" = {
 		$FunctionListNow = Get-ChildItem function:\
@@ -119,5 +143,42 @@ $EshellUI = ValueEx @{
 		$this.ProvidedAliases() | ForEach-Object {
 			Remove-Item alias:\$($_.Name)
 		}
+	}
+	"method:Repl" = {
+		param([switch]$NotEnterNestedPrompt = $false)
+		$HistoryId = 0
+		if (-not $NotEnterNestedPrompt) { $NestedPromptLevel++ }
+		function DefaultPrompt {
+			$str = "esh"
+			0..$NestedPromptLevel | ForEach-Object { $str += ">" }
+			return $str
+		}
+		:repl while ($true) {
+			Write-Host -NoNewline $($global:prompt ?? $EShellUI.Prompt.Get() ?? $(DefaultPrompt))
+			$expr = PSConsoleHostReadLine
+			switch ($expr.Trim()) {
+				'' { continue }
+				'exit' { break repl }
+			}
+			$HistoryId++
+			$local:myInvocation = [System.Management.Automation.InvocationInfo]::Create(
+				[System.Management.Automation.CmdletInfo]::new("Esh-Repl",[System.Management.Automation.PSCmdLet]),
+				[System.Management.Automation.Language.ScriptExtent]::new(
+					[System.Management.Automation.Language.ScriptPosition]::new("esh",$HistoryId,1,$expr),
+					[System.Management.Automation.Language.ScriptPosition]::new("esh",$HistoryId,$expr.Length,$expr)
+				)
+			)
+			$StartExecutionTime = Get-Date
+			try { Invoke-Expression $expr | Out-Default }
+			catch { $Host.UI.WriteErrorLine($_) }
+			$EndExecutionTime = Get-Date
+			[PSCustomObject](@{
+				CommandLine = $expr
+				ExecutionStatus = "Completed"
+				StartExecutionTime = $StartExecutionTime
+				EndExecutionTime = $EndExecutionTime
+			}) | Add-History
+		}
+		if (-not $NotEnterNestedPrompt) { $NestedPromptLevel-- }
 	}
 }

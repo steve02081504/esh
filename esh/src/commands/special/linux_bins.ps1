@@ -41,10 +41,7 @@ function global:cd {
 		if ($Path.Length -eq 0) {
 			Set-Location ~
 		}
-		elseif ($IsFollowSymbolicLink) {
-			Set-Location $Path
-		}
-		else {
+		elseif (-not $IsFollowSymbolicLink) {
 			#循环分割路径，检查每一级路径是否是符号链接
 			$PreviousPath = ""
 			while ($Path) {
@@ -52,6 +49,9 @@ function global:cd {
 				$ChildPath = Split-Path $Path -Leaf
 				$PreviousPath = Join-Path $PreviousPath $CurrentPath
 				$Path = $ChildPath
+				if (-not (Test-Path $PreviousPath)) {
+					$Host.UI.WriteErrorLine("bash: cd: ${PreviousPath}: No such file or directory")
+				}
 				#若是符号链接
 				if ((Get-Item $PreviousPath).Attributes -band [System.IO.FileAttributes]::ReparsePoint) {
 					#则更新路径到符号链接的目标
@@ -59,7 +59,12 @@ function global:cd {
 					continue
 				}
 			}
+		}
+		if (Test-Path $Path) {
 			Set-Location $Path
+		}
+		else {
+			$Host.UI.WriteErrorLine("bash: cd: ${Path}: No such file or directory")
 		}
 		return
 	}

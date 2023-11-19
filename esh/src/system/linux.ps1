@@ -158,15 +158,24 @@ Set-PSReadLineKeyHandler -Key Enter -ScriptBlock {
 	if ($Executable.StartsWith("/") -or $Executable.StartsWith("~")) {
 		Write-Host ""
 		[Microsoft.PowerShell.PSConsoleReadLine]::CancelLine()
-		[Microsoft.PowerShell.PSConsoleReadLine]::AddToHistory($OriLine)
 		Write-Host "`b`b  "
 		#则转换为windows路径
 		$Executable = LinuxPathToWindowsPath $Executable
 		#求值并输出
-		Invoke-Expression "$Executable $Rest *>&1" | Write-Host
+		$StartExecutionTime = Get-Date
+		try { Invoke-Expression "$Executable $Rest *>&1" | Out-Default }
+		catch { $Host.UI.WriteErrorLine($_) }
+		$EndExecutionTime = Get-Date
+		[Microsoft.PowerShell.PSConsoleReadLine]::AddToHistory($OriLine)
+		[PSCustomObject](@{
+			CommandLine = "$Executable $Rest"
+			ExecutionStatus = "Completed"
+			StartExecutionTime = $StartExecutionTime
+			EndExecutionTime = $EndExecutionTime
+		}) | Add-History
 	}
 	else {
-		if ($EshellUI.Im.VSCodeExtension) {
+		if ($EshellUI.Im.VSCodeExtension -and ($NestedPromptLevel -eq 0)) {
 			if ($Line.StartsWith("exit")) {
 				#若当前行以exit开头，则退出vscode
 				Invoke-Expression "global:$Line"
