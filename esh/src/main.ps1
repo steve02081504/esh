@@ -185,16 +185,22 @@ $EshellUI = ValueEx @{
 	}
 	"method:RunFromScript" = {
 		param($Invocation)
-		if (-not $this.State.Started) {
-			$this.Init($Invocation)
-			$this.LoadVariables()
-			$this.Start()
+		try{
+			if (-not $this.State.Started) {
+				$this.Init($Invocation)
+				$this.LoadVariables()
+				$this.Start()
+			}
+			$global:EshellUI ??= $this
+			if ($this.GetFromOf($Invocation).FileExplorer) {
+				# 该代码由用户点击脚本执行 我们需要启动repl而不是退出
+				Write-Warning "Running esh in self-hosted REPL mode."
+				$this.Repl($true)
+			}
 		}
-		$global:EshellUI ??= $this
-		if ($this.GetFromOf($Invocation).FileExplorer) {
-			# 该代码由用户点击脚本执行 我们需要启动repl而不是退出
-			Write-Warning "Running esh in self-hosted REPL mode."
-			$this.Repl($true)
+		catch {
+			$EshellUI.Remove()
+			throw $_
 		}
 	}
 }
