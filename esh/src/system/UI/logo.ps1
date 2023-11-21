@@ -1,6 +1,8 @@
 ﻿. $PSScriptRoot/hints.ps1
 $EshellUI.Logo = ValueEx @{
+	Parent = $EshellUI
 	"method:Print" = {
+		$local:EshellUI = $this.Parent
 		Write-Host -NoNewline "${VirtualTerminal.ClearScreenDown}${VirtualTerminal.Colors.Green}E-Shell"
 		if ($EshellUI.Im.Sudo) {
 			Write-Host -NoNewline "${VirtualTerminal.Colors.Cyan}(root)"

@@ -40,8 +40,8 @@ $EshellUI = ValueEx @{
 	MSYS = @{
 		RootPath = 'C:\msys64'
 	}
-	BackgroundLoadingJobs = @{
-		__value_type__ = [System.Collections.ArrayList]
+	BackgroundLoadingJobs = ValueEx @{
+		__type__ = [System.Collections.ArrayList]
 		"method:Pop" = {
 			$job = $this[0]
 			$this.RemoveAt(0)
@@ -62,6 +62,8 @@ $EshellUI = ValueEx @{
 			AliasesList = Get-ChildItem alias:\
 			promptBackup = $function:prompt
 			Errors = $Error
+			TabHandler = (Get-PSReadLineKeyHandler Tab).Function
+			EnterHandler = (Get-PSReadLineKeyHandler Enter).Function
 		}
 		ReloadSafeVariables = $EshellUI.OtherData.ReloadSafeVariables ?? @{}
 	}
@@ -143,18 +145,18 @@ $EshellUI = ValueEx @{
 		$this.ProvidedAliases() | ForEach-Object {
 			Remove-Item alias:\$($_.Name)
 		}
+		Remove-PSReadLineKeyHandler Tab
+		Set-PSReadLineKeyHandler Tab $this.OtherData.BeforeEshLoaded.TabHandler
+		Remove-PSReadLineKeyHandler Enter
+		Set-PSReadLineKeyHandler Enter $this.OtherData.BeforeEshLoaded.EnterHandler
 	}
 	"method:Repl" = {
 		param([switch]$NotEnterNestedPrompt = $false)
 		$HistoryId = 0
 		if (-not $NotEnterNestedPrompt) { $NestedPromptLevel++ }
-		function DefaultPrompt {
-			$str = "esh"
-			0..$NestedPromptLevel | ForEach-Object { $str += ">" }
-			return $str
-		}
+		function DefaultPrompt { "esh" + ">" * ($NestedPromptLevel+1) }
 		:repl while ($true) {
-			Write-Host -NoNewline $($global:prompt ?? $EShellUI.Prompt.Get() ?? $(DefaultPrompt))
+			Write-Host -NoNewline $($global:prompt ?? $this.Prompt.Get() ?? $(DefaultPrompt))
 			$expr = PSConsoleHostReadLine
 			switch ($expr.Trim()) {
 				'' { continue }
@@ -180,5 +182,19 @@ $EshellUI = ValueEx @{
 			}) | Add-History
 		}
 		if (-not $NotEnterNestedPrompt) { $NestedPromptLevel-- }
+	}
+	"method:RunFromScript" = {
+		param($Invocation)
+		if (-not $this.State.Started) {
+			$this.Init($Invocation)
+			$this.LoadVariables()
+			$this.Start()
+		}
+		$global:EshellUI ??= $this
+		if ($this.GetFromOf($Invocation).FileExplorer) {
+			# 该代码由用户点击脚本执行 我们需要启动repl而不是退出
+			Write-Warning "Running esh in self-hosted REPL mode."
+			$this.Repl($true)
+		}
 	}
 }

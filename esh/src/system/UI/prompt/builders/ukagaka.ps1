@@ -2,7 +2,9 @@
 $EshellUI.Prompt.Builders["ukagaka"] = {
 	param(
 		[Parameter(Mandatory = $true)]
-		[string]$prompt_str
+		[string]$prompt_str,
+		[Parameter(Mandatory = $true)]
+		[HashTable]$BuildMethods
 	)
 	$ukagaka_prompt_str = $null
 	$ukagakaDescription = Test-Ukagaka-Directory $PWD.Path
@@ -47,17 +49,17 @@ $EshellUI.Prompt.Builders["ukagaka"] = {
 			}
 		}
 		if ($ukagakaDescription["craftman"]) {
-			$ukagaka_prompt_str = $EshellUI.Prompt.AddBlock($ukagaka_prompt_str," by $($ukagakaDescription[`"craftman`"])")
+			$ukagaka_prompt_str = $BuildMethods.AddBlock($ukagaka_prompt_str," by $($ukagakaDescription[`"craftman`"])")
 		}
 		if ($ukagakaDescription["githubrepo"]) {
-			$ukagaka_prompt_str = $EshellUI.Prompt.AddBlock($ukagaka_prompt_str," @ <$($ukagakaDescription[`"githubrepo`"])>")
+			$ukagaka_prompt_str = $BuildMethods.AddBlock($ukagaka_prompt_str," @ <$($ukagakaDescription[`"githubrepo`"])>")
 		}
 		elseif ($ukagakaDescription["craftmanurl"]) {
-			$ukagaka_prompt_str = $EshellUI.Prompt.AddBlock($ukagaka_prompt_str," @ <$($ukagakaDescription[`"craftmanurl`"])>")
+			$ukagaka_prompt_str = $BuildMethods.AddBlock($ukagaka_prompt_str," @ <$($ukagakaDescription[`"craftmanurl`"])>")
 		}
 	}
 	if ($ukagaka_prompt_str) {
-		$prompt_str = $EshellUI.Prompt.AddBlock($prompt_str,$ukagaka_prompt_str)
+		$prompt_str = $BuildMethods.AddBlock($prompt_str,$ukagaka_prompt_str)
 	}
 	$prompt_str
 }

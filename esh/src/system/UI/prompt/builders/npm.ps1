@@ -1,7 +1,9 @@
 ﻿$EshellUI.Prompt.Builders["npm"] = {
 	param(
 		[Parameter(Mandatory = $true)]
-		[string]$prompt_str
+		[string]$prompt_str,
+		[Parameter(Mandatory = $true)]
+		[HashTable]$BuildMethods
 	)
 	if (Test-Path package.json) {
 		$packageJson = Get-Content package.json -Raw -ErrorAction SilentlyContinue
@@ -25,7 +27,7 @@
 		}
 	}
 	if ($npm_prompt_str) {
-		$prompt_str = $EshellUI.Prompt.AddBlock($prompt_str,$npm_prompt_str)
+		$prompt_str = $BuildMethods.AddBlock($prompt_str,$npm_prompt_str)
 	}
 	$prompt_str
 }

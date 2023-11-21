@@ -15,8 +15,6 @@ if (-not $EshellUI.MSYS.RootPath -or -not (Test-Path $EshellUI.MSYS.RootPath)) {
 	}
 }
 
-$EshellUI["PathHandler"] = @{}
-
 function global:IsLinuxPath {
 	param(
 		[string]$Path

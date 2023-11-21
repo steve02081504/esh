@@ -1,7 +1,9 @@
 ﻿$EshellUI.Prompt.Builders["git"] = {
 	param(
 		[Parameter(Mandatory = $true)]
-		[string]$prompt_str
+		[string]$prompt_str,
+		[Parameter(Mandatory = $true)]
+		[HashTable]$BuildMethods
 	)
 	if (Test-Command git) {
 		$gitRepoUid = git rev-parse --short HEAD 2>$null
@@ -20,7 +22,7 @@
 			}
 		}
 		if ($git_prompt_str) {
-			$prompt_str = $EshellUI.Prompt.AddBlock($prompt_str,$git_prompt_str)
+			$prompt_str = $BuildMethods.AddBlock($prompt_str,$git_prompt_str)
 		}
 	}
 	$prompt_str
