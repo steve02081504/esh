@@ -1,5 +1,5 @@
 ﻿. "$($EshellUI.Sources.Path)/src/scripts/Ukagaka.ps1"
-$EshellUI.Prompt.Builders["ukagaka"] = {
+$EshellUI.Prompt.Builders['ukagaka'] = {
 	param(
 		[Parameter(Mandatory = $true)]
 		[string]$prompt_str,
@@ -9,52 +9,52 @@ $EshellUI.Prompt.Builders["ukagaka"] = {
 	$ukagaka_prompt_str = $null
 	$ukagakaDescription = Test-Ukagaka-Directory $PWD.Path
 	if ($ukagakaDescription.Count -gt 0) {
-		switch ($x = $ukagakaDescription["type"]) {
-			"ghost" {
+		switch ($x = $ukagakaDescription['type']) {
+			'ghost' {
 				$ukagaka_prompt_str = " ${VirtualTerminal.Colors.Green}󰀆 $x"
-				if ($ukagakaDescription["name"]) {
+				if ($ukagakaDescription['name']) {
 					$ukagaka_prompt_str += " $($ukagakaDescription[`"name`"])"
-					if ($ukagakaDescription["sakura.name"]) {
+					if ($ukagakaDescription['sakura.name']) {
 						$ukagaka_prompt_str += "($($ukagakaDescription[`"sakura.name`"])"
-						if ($ukagakaDescription["kero.name"]) {
+						if ($ukagakaDescription['kero.name']) {
 							$ukagaka_prompt_str += "&$($ukagakaDescription[`"kero.name`"])"
 						}
-						$ukagaka_prompt_str += ")"
+						$ukagaka_prompt_str += ')'
 					}
 				}
-				elseif ($ukagakaDescription["sakura.name"]) {
+				elseif ($ukagakaDescription['sakura.name']) {
 					$ukagaka_prompt_str += " $($ukagakaDescription[`"sakura.name`"])"
-					if ($ukagakaDescription["kero.name"]) {
+					if ($ukagakaDescription['kero.name']) {
 						$ukagaka_prompt_str += "&$($ukagakaDescription[`"kero.name`"])"
 					}
 				}
 			}
-			"shell" {
+			'shell' {
 				$ukagaka_prompt_str = " ${VirtualTerminal.Colors.Green}󱓨 $x"
-				if ($ukagakaDescription["name"]) {
+				if ($ukagakaDescription['name']) {
 					$ukagaka_prompt_str += " $($ukagakaDescription[`"name`"])"
 				}
 			}
-			"balloon" {
+			'balloon' {
 				$ukagaka_prompt_str = " ${VirtualTerminal.Colors.Green}󰍡 $x"
-				if ($ukagakaDescription["name"]) {
+				if ($ukagakaDescription['name']) {
 					$ukagaka_prompt_str += " $($ukagakaDescription[`"name`"])"
 				}
 			}
 			default {
 				$ukagaka_prompt_str = " ${VirtualTerminal.Colors.Green} $x"
-				if ($ukagakaDescription["name"]) {
+				if ($ukagakaDescription['name']) {
 					$ukagaka_prompt_str += " $($ukagakaDescription[`"name`"])"
 				}
 			}
 		}
-		if ($ukagakaDescription["craftman"]) {
+		if ($ukagakaDescription['craftman']) {
 			$ukagaka_prompt_str = $BuildMethods.AddBlock($ukagaka_prompt_str," by $($ukagakaDescription[`"craftman`"])")
 		}
-		if ($ukagakaDescription["githubrepo"]) {
+		if ($ukagakaDescription['githubrepo']) {
 			$ukagaka_prompt_str = $BuildMethods.AddBlock($ukagaka_prompt_str," @ <$($ukagakaDescription[`"githubrepo`"])>")
 		}
-		elseif ($ukagakaDescription["craftmanurl"]) {
+		elseif ($ukagakaDescription['craftmanurl']) {
 			$ukagaka_prompt_str = $BuildMethods.AddBlock($ukagaka_prompt_str," @ <$($ukagakaDescription[`"craftmanurl`"])>")
 		}
 	}

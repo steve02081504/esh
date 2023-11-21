@@ -4,7 +4,7 @@ $EshellUI.Prompt = ValueEx @{
 	Parent = $EshellUI
 	Builders = @{}
 	BuildMethods = ValueEx @{
-		"method:NewlineCheck" = {
+		'method:NewlineCheck' = {
 			param(
 				[Parameter(Mandatory = $true)]
 				[string]$prompt_str
@@ -17,7 +17,7 @@ $EshellUI.Prompt = ValueEx @{
 			}
 			return $prompt_str
 		}
-		"method:AddBlock" = {
+		'method:AddBlock' = {
 			param($prompt_str,$block_str)
 			$LastLineIndex = Max $prompt_str.LastIndexOf('`n') 0
 			$LastLine = $prompt_str.Substring($LastLineIndex)
@@ -28,7 +28,7 @@ $EshellUI.Prompt = ValueEx @{
 			return $prompt_str + $block_str
 		}
 	}
-	"method:Get" = {
+	'method:Get' = {
 		$local:EshellUI = $this.Parent
 		$prompt_str = $PWD.Path
 		if (($prompt_str.StartsWith($HOME)) -or ($prompt_str.StartsWith($EshellUI.MSYS.RootPath))) {
@@ -39,7 +39,7 @@ $EshellUI.Prompt = ValueEx @{
 			$prompt_str = $this.Builders[$_].Invoke($prompt_str, $this.BuildMethods)
 		}
 		$prompt_str = $this.BuildMethods.NewlineCheck("$prompt_str ${VirtualTerminal.Colors.Reset}")
-		$prompt_str += ">" * ($NestedPromptLevel+1)
+		$prompt_str += '>' * ($NestedPromptLevel+1)
 		return $prompt_str
 	}
 }

@@ -7,13 +7,13 @@
 				gh extension install github/gh-copilot
 			} catch {
 				#install failed
-				Write-Error "Error: Install github cli failed."
+				Write-Error 'Error: Install github cli failed.'
 				throw
 			}
 		}
 		else {
 			#winget not found
-			Write-Error "Please install github cli first."
+			Write-Error 'Please install github cli first.'
 			throw
 		}
 	}

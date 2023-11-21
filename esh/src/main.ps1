@@ -12,16 +12,16 @@ $EshellUI = ValueEx @{
 	Im = @{
 		Sudo = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]“Administrator”)
 		VSCodeExtension = [bool]($psEditor)
-		WindowsPowerShell = (Split-Path $(Split-Path $PROFILE) -Leaf) -eq "WindowsPowerShell"
+		WindowsPowerShell = (Split-Path $(Split-Path $PROFILE) -Leaf) -eq 'WindowsPowerShell'
 		ISE = [bool]($psISE)
 		FirstLoading = $EshellUI -eq $LastExitCode
 		InScope = $EshellUI -ne $global:EshellUI
 	}
-	"method:GetFromOf" = {
+	'method:GetFromOf' = {
 		param($Invocation)
-		$FromProfile = ($Invocation.CommandOrigin -eq "Internal") -and (-not $Invocation.PSScriptRoot)
-		$FromOtherScript = ($Invocation.CommandOrigin -eq "Internal") -and ($Invocation.PSScriptRoot)
-		$MayFromCommand = ($Invocation.CommandOrigin -eq "Runspace") -and (-not $Invocation.PSScriptRoot)
+		$FromProfile = ($Invocation.CommandOrigin -eq 'Internal') -and (-not $Invocation.PSScriptRoot)
+		$FromOtherScript = ($Invocation.CommandOrigin -eq 'Internal') -and ($Invocation.PSScriptRoot)
+		$MayFromCommand = ($Invocation.CommandOrigin -eq 'Runspace') -and (-not $Invocation.PSScriptRoot)
 		$FromFileExplorer = $MayFromCommand -and ($Invocation.HistoryId -eq 1)
 		$FromCommand = $MayFromCommand -and (-not $FromFileExplorer)
 		return @{
@@ -31,7 +31,7 @@ $EshellUI = ValueEx @{
 			FileExplorer = $FromFileExplorer
 		}
 	}
-	"method:Init" = {
+	'method:Init' = {
 		param($Invocation)
 		$this.Im.From = $this.GetFromOf($Invocation)
 		$this.Invocation = $Invocation
@@ -42,15 +42,15 @@ $EshellUI = ValueEx @{
 	}
 	BackgroundLoadingJobs = ValueEx @{
 		__type__ = [System.Collections.ArrayList]
-		"method:Pop" = {
+		'method:Pop' = {
 			$job = $this[0]
 			$this.RemoveAt(0)
 			$job
 		}
-		"method:PopAndRun" = {
+		'method:PopAndRun' = {
 			$job = $this.Pop()
 			$OriginalPref = $ProgressPreference # Default is 'Continue'
-			$ProgressPreference = "SilentlyContinue"
+			$ProgressPreference = 'SilentlyContinue'
 			$job.Invoke()
 			$ProgressPreference = $OriginalPref
 		}
@@ -67,14 +67,14 @@ $EshellUI = ValueEx @{
 		}
 		ReloadSafeVariables = $EshellUI.OtherData.ReloadSafeVariables ?? @{}
 	}
-	"method:SaveVariables" = {
+	'method:SaveVariables' = {
 		if ($this.MSYS.RootPath) { Set-Content "$($this.Sources.Path)/data/vars/MSYSRootPath.txt" $this.MSYS.RootPath }
 	}
-	"method:LoadVariables" = {
+	'method:LoadVariables' = {
 		$this.MSYS.RootPath = Get-Content "$($this.Sources.Path)/data/vars/MSYSRootPath.txt" -ErrorAction Ignore
 		$this.State.VariablesLoaded = $true
 	}
-	"method:Start" = {
+	'method:Start' = {
 		$this.OtherData.BeforeEshLoaded.promptBackup = $function:prompt
 		#注册事件以在退出时保存数据
 		Register-EngineEvent PowerShell.Exiting -Action {
@@ -106,32 +106,32 @@ $EshellUI = ValueEx @{
 
 		$this.State.Started = $true
 	}
-	"method:Reload" = {
+	'method:Reload' = {
 		$this.SaveVariables()
 		$this.Remove()
 		. "$($this.Sources.Path)/main.ps1"
 		$EshellUI.LoadVariables()
 		$EshellUI.Start()
 	}
-	"method:ProvidedFunctions" = {
+	'method:ProvidedFunctions' = {
 		$FunctionListNow = Get-ChildItem function:\
 		$FunctionListNow | ForEach-Object {
 			if ($this.OtherData.BeforeEshLoaded.FunctionList.Name -notcontains $_.Name) { $_ }
 		}
 	}
-	"method:ProvidedVariables" = {
+	'method:ProvidedVariables' = {
 		$VariableListNow = Get-ChildItem variable:\
 		$VariableListNow | ForEach-Object {
 			if ($this.OtherData.BeforeEshLoaded.VariableList.Name -notcontains $_.Name) { $_ }
 		}
 	}
-	"method:ProvidedAliases" = {
+	'method:ProvidedAliases' = {
 		$AliasesListNow = Get-ChildItem alias:\
 		$AliasesListNow | ForEach-Object {
 			if ($this.OtherData.BeforeEshLoaded.AliasesList.Name -notcontains $_.Name) { $_ }
 		}
 	}
-	"method:Remove" = {
+	'method:Remove' = {
 		$this.SaveVariables()
 		$function:prompt = $this.OtherData.BeforeEshLoaded.promptBackup
 		Unregister-Event PowerShell.OnIdle
@@ -150,11 +150,11 @@ $EshellUI = ValueEx @{
 		Remove-PSReadLineKeyHandler Enter
 		Set-PSReadLineKeyHandler Enter $this.OtherData.BeforeEshLoaded.EnterHandler
 	}
-	"method:Repl" = {
+	'method:Repl' = {
 		param([switch]$NotEnterNestedPrompt = $false)
 		$HistoryId = 0
 		if (-not $NotEnterNestedPrompt) { $NestedPromptLevel++ }
-		function DefaultPrompt { "esh" + ">" * ($NestedPromptLevel+1) }
+		function DefaultPrompt { 'esh' + '>' * ($NestedPromptLevel+1) }
 		:repl while ($true) {
 			Write-Host -NoNewline $($global:prompt ?? $this.Prompt.Get() ?? $(DefaultPrompt))
 			$expr = PSConsoleHostReadLine
@@ -164,10 +164,10 @@ $EshellUI = ValueEx @{
 			}
 			$HistoryId++
 			$local:myInvocation = [System.Management.Automation.InvocationInfo]::Create(
-				[System.Management.Automation.CmdletInfo]::new("Esh-Repl",[System.Management.Automation.PSCmdLet]),
+				[System.Management.Automation.CmdletInfo]::new('Esh-Repl',[System.Management.Automation.PSCmdLet]),
 				[System.Management.Automation.Language.ScriptExtent]::new(
-					[System.Management.Automation.Language.ScriptPosition]::new("esh",$HistoryId,1,$expr),
-					[System.Management.Automation.Language.ScriptPosition]::new("esh",$HistoryId,$expr.Length,$expr)
+					[System.Management.Automation.Language.ScriptPosition]::new('esh',$HistoryId,1,$expr),
+					[System.Management.Automation.Language.ScriptPosition]::new('esh',$HistoryId,$expr.Length,$expr)
 				)
 			)
 			$StartExecutionTime = Get-Date
@@ -176,14 +176,14 @@ $EshellUI = ValueEx @{
 			$EndExecutionTime = Get-Date
 			[PSCustomObject](@{
 				CommandLine = $expr
-				ExecutionStatus = "Completed"
+				ExecutionStatus = 'Completed'
 				StartExecutionTime = $StartExecutionTime
 				EndExecutionTime = $EndExecutionTime
 			}) | Add-History
 		}
 		if (-not $NotEnterNestedPrompt) { $NestedPromptLevel-- }
 	}
-	"method:RunFromScript" = {
+	'method:RunFromScript' = {
 		param($Invocation)
 		try{
 			if (-not $this.State.Started) {
@@ -194,7 +194,7 @@ $EshellUI = ValueEx @{
 			$global:EshellUI ??= $this
 			if ($this.GetFromOf($Invocation).FileExplorer) {
 				# 该代码由用户点击脚本执行 我们需要启动repl而不是退出
-				Write-Warning "Running esh in self-hosted REPL mode."
+				Write-Warning 'Running esh in self-hosted REPL mode.'
 				$this.Repl($true)
 			}
 		}

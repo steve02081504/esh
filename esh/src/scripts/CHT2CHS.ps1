@@ -58,17 +58,17 @@ ${CHSCHT.oridata.alphas}.Keys | ForEach-Object {
 	$Key = $_
 	$Value = ${CHSCHT.oridata.alphas}[$Key].ToCharArray();
 	if ($Value.Count -gt 0) {
-		if ($Value[0] -ne " ") {
+		if ($Value[0] -ne ' ') {
 			${CHS2CHT.data.alphas}.Add($Key[0],$Value[0])
 		}
 		$Value | ForEach-Object {
-			if ($_ -ne " ") {
+			if ($_ -ne ' ') {
 				${CHT2CHS.data.alphas}.Add($_,$Key[0])
 			}
 		}
 	}
 }
-Remove-Variable -Name "CHSCHT.oridata.alphas" -Scope Global
+Remove-Variable -Name 'CHSCHT.oridata.alphas' -Scope Global
 ${CHSCHT.oridata.words}.Keys | ForEach-Object {
 	$Key = $_
 	$Value = ${CHSCHT.oridata.words}[$Key].Trim()
@@ -81,4 +81,4 @@ ${CHSCHT.oridata.words}.Keys | ForEach-Object {
 		${CHS2CHT.data.words}.Add($S,$Value)
 	}
 }
-Remove-Variable -Name "CHSCHT.oridata.words" -Scope Global
+Remove-Variable -Name 'CHSCHT.oridata.words' -Scope Global

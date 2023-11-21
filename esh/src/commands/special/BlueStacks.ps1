@@ -3,12 +3,12 @@
 		[Parameter(Mandatory = $true)]
 		[string]$apkPath
 	)
-	. "C:\Program Files\BlueStacks_nxt\HD-Player.exe" --instance Pie64 --cmd installApk --filepath "$apkPath"
+	. 'C:\Program Files\BlueStacks_nxt\HD-Player.exe' --instance Pie64 --cmd installApk --filepath "$apkPath"
 }
 
 function global:Show-apks {
 	#读取C:\ProgramData\BlueStacks_nxt\Engine\Pie64\AppCache\AppCache.json
-	$AppCache = Get-Content "C:\ProgramData\BlueStacks_nxt\Engine\Pie64\AppCache\AppCache.json" -Raw | ConvertFrom-Json
+	$AppCache = Get-Content 'C:\ProgramData\BlueStacks_nxt\Engine\Pie64\AppCache\AppCache.json' -Raw | ConvertFrom-Json
 	<#
 	{
 		"activity": "jp.co.cygames.activity.OverrideUnityActivity",
@@ -70,7 +70,7 @@ function global:Start-apk {
 		return
 	}
 	else {
-		. "C:\Program Files\BlueStacks_nxt\HD-Player.exe" --instance Pie64 --cmd launchApp --package "$apkSign"
+		. 'C:\Program Files\BlueStacks_nxt\HD-Player.exe' --instance Pie64 --cmd launchApp --package "$apkSign"
 	}
 }
 

@@ -1,5 +1,5 @@
 ﻿function global:EShell {
-	pwsh -nologo $(if ($PSVersionTable.PSVersion -gt 7.3) { "-NoProfileLoadTime" })
+	pwsh -nologo $(if ($PSVersionTable.PSVersion -gt 7.3) { '-NoProfileLoadTime' })
 }
 #设定别名esh
 Set-Alias esh EShell -Scope global
@@ -17,10 +17,10 @@ function global:sudo {
 		}
 		# If the command is empty, open a new PowerShell shell with admin privileges
 		elseif (Test-Command wt.exe) {
-			Start-Process -Wait -FilePath "wt.exe" -ArgumentList "pwsh.exe $pwshArguments" -Verb runas
+			Start-Process -Wait -FilePath 'wt.exe' -ArgumentList "pwsh.exe $pwshArguments" -Verb runas
 		}
 		else {
-			Start-Process -Wait -FilePath "pwsh.exe" -ArgumentList $pwshArguments -Verb runas
+			Start-Process -Wait -FilePath 'pwsh.exe' -ArgumentList $pwshArguments -Verb runas
 		}
 	} else {
 		if ($EshellUI.Im.Sudo) {
@@ -28,14 +28,14 @@ function global:sudo {
 		}
 		# Otherwise, run the command as an admin
 		elseif (Test-Command wt.exe) {
-			$Arguments = @("pwsh","-Command",$(pwsh_args_convert $RemainingArguments))
+			$Arguments = @('pwsh','-Command',$(pwsh_args_convert $RemainingArguments))
 			$Arguments = cmd_args_convert $Arguments
-			Start-Process -Wait -FilePath "wt.exe" -ArgumentList $Arguments.Replace('"','\"') -Verb runas
+			Start-Process -Wait -FilePath 'wt.exe' -ArgumentList $Arguments.Replace('"','\"') -Verb runas
 		}
 		else {
-			$Arguments = @("-Command",$(pwsh_args_convert $RemainingArguments))
+			$Arguments = @('-Command',$(pwsh_args_convert $RemainingArguments))
 			$Arguments = cmd_args_convert $Arguments
-			Start-Process -Wait -FilePath "pwsh.exe" -ArgumentList "$pwshArguments $Arguments" -Verb runas
+			Start-Process -Wait -FilePath 'pwsh.exe' -ArgumentList "$pwshArguments $Arguments" -Verb runas
 		}
 	}
 }
@@ -79,17 +79,17 @@ function global:shutdown {
 Set-Alias global:poweroff shutdown
 
 function global:poweron {
-	Write-Host "This computer is already powered on."
+	Write-Host 'This computer is already powered on.'
 }
 function global:power {
 	param(
 		#off / on
-		[ValidateSet("off","on")]
+		[ValidateSet('off','on')]
 		[string]$action
 	)
 	switch ($action) {
-		"off" { poweroff }
-		"on" { poweron }
+		'off' { poweroff }
+		'on' { poweron }
 		default {
 			Write-Host "I'm the storm that's ${VirtualTerminal.Styles.Blink}approaching!!!!!!!!!!!!!!!!!!!!`nApproaching!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!${VirtualTerminal.Styles.NoBlink}"
 		}

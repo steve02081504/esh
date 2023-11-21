@@ -1,4 +1,4 @@
-﻿$EshellUI.Prompt.Builders["git"] = {
+﻿$EshellUI.Prompt.Builders['git'] = {
 	param(
 		[Parameter(Mandatory = $true)]
 		[string]$prompt_str,
@@ -18,7 +18,7 @@
 		if ($gitChangedFileNum -gt 0) {
 			$git_prompt_str = "$git_prompt_str $gitChangedFileNum file"
 			if ($gitChangedFileNum -gt 1) {
-				$git_prompt_str += "s"
+				$git_prompt_str += 's'
 			}
 		}
 		if ($git_prompt_str) {

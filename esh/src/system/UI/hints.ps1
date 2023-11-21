@@ -1,6 +1,6 @@
 ﻿$EshellUI.Hints = ValueEx @{
 	__type__ = [System.Collections.ArrayList]
-	"method:AddWithCommand" = {
+	'method:AddWithCommand' = {
 		param(
 			[string]$command,
 			[string]$hint,
@@ -10,18 +10,18 @@
 			$this.Add("Type '${VirtualTerminal.Colors.BrightYellow}$command${VirtualTerminal.Colors.Reset}' to $hint.")
 		}
 	}
-	"method:GetRandom" = {
+	'method:GetRandom' = {
 		$this[$(Get-Random -Minimum 0 -Maximum $this.Count)]
 	}
-	"method:PrintRandom" = {
+	'method:PrintRandom' = {
 		try { Write-Host $this.GetRandom() }
 		catch { $this.PrintRandom() }
 	}
 }
 
-$EshellUI.Hints.AddWithCommand("fk","fuck typos","thefuck") | Out-Null
-$EshellUI.Hints.AddWithCommand("coffee","get a cup of coffee") | Out-Null
-$EshellUI.Hints.AddWithCommand("poweron","turn on this computer") | Out-Null
+$EshellUI.Hints.AddWithCommand('fk','fuck typos','thefuck') | Out-Null
+$EshellUI.Hints.AddWithCommand('coffee','get a cup of coffee') | Out-Null
+$EshellUI.Hints.AddWithCommand('poweron','turn on this computer') | Out-Null
 $EshellUI.Hints.Add($(coffee)) | Out-Null
 
 Get-Content "$($EshellUI.Sources.Path)/data/SAO-lib.txt" -ErrorAction Ignore -Encoding utf-8 | ForEach-Object { $EshellUI.Hints.Add($_) } | Out-Null
