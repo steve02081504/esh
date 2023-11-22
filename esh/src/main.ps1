@@ -59,7 +59,7 @@ $EshellUI = ValueEx @{
 		ReloadSafeVariables = $EshellUI.OtherData.ReloadSafeVariables ?? @{}
 	}
 	'method:SaveVariables' = {
-		if ($this.MSYS.RootPath) { Set-Content "$($this.Sources.Path)/data/vars/MSYSRootPath.txt" $this.MSYS.RootPath }
+		if ($this.MSYS.RootPath) { Set-Content "$($this.Sources.Path)/data/vars/MSYSRootPath.txt" $this.MSYS.RootPath -NoNewline }
 	}
 	'method:LoadVariables' = {
 		$this.MSYS.RootPath = Get-Content "$($this.Sources.Path)/data/vars/MSYSRootPath.txt" -ErrorAction Ignore
