@@ -21,7 +21,7 @@
 		$npmRepoVersion = $packageJson.Version
 	}
 	if ($null -ne $npmRepoName) {
-		$npm_prompt_str = " ${VirtualTerminal.Colors.Red} $npmRepoName"
+		$npm_prompt_str = " $($VirtualTerminal.Colors.Red) $npmRepoName"
 		if ($null -ne $npmRepoVersion) {
 			$npm_prompt_str += "@$npmRepoVersion"
 		}

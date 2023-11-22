@@ -10,7 +10,7 @@
 		$gitRepoBranch = git rev-parse --abbrev-ref HEAD 2>$null
 		$gitChangedFileNum = git status --porcelain 2>$null | Measure-Object -Line | Select-Object -ExpandProperty Lines
 		if ($null -ne $gitRepoUid) {
-			$git_prompt_str = " ${VirtualTerminal.Colors.Cyan}$gitRepoUid"
+			$git_prompt_str = " $($VirtualTerminal.Colors.Cyan)$gitRepoUid"
 			if ($null -ne $gitRepoBranch) {
 				$git_prompt_str += "@$gitRepoBranch"
 			}

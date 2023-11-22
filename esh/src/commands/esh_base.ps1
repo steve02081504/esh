@@ -13,7 +13,7 @@ function global:sudo {
 	$pwshArguments = "$(if($PSVersionTable.PSVersion -gt 7.3){`"-NoProfileLoadTime`"}) -nologo"
 	if ($RemainingArguments.Length -eq 0) {
 		if ($EshellUI.Im.Sudo) {
-			Write-Host "I already have ${VirtualTerminal.Styles.Blink}Super Power${VirtualTerminal.Styles.NoBlink}s."
+			Write-Host "I already have $($VirtualTerminal.Styles.Blink)Super Power$($VirtualTerminal.Styles.NoBlink)s."
 		}
 		# If the command is empty, open a new PowerShell shell with admin privileges
 		elseif (Test-Command wt.exe) {
@@ -91,7 +91,7 @@ function global:power {
 		'off' { poweroff }
 		'on' { poweron }
 		default {
-			Write-Host "I'm the storm that's ${VirtualTerminal.Styles.Blink}approaching!!!!!!!!!!!!!!!!!!!!`nApproaching!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!${VirtualTerminal.Styles.NoBlink}"
+			Write-Host "I'm the storm that's $($VirtualTerminal.Styles.Blink)approaching!!!!!!!!!!!!!!!!!!!!`nApproaching!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!$($VirtualTerminal.Styles.NoBlink)"
 		}
 	}
 }

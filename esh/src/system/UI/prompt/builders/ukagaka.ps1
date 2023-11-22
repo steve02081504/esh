@@ -11,7 +11,7 @@ $EshellUI.Prompt.Builders['ukagaka'] = {
 	if ($ukagakaDescription.Count -gt 0) {
 		switch ($x = $ukagakaDescription['type']) {
 			'ghost' {
-				$ukagaka_prompt_str = " ${VirtualTerminal.Colors.Green}󰀆 $x"
+				$ukagaka_prompt_str = " $($VirtualTerminal.Colors.Green)󰀆 $x"
 				if ($ukagakaDescription['name']) {
 					$ukagaka_prompt_str += " $($ukagakaDescription[`"name`"])"
 					if ($ukagakaDescription['sakura.name']) {
@@ -30,19 +30,19 @@ $EshellUI.Prompt.Builders['ukagaka'] = {
 				}
 			}
 			'shell' {
-				$ukagaka_prompt_str = " ${VirtualTerminal.Colors.Green}󱓨 $x"
+				$ukagaka_prompt_str = " $($VirtualTerminal.Colors.Green)󱓨 $x"
 				if ($ukagakaDescription['name']) {
 					$ukagaka_prompt_str += " $($ukagakaDescription[`"name`"])"
 				}
 			}
 			'balloon' {
-				$ukagaka_prompt_str = " ${VirtualTerminal.Colors.Green}󰍡 $x"
+				$ukagaka_prompt_str = " $($VirtualTerminal.Colors.Green)󰍡 $x"
 				if ($ukagakaDescription['name']) {
 					$ukagaka_prompt_str += " $($ukagakaDescription[`"name`"])"
 				}
 			}
 			default {
-				$ukagaka_prompt_str = " ${VirtualTerminal.Colors.Green} $x"
+				$ukagaka_prompt_str = " $($VirtualTerminal.Colors.Green) $x"
 				if ($ukagakaDescription['name']) {
 					$ukagaka_prompt_str += " $($ukagakaDescription[`"name`"])"
 				}

@@ -7,7 +7,7 @@
 			[string]$check_command = $command
 		)
 		if (Test-Command $check_command) {
-			$this.Add("Type '${VirtualTerminal.Colors.BrightYellow}$command${VirtualTerminal.Colors.Reset}' to $hint.")
+			$this.Add("Type '$($VirtualTerminal.Colors.BrightYellow)$command$($VirtualTerminal.Colors.Reset)' to $hint.")
 		}
 	}
 	'method:GetRandom' = {

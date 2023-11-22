@@ -31,7 +31,7 @@ function global:Update-EShell {
 
 function global:Update-All-Paks {
 	function Update-HEAD ($text) {
-		Write-Host "${VirtualTerminal.Colors.BrightMagenta}Updating $text...${VirtualTerminal.Colors.Reset}"
+		Write-Host "$($VirtualTerminal.Colors.BrightMagenta)Updating $text...$($VirtualTerminal.Colors.Reset)"
 	}
 	#Update Powershell Modules
 	Update-HEAD 'Powershell Modules'

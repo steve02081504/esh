@@ -38,7 +38,7 @@ $EshellUI.Prompt = ValueEx @{
 		$this.Builders.Keys | ForEach-Object {
 			$prompt_str = $this.Builders[$_].Invoke($prompt_str, $this.BuildMethods)
 		}
-		$prompt_str = $this.BuildMethods.NewlineCheck("$prompt_str ${VirtualTerminal.Colors.Reset}")
+		$prompt_str = $this.BuildMethods.NewlineCheck("$prompt_str $($VirtualTerminal.Colors.Reset)")
 		$prompt_str += '>' * ($NestedPromptLevel+1)
 		return $prompt_str
 	}

@@ -66,7 +66,7 @@ function global:Start-apk {
 	$apkList = Show-apks
 	$apkSign = $apkList | Where-Object { $_.appLabel -eq $apkSignOrName -or $_.package -eq $apkSignOrName } | Select-Object -First 1 -ExpandProperty Package
 	if ($null -eq $apkSign) {
-		Write-Host "${VirtualTerminal.Colors.Red}Error: ${VirtualTerminal.Colors.Reset}No such apk."
+		Write-Host "$($VirtualTerminal.Colors.Red)Error: $($VirtualTerminal.Colors.Reset)No such apk."
 		return
 	}
 	else {
