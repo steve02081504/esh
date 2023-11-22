@@ -129,6 +129,8 @@ $LinuxPathCompleter = {
 }
 Register-ArgumentCompleter -ParameterName "Path" -ScriptBlock $LinuxPathCompleter
 Register-ArgumentCompleter -ParameterName "Destination" -ScriptBlock $LinuxPathCompleter
+Remove-Variable LinuxPathCompleter
+
 Set-PSReadLineKeyHandler -Key Tab -Function MenuComplete
 
 if (Test-Command rm.exe) {

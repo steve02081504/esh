@@ -56,15 +56,6 @@ $EshellUI = ValueEx @{
 		}
 	}
 	OtherData = @{
-		BeforeEshLoaded = @{
-			FunctionList = Get-ChildItem function:\
-			VariableList = Get-ChildItem variable:\
-			AliasesList = Get-ChildItem alias:\
-			promptBackup = $function:prompt
-			Errors = $Error
-			TabHandler = (Get-PSReadLineKeyHandler Tab).Function
-			EnterHandler = (Get-PSReadLineKeyHandler Enter).Function
-		}
 		ReloadSafeVariables = $EshellUI.OtherData.ReloadSafeVariables ?? @{}
 	}
 	'method:SaveVariables' = {
@@ -75,7 +66,15 @@ $EshellUI = ValueEx @{
 		$this.State.VariablesLoaded = $true
 	}
 	'method:Start' = {
-		$this.OtherData.BeforeEshLoaded.promptBackup = $function:prompt
+		$this.OtherData.BeforeEshLoaded = @{
+			FunctionList = Get-ChildItem function:\
+			VariableList = Get-ChildItem variable:\
+			AliasesList = Get-ChildItem alias:\
+			promptBackup = $function:prompt
+			Errors = $Error
+			TabHandler = (Get-PSReadLineKeyHandler Tab).Function
+			EnterHandler = (Get-PSReadLineKeyHandler Enter).Function
+		}
 		#注册事件以在退出时保存数据
 		Register-EngineEvent PowerShell.Exiting -Action {
 			$EshellUI.SaveVariables()
@@ -105,6 +104,12 @@ $EshellUI = ValueEx @{
 		. $PSScriptRoot/system/UI/loaded.ps1
 
 		$this.State.Started = $true
+		$this.OtherData.AfterEshLoaded = @{
+			FunctionList = Get-ChildItem function:\
+			VariableList = Get-ChildItem variable:\
+			AliasesList = Get-ChildItem alias:\
+			Errors = $Error
+		}
 	}
 	'method:Reload' = {
 		$this.SaveVariables()
@@ -114,20 +119,17 @@ $EshellUI = ValueEx @{
 		$EshellUI.Start()
 	}
 	'method:ProvidedFunctions' = {
-		$FunctionListNow = Get-ChildItem function:\
-		$FunctionListNow | ForEach-Object {
+		$this.OtherData.AfterEshLoaded.FunctionList | ForEach-Object {
 			if ($this.OtherData.BeforeEshLoaded.FunctionList.Name -notcontains $_.Name) { $_ }
 		}
 	}
 	'method:ProvidedVariables' = {
-		$VariableListNow = Get-ChildItem variable:\
-		$VariableListNow | ForEach-Object {
+		$this.OtherData.AfterEshLoaded.VariableList | ForEach-Object {
 			if ($this.OtherData.BeforeEshLoaded.VariableList.Name -notcontains $_.Name) { $_ }
 		}
 	}
 	'method:ProvidedAliases' = {
-		$AliasesListNow = Get-ChildItem alias:\
-		$AliasesListNow | ForEach-Object {
+		$this.OtherData.AfterEshLoaded.AliasesList | ForEach-Object {
 			if ($this.OtherData.BeforeEshLoaded.AliasesList.Name -notcontains $_.Name) { $_ }
 		}
 	}
