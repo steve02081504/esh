@@ -25,3 +25,24 @@
 	}
 	return ,$ValueExed
 }
+function IndexEx ($Value,$Index,[switch]$Set=$false,$ValueToSet) {
+	if(-not $Index){ return ,$Value }
+	if($Index.Contains('.')){
+		while($Index.Contains('.')){
+			$Pos = $Index.IndexOf('.')
+			$SubIndex = $Index.Substring(0, $Pos)
+			$Index = $Index.Substring($Pos + 1)
+			$Value = IndexEx $Value $SubIndex
+		}
+	}
+	if($Set){
+		if($Value.__arec_set__){ $Value.__arec_set__($Index, $ValueToSet) }
+		else{ $Value[$Index] = $ValueToSet }
+		$Result = $ValueToSet
+	}
+	else{
+		if($Value.__arec__){ $Result = $Value.__arec__($Index) }
+		else{ $Result = $Value[$Index] }
+	}
+	return ,$Result
+}

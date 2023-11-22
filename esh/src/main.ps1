@@ -57,12 +57,30 @@ $EshellUI = ValueEx @{
 	}
 	OtherData = @{
 		ReloadSafeVariables = $EshellUI.OtherData.ReloadSafeVariables ?? @{}
+		VariableSaveList = @{
+			'MSYSRootPath' = 'MSYS.RootPath'
+		}
+	}
+	'method:LoadVariable' = {
+		param($FileName)
+		Get-Content "$($this.Sources.Path)/data/vars/$FileName.txt" -ErrorAction Ignore
+	}
+	'method:SaveVariable' = {
+		param($Value, $FileName)
+		if((-not $Value) -or ($this.LoadVariable($FileName) -eq $Value)) { return }
+		$Value | Set-Content "$($this.Sources.Path)/data/vars/$FileName.txt" -NoNewline
 	}
 	'method:SaveVariables' = {
-		if ($this.MSYS.RootPath) { Set-Content "$($this.Sources.Path)/data/vars/MSYSRootPath.txt" $this.MSYS.RootPath -NoNewline }
+		$this.OtherData.VariableSaveList.GetEnumerator() | ForEach-Object {
+			$Value = IndexEx $this $_.Value
+			$this.SaveVariable($Value, $_.Name)
+		}
 	}
 	'method:LoadVariables' = {
-		$this.MSYS.RootPath = Get-Content "$($this.Sources.Path)/data/vars/MSYSRootPath.txt" -ErrorAction Ignore
+		$this.OtherData.VariableSaveList.GetEnumerator() | ForEach-Object {
+			$Value = $this.LoadVariable($_.Name)
+			if ($Value) { IndexEx $this $_.Value -Set $Value }
+		}
 		$this.State.VariablesLoaded = $true
 	}
 	'method:Start' = {
