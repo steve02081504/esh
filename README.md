@@ -7,24 +7,27 @@
 - clone后放置于`~/Documents/powershell`
 - 在windows terminal中将字体设置为[`FriaCode Nerd Font`](https://github.com/ryanoasis/nerd-fonts/releases/latest/download/FiraCode.zip)
 - 你或许想追加`-NoProfileLoadTime -nologo`到powershell启动参数中
-- 修改`$EshellUI.MSYS.RootPath`为你的msys2安装路径并`$EshellUI.SaveVariable()`
+- 修改`$EshellUI.MSYS.RootPath`为你的msys2安装路径并`$EshellUI.SaveVariables()`
 - 视需要修改其他文件内容
 
 ## 快速开始
 
 将以下命令复制粘贴到powershell中以快速开始  
-注意：**这将清除你现在的powershell配置文件和已经安装的模块**
 
 ```powershell
 $PwshProFiles = Split-Path $PROFILE
 $ParentPath = Split-Path $PwshProFiles
-Remove-Item $PwshProFiles -Confirm -ErrorAction Ignore
-Remove-Item $ParentPath/my-powershell-profile-master -Force -ErrorAction SilentlyContinue
+Remove-Item $PwshProFiles/esh -Confirm -ErrorAction Ignore -Recurse
+Remove-Item $ParentPath/my-powershell-profile-master -Force -ErrorAction SilentlyContinue -Confirm:$false -Recurse
 Invoke-WebRequest https://github.com/steve02081504/my-powershell-profile/archive/refs/heads/master.zip -OutFile Eshell.zip
 Expand-Archive Eshell.zip $ParentPath -Force
-Rename-Item $ParentPath/my-powershell-profile-master PowerShell -Force
 Remove-Item Eshell.zip -Force
+New-Item -ItemType Directory -Force -Path $PwshProFiles | Out-Null
+Move-Item $ParentPath/my-powershell-profile-master/esh $PwshProFiles/esh -Force
+Remove-Item $ParentPath/my-powershell-profile-master -Force -ErrorAction SilentlyContinue -Confirm:$false -Recurse
+& $PwshProFiles/esh/add2profile.ps1
 . $PwshProFiles/esh/run.ps1
+Remove-Variable @('PwshProFiles','ParentPath')
 
 ```
 

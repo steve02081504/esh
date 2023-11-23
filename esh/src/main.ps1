@@ -17,14 +17,14 @@ $EshellUI = ValueEx @{
 		FirstLoading = $EshellUI -eq $LastExitCode
 		InScope = $EshellUI -ne $global:EshellUI
 	}
-	'method:GetFromOf' = {
+	'method:GetMyFrom' = {
 		param($Invocation)
 		$FromProfile = ($Invocation.CommandOrigin -eq 'Internal') -and (-not $Invocation.PSScriptRoot)
 		$FromOtherScript = ($Invocation.CommandOrigin -eq 'Internal') -and ($Invocation.PSScriptRoot)
 		$MayFromCommand = ($Invocation.CommandOrigin -eq 'Runspace') -and (-not $Invocation.PSScriptRoot)
-		$FromFileExplorer = $MayFromCommand -and ($Invocation.HistoryId -eq 1)
+		$FromFileExplorer = $MayFromCommand -and ($Invocation.HistoryId -eq 1) -and $this.Im.StartedFrom.FileExplorer
 		$FromCommand = $MayFromCommand -and (-not $FromFileExplorer)
-		return @{
+		@{
 			Profile = $FromProfile
 			OtherScript = $FromOtherScript
 			Command = $FromCommand
@@ -33,8 +33,14 @@ $EshellUI = ValueEx @{
 	}
 	'method:Init' = {
 		param($Invocation)
-		$this.Im.From = $this.GetFromOf($Invocation)
 		$this.Invocation = $Invocation
+		$this.Process = Get-CimInstance -Query "select * from Win32_Process where Handle=$pid"
+		$this.ParentProcess = Get-CimInstance -Query "select * from Win32_Process where Handle=$($this.Process.ParentProcessId)"
+		$this.Im.StartedFrom = @{
+			WindowsTerminal = $this.ParentProcess.Name -eq 'WindowsTerminal.exe'
+			FileExplorer = $this.ParentProcess.Name -eq 'explorer.exe'
+		}
+		$this.Im.From = $this.GetMyFrom($Invocation)
 	}
 
 	MSYS = @{
@@ -48,10 +54,9 @@ $EshellUI = ValueEx @{
 			$job
 		}
 		'method:PopAndRun' = {
-			$job = $this.Pop()
 			$OriginalPref = $ProgressPreference # Default is 'Continue'
 			$ProgressPreference = 'SilentlyContinue'
-			$job.Invoke()
+			$this.Pop().Invoke()
 			$ProgressPreference = $OriginalPref
 		}
 	}
@@ -66,21 +71,21 @@ $EshellUI = ValueEx @{
 		Get-Content "$($this.Sources.Path)/data/vars/$FileName.txt" -ErrorAction Ignore
 	}
 	'method:SaveVariable' = {
-		param($Value, $FileName)
-		if((-not $Value) -or ($this.LoadVariable($FileName) -eq $Value)) { return }
-		$Value | Set-Content "$($this.Sources.Path)/data/vars/$FileName.txt" -NoNewline
+		param($Value,$FileName)
+		if ((-not $Value) -or ($this.LoadVariable($FileName) -eq $Value)) { return }
+		Set-Content "$($this.Sources.Path)/data/vars/$FileName.txt" $Value -NoNewline
 	}
 	'method:SaveVariables' = {
 		$this.OtherData.VariableSaveList.GetEnumerator() | ForEach-Object {
 			$Value = IndexEx $this $_.Value
 			$this.SaveVariable($Value, $_.Name)
-		}
+		} | Out-Null
 	}
 	'method:LoadVariables' = {
 		$this.OtherData.VariableSaveList.GetEnumerator() | ForEach-Object {
 			$Value = $this.LoadVariable($_.Name)
 			if ($Value) { IndexEx $this $_.Value -Set $Value }
-		}
+		} | Out-Null
 		$this.State.VariablesLoaded = $true
 	}
 	'method:Start' = {
@@ -205,17 +210,21 @@ $EshellUI = ValueEx @{
 	}
 	'method:RunFromScript' = {
 		param($Invocation)
-		try{
+		try {
 			if (-not $this.State.Started) {
 				$this.Init($Invocation)
 				$this.LoadVariables()
 				$this.Start()
+				$StartedInThisCall = $true
 			}
 			$global:EshellUI ??= $this
-			if ($this.GetFromOf($Invocation).FileExplorer) {
+			if ($this.GetMyFrom($Invocation).FileExplorer) {
 				# 该代码由用户点击脚本执行 我们需要启动repl而不是退出
 				Write-Warning 'Running esh in self-hosted REPL mode.'
 				$this.Repl($true)
+			}
+			elseif (-not $StartedInThisCall) {
+				Write-Warning "esh is already running.`nIf you want to run a nested esh, use `n`t'`$EshellUI.Repl()'`nor`n`t'`$Host.EnterNestedPrompt()'`ninstead.`nor use 'esh' to start a new esh."
 			}
 		}
 		catch {
