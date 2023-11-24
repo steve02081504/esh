@@ -30,6 +30,8 @@ Remove-Item $ParentPath/my-powershell-profile-master -Force -ErrorAction Silentl
 Remove-Variable @('PwshProFiles','ParentPath')
 
 ```
+![loading preview](https://github.com/steve02081504/my-powershell-profile/assets/31927825/c7ba3f3f-cdb2-4b93-8fdc-2f5901e0ce12)
+
 
 如果你正在使用它，你可以这样更新：
 
@@ -63,11 +65,11 @@ ukagaka提示符支持
 
 ### 命令
 
-rm、ls、cd、mv等常见文件操作命令支持linux和powershell两种风格调用  
+rm、ls、cd、mv等常见文件操作命令支持linux和powershell两种风格调用（需要将msys2的bin添加到path）  
 ![图片](https://github.com/steve02081504/my-powershell-profile/assets/31927825/fdf5e98a-5532-4318-9a81-c5337c6d323a)
 
 linux路径支持（包括补全和索引command）  
-![图片](https://github.com/steve02081504/my-powershell-profile/assets/31927825/cedc3d38-de89-4c9e-aa97-4bd5fb83dff5)
+![图片](https://github.com/steve02081504/my-powershell-profile/assets/31927825/da57f8b3-59cc-461c-89c7-801951038245)
 
 自动检索AppData
 ![图片](https://github.com/steve02081504/my-powershell-profile/assets/31927825/08eeaea8-5050-4378-91a2-45713b4b6915)

@@ -1,5 +1,24 @@
 ﻿$EshellUI.BackgroundLoadingJobs.AddRange(@(
 	{
+		Update-FormatData -PrependPath "$($EshellUI.Sources.Path)/data/formatxml/ls.bare.format.ps1xml"
+		if ($Host.UI.SupportsVirtualTerminal) {
+			# https://github.com/ryanoasis/nerd-fonts/releases/latest/download/FiraCode.zip
+			if (-not (Get-Module -ListAvailable Terminal-Icons)) {
+				Install-Module Terminal-Icons -Repository PSGallery -Force
+			}
+			Import-Module Terminal-Icons
+			Update-FormatData -PrependPath "$($EshellUI.Sources.Path)/data/formatxml/ls.Terminal-Icons.format.ps1xml"
+		}
+	}
+	{
+		if (Test-Command git) {
+			if (-not (Get-Module -ListAvailable posh-git)) {
+				Install-Module posh-git -Force
+			}
+			Import-Module posh-git
+		}
+	}
+	{
 		#set thefuck as alias 'fk'
 		if (Test-Command thefuck) {
 			try {
@@ -10,20 +29,11 @@
 		}
 	}
 	{
-		if ($Host.UI.SupportsVirtualTerminal) {
-			# https://github.com/ryanoasis/nerd-fonts/releases/latest/download/FiraCode.zip
-			if (-not (Get-Module -ListAvailable Terminal-Icons)) {
-				Install-Module Terminal-Icons -Repository PSGallery -Force
+		if (Test-Command npm) {
+			if (-not (Get-Module -ListAvailable npm-completion)) {
+				Install-Module npm-completion -Force
 			}
-			Import-Module Terminal-Icons
-		}
-	}
-	{
-		if (Test-Command git) {
-			if (-not (Get-Module -ListAvailable posh-git)) {
-				Install-Module posh-git -Force
-			}
-			Import-Module posh-git
+			Import-Module npm-completion
 		}
 	}
 	{
@@ -47,14 +57,6 @@
 			#take TabExpansion function to global
 			Rename-Item function:TabExpansion global:TabExpansion -Force
 			$EshellUI.OtherData.ReloadSafeVariables.vcpkgFunctionExported = $true
-		}
-	}
-	{
-		if (Test-Command npm) {
-			if (-not (Get-Module -ListAvailable npm-completion)) {
-				Install-Module npm-completion -Force
-			}
-			Import-Module npm-completion
 		}
 	}
 	{

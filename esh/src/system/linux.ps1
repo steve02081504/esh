@@ -85,10 +85,12 @@ function global:WindowsPathToLinuxPath {
 	if ($Path.StartsWith($EshellUI.MSYS.RootPath)) {
 		#则转换为linux路径
 		$Path = $Path.Substring($EshellUI.MSYS.RootPath.Length)
+		if(-not $Path){ $Path = '/' }
 	}
 	elseif ($Path.StartsWith($HOME)) {
 		$Path = "~" + $Path.Substring($HOME.Length)
 	}
+	elseif ($Path.Length -lt 2) {}
 	elseif ($Path.Substring(1,1) -eq ":") {
 		#否则根据盘符转换
 		$DriveLetter = $Path.Substring(0,1)

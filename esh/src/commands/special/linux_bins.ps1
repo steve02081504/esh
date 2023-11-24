@@ -113,48 +113,8 @@ function global:cd {
 			elseif ($arg -eq "-@") {
 				#-@的意思是显示扩展属性，我们直接不支持这个功能
 			}
-			elseif ($arg -eq "--help") {
-				@"
-cd: cd [-L|[-P [-e]] [-@]] [dir]
-    Change the shell working directory.
-
-    Change the current directory to DIR.  The default DIR is the value of the
-    HOME shell variable. If DIR is "-", it is converted to `$OLDPWD.
-
-    The variable CDPATH defines the search path for the directory containing
-    DIR.  Alternative directory names in CDPATH are separated by a colon (:).
-    A null directory name is the same as the current directory.  If DIR begins
-    with a slash (/), then CDPATH is not used.
-
-    If the directory is not found, and the shell option ``cdable_vars' is set,
-    the word is assumed to be  a variable name.  If that variable has a value,
-    its value is used for DIR.
-
-    Options:
-      -L        force symbolic links to be followed: resolve symbolic
-                links in DIR after processing instances of ``..'
-      -P        use the physical directory structure without following
-                symbolic links: resolve symbolic links in DIR before
-                processing instances of ``..'
-      -e        if the -P option is supplied, and the current working
-                directory cannot be determined successfully, exit with
-                a non-zero status
-      -@        on systems that support it, present a file with extended
-                attributes as a directory containing the file attributes
-
-    The default is to follow symbolic links, as if ``-L' were specified.
-    ``..' is processed by removing the immediately previous pathname component
-    back to a slash or the beginning of DIR.
-
-    Exit Status:
-    Returns 0 if the directory is changed, and if `$PWD is set successfully when
-    -P is used; non-zero otherwise.
-
-"@
-				return
-			}
 			else {
-				Write-Host "bash: cd: ${arg}: invalid option`ncd: usage: cd [-L|[-P [-e]] [-@]] [dir]"
+				bash -c "cd $Path $RemainingArguments"
 				return
 			}
 		}
@@ -187,13 +147,16 @@ function global:ls {
 		break
 	}
 	[string[]]$RemainingArguments = @($RemainingArguments)
+	if (-not "$RemainingArguments") {
+		$RemainingArguments = @()
+	}
 	#若path是linux路径
 	if (IsLinuxPath $Path) {
 		#则转换为windows路径
 		$Path = LinuxPathToWindowsPath $Path
 	}
 	$IsLinuxBin = $false
-	if ($null -eq $RemainingArguments) {
+	if ($RemainingArguments.Length -eq 0) {
 		#若RemainingArguments是空的
 		#则调用Get-ChildItem
 		if ($Path.Length -eq 0) {
@@ -274,6 +237,9 @@ function global:rm {
 		break
 	}
 	[string[]]$RemainingArguments = @($RemainingArguments)
+	if (-not "$RemainingArguments") {
+		$RemainingArguments = @()
+	}
 	#若path是linux路径
 	if (IsLinuxPath $Path) {
 		#则转换为windows路径
@@ -284,7 +250,7 @@ function global:rm {
 		rm.exe $RemainingArguments
 		return
 	}
-	if ($null -eq $RemainingArguments) {
+	if ($RemainingArguments.Length -eq 0) {
 		#若RemainingArguments是空的
 		#则调用Remove-Item
 		Remove-Item $Path
@@ -363,6 +329,9 @@ function global:mv {
 		break
 	}
 	[string[]]$RemainingArguments = @($RemainingArguments)
+	if (-not "$RemainingArguments") {
+		$RemainingArguments = @()
+	}
 	#若path是linux路径
 	if (IsLinuxPath $Path) {
 		#则转换为windows路径
@@ -377,7 +346,7 @@ function global:mv {
 		mv.exe @args
 		return
 	}
-	if ($null -eq $RemainingArguments) {
+	if ($RemainingArguments.Length -eq 0) {
 		#若RemainingArguments是空的
 		#则调用Move-Item
 		Move-Item $Path -Destination $Destination
@@ -456,6 +425,9 @@ function global:cp {
 		break
 	}
 	[string[]]$RemainingArguments = @($RemainingArguments)
+	if (-not "$RemainingArguments") {
+		$RemainingArguments = @()
+	}
 	#若path是linux路径
 	if (IsLinuxPath $Path) {
 		#则转换为windows路径
@@ -470,7 +442,7 @@ function global:cp {
 		cp.exe @args
 		return
 	}
-	if ($null -eq $RemainingArguments) {
+	if ($RemainingArguments.Length -eq 0) {
 		#若RemainingArguments是空的
 		#则调用Copy-Item
 		Copy-Item $Path -Destination $Destination
@@ -534,6 +506,9 @@ function global:mkdir {
 		break
 	}
 	[string[]]$RemainingArguments = @($RemainingArguments)
+	if (-not "$RemainingArguments") {
+		$RemainingArguments = @()
+	}
 	#若path是linux路径
 	if (IsLinuxPath $Path) {
 		#则转换为windows路径
@@ -544,7 +519,7 @@ function global:mkdir {
 		mkdir.exe @args
 		return
 	}
-	if ($null -eq $RemainingArguments) {
+	if ($RemainingArguments.Length -eq 0) {
 		#若RemainingArguments是空的
 		#则调用New-Item
 		New-Item $Path -ItemType Directory
@@ -608,6 +583,9 @@ function global:touch {
 		break
 	}
 	[string[]]$RemainingArguments = @($RemainingArguments)
+	if (-not "$RemainingArguments") {
+		$RemainingArguments = @()
+	}
 	#若path是linux路径
 	if (IsLinuxPath $Path) {
 		#则转换为windows路径
@@ -618,7 +596,7 @@ function global:touch {
 		touch.exe @args
 		return
 	}
-	if ($null -eq $RemainingArguments) {
+	if ($RemainingArguments.Length -eq 0) {
 		#若RemainingArguments是空的
 		#则调用New-Item
 		New-Item $Path -ItemType File
@@ -686,6 +664,9 @@ function global:cat {
 		break
 	}
 	[string[]]$RemainingArguments = @($RemainingArguments)
+	if (-not "$RemainingArguments") {
+		$RemainingArguments = @()
+	}
 	#若path是linux路径
 	if (IsLinuxPath $Path) {
 		#则转换为windows路径
@@ -696,7 +677,7 @@ function global:cat {
 		cat.exe @args
 		return
 	}
-	if ($null -eq $RemainingArguments) {
+	if ($RemainingArguments.Length -eq 0) {
 		#若RemainingArguments是空的
 		#则调用Get-Content
 		Get-Content $Path
