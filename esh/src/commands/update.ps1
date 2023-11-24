@@ -6,6 +6,19 @@
 	}
 	catch {}
 }
+
+function global:Update-gcc-Kawaii {
+	if (-not (Test-PathEx /usr/share/locale/zh_CN/LC_MESSAGES/gcc.mo.bak)){
+		Write-Information "the original gcc.mo file is now backed up to gcc.mo.bak"
+		mv /usr/share/locale/zh_CN/LC_MESSAGES/gcc.mo /usr/share/locale/zh_CN/LC_MESSAGES/gcc.mo.bak
+	}
+	$espath = $EshellUI.Sources.Path
+	Invoke-WebRequest 'https://github.com/Bill-Haku/kawaii-gcc/raw/main/gcc-zh.po' -OutFile "$espath/data/gcc-zh.po"
+	msgfmt "$espath/data/gcc-zh.po" -o /usr/share/locale/zh_CN/LC_MESSAGES/gcc.mo
+	Remove-Item "$espath/data/gcc-zh.po" -Force
+	gcc
+}
+
 function global:Update-EShell {
 	Update-SAO-lib
 	$espath = $EshellUI.Sources.Path
@@ -143,5 +156,9 @@ function global:Update-All-Paks {
 	if (Test-Command gh) {
 		Update-HEAD 'Github CLI Extensions'
 		gh extension upgrade --all
+	}
+	if (Test-PathEx /usr/share/locale/zh_CN/LC_MESSAGES/gcc.mo.bak) {
+		Update-HEAD 'gcc Kawaii'
+		Update-gcc-Kawaii
 	}
 }

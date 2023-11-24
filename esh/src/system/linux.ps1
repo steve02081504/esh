@@ -16,7 +16,17 @@ if (-not $EshellUI.MSYS.RootPath -or -not (Test-Path $EshellUI.MSYS.RootPath)) {
 }
 
 if (Test-Command locale) {
-	$env:LANG=$env:LANGUAGE=$env:LC_ALL=$(locale -uU)
+	$env:LANG ??= $env:LANGUAGE ??= $env:LC_ALL ??= $(locale -uU)
+}
+
+function global:Test-PathEx {
+	param(
+		[string]$Path
+	)
+	if ($Path.StartsWith("/") -or $Path.StartsWith("~")) {
+		$Path = LinuxPathToWindowsPath $Path
+	}
+	return Test-Path $Path
 }
 
 function global:IsLinuxPath {
