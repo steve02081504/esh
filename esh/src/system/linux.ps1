@@ -15,6 +15,10 @@ if (-not $EshellUI.MSYS.RootPath -or -not (Test-Path $EshellUI.MSYS.RootPath)) {
 	}
 }
 
+if (Test-Command locale) {
+	$env:LANG=$env:LANGUAGE=$env:LC_ALL=$(locale -uU)
+}
+
 function global:IsLinuxPath {
 	param(
 		[string]$Path
