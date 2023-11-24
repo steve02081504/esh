@@ -89,6 +89,10 @@ $EshellUI = ValueEx @{
 		$this.State.VariablesLoaded = $true
 	}
 	'method:Start' = {
+		if ($this.State.Started) {
+			Write-Error 'esh is already started.'
+			return
+		}
 		$this.OtherData.BeforeEshLoaded = @{
 			FunctionList = Get-ChildItem function:\
 			VariableList = Get-ChildItem variable:\
@@ -99,15 +103,18 @@ $EshellUI = ValueEx @{
 			EnterHandler = (Get-PSReadLineKeyHandler Enter).Function
 		}
 		#注册事件以在退出时保存数据
-		Register-EngineEvent PowerShell.Exiting -Action {
+		Register-EngineEvent PowerShell.Exiting -SupportEvent -Action {
 			$EshellUI.SaveVariables()
-		} | Out-Null
+		}
 		#注册事件以在空闲时执行后台任务
-		Register-EngineEvent PowerShell.OnIdle -Action {
+		Register-EngineEvent PowerShell.OnIdle -SupportEvent -Action {
 			if ($EshellUI.BackgroundLoadingJobs.Count) {
 				$EshellUI.BackgroundLoadingJobs.PopAndRun()
 			}
-		} | Out-Null
+		}
+		$EventList = Get-EventSubscriber -Force
+		$this.OtherData.ExitingEvent = $EventList[$EventList.Count-2]
+		$this.OtherData.IdleEvent = $EventList[$EventList.Count-1]
 
 		. $PSScriptRoot/system/base.ps1
 
@@ -157,23 +164,22 @@ $EshellUI = ValueEx @{
 		}
 	}
 	'method:Remove' = {
+		if (-not $this.State.Started) {
+			Write-Error 'esh is not started.'
+			return
+		}
 		$this.SaveVariables()
 		$function:prompt = $this.OtherData.BeforeEshLoaded.promptBackup
-		Unregister-Event PowerShell.OnIdle
-		Unregister-Event PowerShell.Exiting
-		$this.ProvidedFunctions() | ForEach-Object {
-			Remove-Item function:\$($_.Name)
-		}
-		$this.ProvidedVariables() | ForEach-Object {
-			Remove-Item variable:\$($_.Name)
-		}
-		$this.ProvidedAliases() | ForEach-Object {
-			Remove-Item alias:\$($_.Name)
-		}
+		Unregister-Event -SubscriptionId $this.OtherData.ExitingEvent.SubscriptionId
+		Unregister-Event -SubscriptionId $this.OtherData.IdleEvent.SubscriptionId
+		$this.ProvidedFunctions() | ForEach-Object { Remove-Item function:\$($_.Name) }
+		$this.ProvidedVariables() | ForEach-Object { Remove-Item variable:\$($_.Name) }
+		$this.ProvidedAliases() | ForEach-Object { Remove-Item alias:\$($_.Name) }
 		Remove-PSReadLineKeyHandler Tab
 		Set-PSReadLineKeyHandler Tab $this.OtherData.BeforeEshLoaded.TabHandler
 		Remove-PSReadLineKeyHandler Enter
 		Set-PSReadLineKeyHandler Enter $this.OtherData.BeforeEshLoaded.EnterHandler
+		$this.State.Started = $false
 	}
 	'method:Repl' = {
 		param([switch]$NotEnterNestedPrompt = $false)
