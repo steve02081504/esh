@@ -64,8 +64,8 @@ function global:sudo {
 			$ShadowHandled=($Shadow.ToCharArray() | ForEach-Object {
 				if($Width -eq 0) {
 					$Width = [Math]::Max([Math]::Floor(
-						[System.Windows.Forms.TextRenderer]::MeasureText($_, $Font).Width
-					/128)-1,0)
+						[System.Windows.Forms.TextRenderer]::MeasureText($_, $Font).Width/
+					128)-1,0)
 				}
 				elseif($_ -eq $LastChar) { $Width--;return }
 				else{ $UseOriginal = $true }

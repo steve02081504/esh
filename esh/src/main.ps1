@@ -11,7 +11,8 @@ $EshellUI = ValueEx @{
 	}
 	Im = @{
 		Sudo = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]“Administrator”)
-		VSCodeExtension = [bool]($psEditor)
+		VSCodeExtension = [bool]($psEditor) -and ($Host.Name -eq 'Visual Studio Code Host')
+		Editor = [bool]($psEditor)
 		WindowsPowerShell = (Split-Path $(Split-Path $PROFILE) -Leaf) -eq 'WindowsPowerShell'
 		ISE = [bool]($psISE)
 		FirstLoading = $EshellUI -eq $LastExitCode
