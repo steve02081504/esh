@@ -1,4 +1,4 @@
-. $PSScriptRoot/../../esh/main.ps1
+. $PSScriptRoot/../../main.ps1
 
 try{
 	$EshellUI.Init($MyInvocation)

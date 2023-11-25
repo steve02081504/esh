@@ -22,18 +22,17 @@ function global:Update-gcc-Kawaii {
 function global:Update-EShell {
 	Update-SAO-lib
 	$espath = $EshellUI.Sources.Path
+	$praentpath = Split-Path $espath
 	$datapath = "$espath/data"
 	try {
 		#下载最新的EShell
-		Invoke-WebRequest 'https://github.com/steve02081504/my-powershell-profile/archive/refs/heads/master.zip' -OutFile "$datapath/master.zip"
-		#解压缩my-powershell-profile-master中的src文件夹到$dataPath
-		Expand-Archive "$datapath/master.zip" "$datapath" -Force
+		Invoke-WebRequest 'https://github.com/steve02081504/esh/archive/refs/heads/master.zip' -OutFile "$datapath/master.zip"
 		#删除旧的src以确保干净
 		Remove-Item "$espath/src" -Recurse -Force
 		#更新文件
-		Copy-Item "$datapath/my-powershell-profile-master/esh" "$espath/.." -Recurse -Force
-		#删除my-powershell-profile-master
-		Remove-Item "$datapath/my-powershell-profile-master" -Recurse -Force
+		Rename-Item "$espath" "$praentpath/esh-master"
+		Expand-Archive "$praentpath/esh-master/data/master.zip" "$praentpath" -Force
+		Rename-Item "$praentpath/esh-master" "$espath"
 		#删除压缩包
 		Remove-Item "$datapath/master.zip" -Force
 		#重载EShell
