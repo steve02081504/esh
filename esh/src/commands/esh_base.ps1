@@ -4,8 +4,8 @@
 #设定别名esh
 Set-Alias esh EShell -Scope global
 
-# TheSudoShadow函数用于将管理员窗口的输出保存到文件中以便在非管理员窗口中显示
-function global:TheSudoShadow {
+# SudoShadow用于将管理员窗口的输出保存到文件中以便在非管理员窗口中显示
+function global:__SudoShadow__ {
 	param(
 		$Command,
 		$UUID=$(New-Guid).Guid
@@ -42,7 +42,7 @@ function global:sudo {
 		}
 		# Otherwise, run the command as an admin
 		$UUID=$(New-Guid).Guid
-		$ShadowCommand = "TheSudoShadow -UUID '$UUID' -Command '$(pwsh_args_convert $RemainingArguments)'"
+		$ShadowCommand = "__SudoShadow__ -UUID '$UUID' -Command '$(pwsh_args_convert $RemainingArguments)'"
 		if (Test-Command wt.exe) {
 			$Arguments = @('pwsh','-Command', $ShadowCommand)
 			$Arguments = cmd_args_convert $Arguments
@@ -53,20 +53,31 @@ function global:sudo {
 			$Arguments = cmd_args_convert $Arguments
 			Start-Process -Wait -FilePath 'pwsh.exe' -ArgumentList "$pwshArguments $Arguments" -Verb runas
 		}
-		$shadow=Get-Content "$env:Temp/sudo_shadows/$UUID.txt"
-		Remove-Item "$env:Temp/sudo_shadows/$UUID.txt"
-		$shadow = $shadow | Select-Object -Skip 4 -SkipLast 4
-		#由于Start-Transcript会将宽字符重复写入，所以对于每一个字符在$shadow中进行渲染以获取其宽度，去除多余的字符
-		$shadow = $shadow -join "`n"
-		$Font = New-Object System.Drawing.Font('cascadia mono', 128)
-		$Width = 0
-		($shadow.ToCharArray() | ForEach-Object {
-			if($Width -eq 0) {
-				$Width = [Math]::Max([Math]::Floor([System.Windows.Forms.TextRenderer]::MeasureText($_, $Font).Width/128)-1,0)
+		try {
+			$Shadow=Get-Content "$env:Temp/sudo_shadows/$UUID.txt"
+			Remove-Item "$env:Temp/sudo_shadows/$UUID.txt"
+			$Shadow = $Shadow | Select-Object -Skip 4 -SkipLast 4
+			#由于Start-Transcript会将宽字符重复写入，所以对于每一个字符在$Shadow中进行渲染以获取其宽度，去除多余的字符
+			$Shadow = $Shadow -join "`n"
+			$Font = New-Object System.Drawing.Font('cascadia mono', 128)
+			$Width = 0
+			$ShadowHandled=($Shadow.ToCharArray() | ForEach-Object {
+				if($Width -eq 0) {
+					$Width = [Math]::Max([Math]::Floor(
+						[System.Windows.Forms.TextRenderer]::MeasureText($_, $Font).Width
+					/128)-1,0)
+				}
+				elseif($_ -eq $LastChar) { $Width--;return }
+				else{ $UseOriginal = $true }
+				$LastChar = $_
 				$_
-			}
-			else { $Width-- }
-		}) -join '' | Write-Host
+			}) -join ''
+			if($UseOriginal) { $ShadowHandled = $Shadow }
+			Write-Host $ShadowHandled
+		}
+		catch {
+			Write-Warning "Failed to get sudo shadow."
+		}
 	}
 }
 function global:mklink {
