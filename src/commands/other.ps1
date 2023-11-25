@@ -1,4 +1,61 @@
-﻿function global:clear-emptys {
+﻿function global:mklink {
+	param(
+		[Parameter(ValueFromRemainingArguments = $true)]
+		[string[]]$RemainingArguments
+	)
+	#对于每个参数
+	$RemainingArguments = $RemainingArguments | ForEach-Object {
+		#若参数长度不是2且是linux路径
+		if (($_.Length -ne 2) -and (IsLinuxPath $_)) {
+			#转换为windows路径
+			LinuxPathToWindowsPath $_
+		}
+		else {
+			$_
+		}
+	}
+	#调用cmd的mklink
+	. cmd /c mklink $RemainingArguments
+}
+function global:reboot {
+	#重启
+	shutdown.exe /r /t 0
+}
+function global:shutdown {
+	param(
+		[Parameter(ValueFromRemainingArguments = $true)]
+		[string[]]$RemainingArguments
+	)
+	if ($RemainingArguments.Length -eq 0) {
+		#默认为立即关机
+		shutdown.exe /s /t 0
+	}
+	else {
+		#关机
+		shutdown.exe $RemainingArguments
+	}
+}
+Set-Alias poweroff shutdown -Scope global
+
+function global:poweron {
+	Write-Host 'This computer is already powered on.'
+}
+function global:power {
+	param(
+		#off / on
+		[ValidateSet('off','on')]
+		[string]$action
+	)
+	switch ($action) {
+		'off' { poweroff }
+		'on' { poweron }
+		default {
+			Write-Host "I'm the storm that's $($VirtualTerminal.Styles.Blink)approaching!!!!!!!!!!!!!!!!!!!!`nApproaching!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!$($VirtualTerminal.Styles.NoBlink)"
+		}
+	}
+}
+
+function global:clear-emptys {
 	param(
 		[switch]$recursive,
 		[Parameter(ValueFromRemainingArguments = $true)]

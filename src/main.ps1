@@ -16,6 +16,7 @@ $EshellUI = ValueEx @{
 		WindowsPowerShell = (Split-Path $(Split-Path $PROFILE) -Leaf) -eq 'WindowsPowerShell'
 		ISE = [bool]($psISE)
 		FirstLoading = $EshellUI -eq $LastExitCode
+		WindowsTerminal = [bool]$env:WT_SESSION
 		InScope = $EshellUI -ne $global:EshellUI
 	}
 	'method:GetMyFrom' = {

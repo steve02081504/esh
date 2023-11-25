@@ -11,6 +11,12 @@ $EshellUI.Logo = ValueEx @{
 		if ($EshellUI.Im.VSCodeExtension) {
 			Write-Host -NoNewline "$($VirtualTerminal.Colors.Magenta) For $($VirtualTerminal.Styles.Italic)VSCode PowerShell Extension $($VirtualTerminal.Styles.NoItalic)v$($host.Version.ToString())"
 		}
+		<#elseif ($EshellUI.Im.WindowsTerminal) {
+			function Get-WindowsTerminalVersion {
+				[regex]::match((Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\wt.exe").Path, "_(.*?)_").Groups[1].Value
+			}
+			Write-Host -NoNewline "$($VirtualTerminal.Colors.Magenta) For $($VirtualTerminal.Styles.Italic)Windows Terminal $($VirtualTerminal.Styles.NoItalic)v$(Get-WindowsTerminalVersion)"
+		}#>
 		Write-Host ""
 		Write-Host "$($VirtualTerminal.Styles.Italic)$($VirtualTerminal.Colors.BrightMagenta)(c)$($VirtualTerminal.Colors.Reset) E-tek Corporation.$($VirtualTerminal.Styles.NoItalic) $($VirtualTerminal.Styles.Underline)All rights reserved$($VirtualTerminal.Styles.NoUnderline)."
 

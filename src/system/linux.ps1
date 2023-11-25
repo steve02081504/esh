@@ -51,9 +51,9 @@ function global:LinuxPathToWindowsPath {
 		$Path = "~" + $Path.Substring(1)
 	}
 	#若path以/（单个字母）/开头，则对应windows盘符
-	if ($Path -match "^/([a-zA-Z])/") {
+	if (($Path -match "^/([a-zA-Z])/") -or ($Path -match "^/([a-zA-Z])$")) {
 		$DriveLetter = $Matches[1]
-		return Join-Path "${DriveLetter}:" $Path.Substring(3)
+		return Join-Path "${DriveLetter}:" $Path.Substring(2)
 	}
 	elseif ($Path.StartsWith("~")) {
 		$ResultPath = Join-Path $HOME $Path.Substring(1)
@@ -86,6 +86,10 @@ function global:WindowsPathToLinuxPath {
 		#则转换为linux路径
 		$Path = $Path.Substring($EshellUI.MSYS.RootPath.Length)
 		if(-not $Path){ $Path = '/' }
+		$Path = $Path.Replace("\","/")
+		if ($Path.StartsWith("/home/$env:UserName")) {
+			$Path = "~" + $Path.Substring(("/home/$env:UserName").Length)
+		}
 	}
 	elseif ($Path.StartsWith($HOME)) {
 		$Path = "~" + $Path.Substring($HOME.Length)

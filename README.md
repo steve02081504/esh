@@ -11,10 +11,13 @@
 - 视需要修改其他文件内容
 - 使用`add2profile.ps1`将esh添加到你的powershell配置文件中
 - 使用`run.ps1`启动esh
+- 考虑添加`esh/path`到你的环境变量中
 
 ## 快速开始
 
 将以下命令复制粘贴到powershell中以快速开始  
+这段脚本将会在你的powershell配置文件中添加esh并启动它  
+你可以跳过`add2profile.ps1`来避免对配置文件的修改  
 
 ```powershell
 $PwshProFiles = Split-Path $PROFILE
@@ -42,12 +45,28 @@ Update-Eshell
 
 这将清除`esh/src`文件夹和`esh/data/SAO-lib.txt`并重新下载最新的esh和SAO-lib
 
+## 分开esh和pwsh
+
+想要将esh和pwsh分开来进一步迷惑你的朋友吗？  
+参考[`/run.cmd`](./run.cmd)，使用`-NoExit -File`参数来指定pwsh的启动文件而避免将其加入到你的配置文件中  
+
+```cmd
+@echo off
+pwsh.exe %* -nologo -NoExit -File %~dp0\run.ps1
+@echo on
+
+```
+
+如果你已经将`esh/path`添加到了你的环境变量中，你可以直接在bash或cmd和pwsh中`esh`，或在windows terminal中`esh.cmd -WorkingDirectory ~`来启动esh  
+![图片](https://github.com/steve02081504/esh/assets/31927825/f017dd02-80bf-4d1e-9cbc-2ee28d43ede9)
+
 ## 功能预览  
 
-最低兼容PS7.2.15和Windows 6.1.7601（自动纠正编码设置）
+最低兼容PS7.2.15和Windows 6.1.7601（自动纠正编码设置）  
 ![图片](https://github.com/steve02081504/esh/assets/31927825/e87b0407-f874-4d33-9a04-bda6f8c1658c)
 
-支持VSCode的powershell扩展
+支持VSCode的powershell扩展  
+tips: 配置`Microsoft.VSCode_profile.ps1`可以让你**仅**在VSCode中自动加载esh，而不会影响到你的日常pwsh使用  
 ![图片](https://github.com/steve02081504/esh/assets/31927825/f32cdef8-a1fc-42f0-ad1b-64ad87f70a05)
 
 ### 提示符
