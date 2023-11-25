@@ -25,7 +25,7 @@
 	}
 	return ,$ValueExed
 }
-function IndexEx ($Value,$Index,[switch]$Set = $false,$ValueToSet) {
+function global:IndexEx ($Value,$Index,[switch]$Set = $false,$ValueToSet) {
 	if (-not $Index) { return ,$Value }
 	if ($Index.Contains('.')) {
 		while ($Index.Contains('.')) {

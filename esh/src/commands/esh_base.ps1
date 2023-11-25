@@ -4,7 +4,20 @@
 #设定别名esh
 Set-Alias esh EShell -Scope global
 
+# TheSudoShadow函数用于将管理员窗口的输出保存到文件中以便在非管理员窗口中显示
+function global:TheSudoShadow {
+	param(
+		$Command,
+		$UUID=$(New-Guid).Guid
+	)
+	$SudoShadowFile = "$env:Temp/sudo_shadows/$UUID.txt"
+	Start-Transcript -Path $SudoShadowFile -UseMinimalHeader | Out-Null
+	Invoke-Expression $Command
+	Stop-Transcript | Out-Null
+	Write-Host "Sudo shadow file was saved to $SudoShadowFile"
+}
 . "$($EshellUI.Sources.Path)/src/scripts/shell_args_convert.ps1"
+[void][System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms")
 function global:sudo {
 	param(
 		[Parameter(ValueFromRemainingArguments = $true)]
@@ -25,18 +38,35 @@ function global:sudo {
 	} else {
 		if ($EshellUI.Im.Sudo) {
 			Invoke-Expression "$RemainingArguments"
+			return
 		}
 		# Otherwise, run the command as an admin
-		elseif (Test-Command wt.exe) {
-			$Arguments = @('pwsh','-Command',$(pwsh_args_convert $RemainingArguments))
+		$UUID=$(New-Guid).Guid
+		$ShadowCommand = "TheSudoShadow -UUID '$UUID' -Command '$(pwsh_args_convert $RemainingArguments)'"
+		if (Test-Command wt.exe) {
+			$Arguments = @('pwsh','-Command', $ShadowCommand)
 			$Arguments = cmd_args_convert $Arguments
 			Start-Process -Wait -FilePath 'wt.exe' -ArgumentList $Arguments.Replace('"','\"') -Verb runas
 		}
 		else {
-			$Arguments = @('-Command',$(pwsh_args_convert $RemainingArguments))
+			$Arguments = @('-Command', $ShadowCommand)
 			$Arguments = cmd_args_convert $Arguments
 			Start-Process -Wait -FilePath 'pwsh.exe' -ArgumentList "$pwshArguments $Arguments" -Verb runas
 		}
+		$shadow=Get-Content "$env:Temp/sudo_shadows/$UUID.txt"
+		Remove-Item "$env:Temp/sudo_shadows/$UUID.txt"
+		$shadow = $shadow | Select-Object -Skip 4 -SkipLast 4
+		#由于Start-Transcript会将宽字符重复写入，所以对于每一个字符在$shadow中进行渲染以获取其宽度，去除多余的字符
+		$shadow = $shadow -join "`n"
+		$Font = New-Object System.Drawing.Font('cascadia mono', 128)
+		$Width = 0
+		($shadow.ToCharArray() | ForEach-Object {
+			if($Width -eq 0) {
+				$Width = [Math]::Max([Math]::Floor([System.Windows.Forms.TextRenderer]::MeasureText($_, $Font).Width/128)-1,0)
+				$_
+			}
+			else { $Width-- }
+		}) -join '' | Write-Host
 	}
 }
 function global:mklink {
@@ -76,7 +106,7 @@ function global:shutdown {
 		shutdown.exe $RemainingArguments
 	}
 }
-Set-Alias global:poweroff shutdown
+Set-Alias poweroff shutdown -Scope global
 
 function global:poweron {
 	Write-Host 'This computer is already powered on.'

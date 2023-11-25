@@ -115,6 +115,7 @@ $EshellUI = ValueEx @{
 		$EventList = Get-EventSubscriber -Force
 		$this.OtherData.ExitingEvent = $EventList[$EventList.Count-2]
 		$this.OtherData.IdleEvent = $EventList[$EventList.Count-1]
+		Remove-Variable EventList
 
 		. $PSScriptRoot/system/base.ps1
 
@@ -170,8 +171,8 @@ $EshellUI = ValueEx @{
 		}
 		$this.SaveVariables()
 		$function:prompt = $this.OtherData.BeforeEshLoaded.promptBackup
-		Unregister-Event -SubscriptionId $this.OtherData.ExitingEvent.SubscriptionId
-		Unregister-Event -SubscriptionId $this.OtherData.IdleEvent.SubscriptionId
+		Unregister-Event -SubscriptionId $this.OtherData.ExitingEvent.SubscriptionId -Force
+		Unregister-Event -SubscriptionId $this.OtherData.IdleEvent.SubscriptionId -Force
 		$this.ProvidedFunctions() | ForEach-Object { Remove-Item function:\$($_.Name) }
 		$this.ProvidedVariables() | ForEach-Object { Remove-Item variable:\$($_.Name) }
 		$this.ProvidedAliases() | ForEach-Object { Remove-Item alias:\$($_.Name) }

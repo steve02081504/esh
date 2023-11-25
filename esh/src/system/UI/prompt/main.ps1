@@ -1,6 +1,4 @@
-﻿. "$($EshellUI.Sources.Path)/src/scripts/minmax.ps1"
-
-$EshellUI.Prompt = ValueEx @{
+﻿$EshellUI.Prompt = ValueEx @{
 	Parent = $EshellUI
 	Builders = @{}
 	BuildMethods = ValueEx @{
@@ -9,7 +7,7 @@ $EshellUI.Prompt = ValueEx @{
 				[Parameter(Mandatory = $true)]
 				[string]$prompt_str
 			)
-			$LastLineIndex = Max $prompt_str.LastIndexOf('`n') 0
+			$LastLineIndex = [Math]::Max($prompt_str.LastIndexOf('`n'),0)
 			$LastLine = $prompt_str.Substring($LastLineIndex)
 			#如果$prompt_str最后一行长度大于$Host.UI.RawUI.WindowSize.Width/2则换行
 			if ($LastLine.Length -gt ($Host.UI.RawUI.WindowSize.Width / 2)) {
@@ -19,7 +17,7 @@ $EshellUI.Prompt = ValueEx @{
 		}
 		'method:AddBlock' = {
 			param($prompt_str,$block_str)
-			$LastLineIndex = Max $prompt_str.LastIndexOf('`n') 0
+			$LastLineIndex = [Math]::Max($prompt_str.LastIndexOf('`n'),0)
 			$LastLine = $prompt_str.Substring($LastLineIndex)
 			#如果$LastLine + $block_str长度大于$Host.UI.RawUI.WindowSize.Width则换行
 			if (($LastLine + $block_str).Length -gt $Host.UI.RawUI.WindowSize.Width) {
