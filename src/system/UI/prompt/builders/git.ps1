@@ -1,4 +1,4 @@
-﻿$EshellUI.Prompt.Builders['git'] = {
+$EshellUI.Prompt.Builders['git'] = {
 	param(
 		[Parameter(Mandatory = $true)]
 		[string]$prompt_str,

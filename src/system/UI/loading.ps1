@@ -1,4 +1,4 @@
-﻿if ($EshellUI.Im.VSCodeExtension -and (-not $EshellUI.OtherData.ReloadSafeVariables.VSCodeExtensionHostCleared)) {
+if ($EshellUI.Im.VSCodeExtension -and (-not $EshellUI.OtherData.ReloadSafeVariables.VSCodeExtensionHostCleared)) {
 	Clear-Host
 	$EshellUI.OtherData.ReloadSafeVariables.VSCodeExtensionHostCleared = $true
 }

@@ -1,4 +1,4 @@
-﻿function global:Install-Copilot {
+function global:Install-Copilot {
 	if (-not (Test-Command gh)) {
 		#github cli not found
 		if (Test-Command winget) {

@@ -1,4 +1,4 @@
-﻿function global:Get-Ukagaka-Description-File-HashTable {
+function global:Get-Ukagaka-Description-File-HashTable {
 	param(
 		[Parameter(Mandatory = $true)]
 		$Content

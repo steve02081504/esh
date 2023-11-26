@@ -1,4 +1,4 @@
-﻿$EshellUI.Prompt.Builders['npm'] = {
+$EshellUI.Prompt.Builders['npm'] = {
 	param(
 		[Parameter(Mandatory = $true)]
 		[string]$prompt_str,

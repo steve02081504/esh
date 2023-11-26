@@ -1,4 +1,4 @@
-﻿$EshellUI.BackgroundLoadingJobs.AddRange(@(
+$EshellUI.BackgroundLoadingJobs.AddRange(@(
 	{
 		Update-FormatData -PrependPath "$($EshellUI.Sources.Path)/data/formatxml/ls.bare.format.ps1xml"
 		if ($Host.UI.SupportsVirtualTerminal) {

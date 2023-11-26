@@ -1,4 +1,4 @@
-﻿${global:CHSCHT.oridata.words} = @{
+${global:CHSCHT.oridata.words} = @{
 	'窗棂' = '窗櫺';
 	'鼻梁' = '鼻樑';
 	'脊梁' = '脊樑';

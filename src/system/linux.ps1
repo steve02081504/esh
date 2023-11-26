@@ -1,4 +1,4 @@
-﻿#查找$EshellUI.MSYS.RootPath是否是可用的msys路径
+#查找$EshellUI.MSYS.RootPath是否是可用的msys路径
 if (-not $EshellUI.MSYS.RootPath -or -not (Test-Path $EshellUI.MSYS.RootPath)) {
 	#若不是，则遍历所有盘符
 	$DriveLetters = Get-PSDrive -PSProvider FileSystem | ForEach-Object { $_.Name }

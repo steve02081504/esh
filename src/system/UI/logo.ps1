@@ -1,4 +1,4 @@
-﻿. $PSScriptRoot/hints.ps1
+. $PSScriptRoot/hints.ps1
 $EshellUI.Logo = ValueEx @{
 	Parent = $EshellUI
 	'method:Print' = {

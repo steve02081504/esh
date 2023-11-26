@@ -1,4 +1,4 @@
-﻿function global:coffee { "
+function global:coffee { "
     ( (
      ) )
   .______.

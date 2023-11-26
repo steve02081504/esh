@@ -1,4 +1,4 @@
-﻿if (-not (Test-Command esh.cmd)) {
+if (-not (Test-Command esh.cmd)) {
 	function global:EShell {
 		pwsh -nologo $(if ($PSVersionTable.PSVersion -gt 7.3) { '-NoProfileLoadTime' })
 	}

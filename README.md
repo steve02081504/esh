@@ -7,11 +7,9 @@
 
 - 在windows terminal中将字体设置为[`FriaCode Nerd Font`](https://github.com/ryanoasis/nerd-fonts/releases/latest/download/FiraCode.zip)
 - 你或许想追加`-NoProfileLoadTime -nologo`到powershell启动参数中
+- 运行`install.ps1`或下方的快速开始命令
 - 修改`$EshellUI.MSYS.RootPath`为你的msys2安装路径并`$EshellUI.SaveVariables()`
 - 视需要修改其他文件内容
-- 使用`add2profile.ps1`将esh添加到你的powershell配置文件中
-- 使用`run.ps1`启动esh
-- 考虑添加`esh/path`到你的环境变量中
 
 ## 快速开始
 
@@ -21,9 +19,6 @@
 (Invoke-WebRequest https://github.com/steve02081504/esh/raw/master/install.ps1).Content | Invoke-Expression
 
 ```
-
-![loading preview](https://github.com/steve02081504/esh/assets/31927825/c7ba3f3f-cdb2-4b93-8fdc-2f5901e0ce12)
-
 
 如果你正在使用它，你可以这样更新：
 

@@ -1,4 +1,4 @@
-﻿if ($Host.UI.SupportsVirtualTerminal) {
+if ($Host.UI.SupportsVirtualTerminal) {
 	function Escape { [char]27 + '[' + $args }
 	$global:VirtualTerminal = @{
 		Escape = Escape

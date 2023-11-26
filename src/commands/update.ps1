@@ -1,4 +1,4 @@
-﻿function global:Update-SAO-lib {
+function global:Update-SAO-lib {
 	$espath = $EshellUI.Sources.Path
 	try {
 		#下载最新的SAO-lib

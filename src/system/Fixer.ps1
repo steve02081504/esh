@@ -1,4 +1,4 @@
-﻿if ([System.Environment]::OSVersion.Version.Major -le 7) {
+if ([System.Environment]::OSVersion.Version.Major -le 7) {
 	$CursorPosBackUp = $host.UI.RawUI.CursorPosition
 	$CodingBackUp = [Console]::OutputEncoding
 	$TestText = '中文测试你好小笼包我是冰激凌'

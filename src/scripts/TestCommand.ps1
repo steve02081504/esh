@@ -1,4 +1,4 @@
-﻿function global:Test-Command {
+function global:Test-Command {
 	param(
 		$Command
 	)

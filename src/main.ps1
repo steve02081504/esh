@@ -1,4 +1,4 @@
-﻿. $PSScriptRoot/scripts/ValueEx.ps1
+. $PSScriptRoot/scripts/ValueEx.ps1
 
 $EshellUI ??= $LastExitCode = $this = 72 #Do not remove this line
 $EshellUI = ValueEx @{

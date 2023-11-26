@@ -1,4 +1,4 @@
-﻿function global:ValueEx ($ValueAndMethods) {
+function global:ValueEx ($ValueAndMethods) {
 	if ($ValueAndMethods.__value__) {
 		if ($ValueAndMethods.__type__) {
 			$ValueExed = $ValueAndMethods.__type__($ValueAndMethods.__value__)

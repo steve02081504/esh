@@ -1,4 +1,4 @@
-﻿. $PSScriptRoot\CHT2CHS.map.ps1
+. $PSScriptRoot\CHT2CHS.map.ps1
 
 [hashtable]${global:CHT2CHS.data.words} = @{}
 [hashtable]${global:CHS2CHT.data.words} = @{}

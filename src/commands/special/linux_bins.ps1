@@ -1,4 +1,4 @@
-﻿#让我们升级cd来让它可以处理linux路径
+#让我们升级cd来让它可以处理linux路径
 while (Test-Path Alias:cd) {
 	Remove-Item Alias:cd
 }

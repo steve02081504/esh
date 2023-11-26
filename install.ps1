@@ -1,25 +1,23 @@
-﻿#!/usr/bin/env pwsh
+#!/usr/bin/env pwsh
+using namespace System.Management.Automation
+
 $profilesDir = Split-Path $PROFILE
 # 遍历环境变量
 $env:Path.Split(";") | ForEach-Object {
+	if ($_ -and (-not (Test-Path $_ -PathType Container))) {
+		Write-Warning "检测到无效的环境变量于$_，请考虑删除"
+		return
+	}
 	if ($_ -like "*[\\/]esh[\\/]path*") {
-		if(Test-Path $_ -PathType Container){
-			$eshDir = $_ -replace "[\\/]path[\\/]*$",''
-			$eshDirFromEnv = $true
-		}
-		else{
-			Write-Warning "检测到无效的esh环境变量于$_，请考虑删除"
-		}
+		$eshDir = $_ -replace "[\\/]path[\\/]*$", ''
+		$eshDirFromEnv = $true
 	}
 }
-if (-not $eshDir){
+if (-not $eshDir) {
 	$eshDir =
-	if(Test-Path $profilesDir/esh) {
-		 "$profilesDir/esh"
-	}
-	elseif(Test-Path $PWD/path/esh) {
-		$PWD
-	}
+	if (Test-Path $EshellUI.Sources.Path) { $EshellUI.Sources.Path }
+	elseif (Test-Path $profilesDir/esh) { "$profilesDir/esh" }
+	elseif (Test-Path $PWD/path/esh) { $PWD }
 }
 New-Item -ItemType Directory -Force -Path $profilesDir | Out-Null
 if (-not $eshDir) {
@@ -30,30 +28,32 @@ if (-not $eshDir) {
 	Remove-Item Eshell.zip -Force
 	Move-Item $profilesDir/esh-master $profilesDir/esh -Force
 	$eshDir = "$profilesDir/esh"
+	Invoke-WebRequest 'https://github.com/steve02081504/SAO-lib/raw/master/SAO-lib.txt' -OutFile "$eshDir/data/SAO-lib.txt"
 }
-else{
+else {
 	Write-Host "检测到已安装 Esh 于 $eshDir"
 }
-function Choice($caption, $message) {
+function YorN($message, [switch]$defaultN = $false) {
 	do {
-	    $response = $Host.UI.PromptForChoice($caption, $message, @('&Yes', '&No'), 1)
+		$response = $Host.UI.PromptForChoice("", $message, @('&Yes', '&No'), $(if($defaultN){1}else{0}))
 	} until ($response -ne -1)
 	$response -eq 0
 }
-if ((-not $eshDirFromEnv) -and (Choice("", "你想要安装 Eshell 到环境变量吗？"))) {
-	$env:Path += ";$profilesDir/esh/path"
-	$UserPath = [Environment]::GetEnvironmentVariable("Path", "User") + ";$profilesDir/esh/path"
+if ((-not $eshDirFromEnv) -and (YorN "要安装 Eshell 到环境变量吗？")) {
+	$env:Path += ";$eshDir/path"
+	$UserPath = [Environment]::GetEnvironmentVariable("Path", "User") + ";$eshDir/path"
 	[Environment]::SetEnvironmentVariable("Path", $UserPath, "User")
-	Write-Host "安装成功！`n你现在可以在任何地方使用 ``esh`` 或 ``EShell`` 命令了。"
+	Write-Host "安装成功！`n现在可以在任何地方使用 ``esh`` 或 ``EShell`` 命令了。"
+	$eshDirFromEnv = $true
 }
 $profilEshDir = $eshDir
 if ($profilEshDir -like "$profilesDir[\\/]?*") {
-	$profilEshDir = $profilEshDir -replace "^$($profilesDir -replace "\\","\\")[\\/]?",'$PSScriptRoot/'
+	$profilEshDir = $profilEshDir -replace "^$($profilesDir -replace "\\","\\")[\\/]?", '$PSScriptRoot/'
 }
 $startScript = ". $profilEshDir/run.ps1"
 $universalProfile = "$profilesDir/profile.ps1"
 function checkLoaded ($theProfile) {
-	(Get-Content $theProfile -ErrorAction Ignore) -ccontains $startScript
+	(Get-Content $theProfile -ErrorAction Ignore) -contains $startScript
 }
 $added = $false
 @(
@@ -66,7 +66,7 @@ $added = $false
 		$added = $true
 	}
 }
-if ((-not $added) -and (Choice("", "你想要添加 Eshell 到 PowerShell 配置文件吗？"))) {
+if ((-not $added) -and (YorN "要添加 Eshell 到 PowerShell 配置文件吗？" -defaultN:$true)) {
 	@(
 		$universalProfile
 		$profile
@@ -82,8 +82,53 @@ if ((-not $added) -and (Choice("", "你想要添加 Eshell 到 PowerShell 配置
 		Set-Content $universalProfile $startScript
 	}
 }
-if(-not $EshellUI) {
-	. $eshDir/run.ps1 -Invocation $MyInvocation
+$hasWT = [bool]$(Get-Command wt.exe -ErrorAction Ignore)
+if ($hasWT) {
+	$wtFragmentDir = "$env:LOCALAPPDATA\Microsoft\Windows Terminal\Fragments\esh"
+	$BaseWtProfile = @{
+		name = "Eshell"
+		icon = "ms-appx:///ProfileIcons/{0caa0dad-35be-5f56-a8ff-afceeeaa6101}.png"
+		commandline = "$(if(-not $eshDirFromEnv) { "$eshDir/path/" })esh.cmd -WorkingDirectory ~"
+		hidden = $false
+	}
+	$RootWtProfile = [PSSerializer]::Deserialize([PSSerializer]::Serialize($BaseWtProfile))
+	$RootWtProfile.name = "Eshell (Root)"
+	$RootWtProfile.elevate = $true
+	$wtFragment = @{
+		schema = "https://aka.ms/terminal-profiles-schema"
+		profiles = @( $BaseWtProfile, $RootWtProfile )
+	}
+	if ($PSVersionTable.PSVersion.Major -lt 6) {
+		$wtFragmentJson = ($wtFragment | ConvertTo-Json).Replace("`r`n", "`n")
+	}
+	else{
+		$wtFragmentJson = ($wtFragment | ConvertTo-Json -EnumsAsStrings).Replace("`r`n", "`n")
+	}
+	if(-not (Test-Path $wtFragmentDir/esh.json)) {}
+	elseif (Test-Path $wtFragmentDir/esh.json) {
+		if (-not (Compare-Object (Get-Content $wtFragmentDir/esh.json | ConvertFrom-Json) $wtFragment)) {
+			Set-Content $wtFragmentDir/esh.json $wtFragmentJson -NoNewline
+			Write-Warning "检测到旧的 Eshell Windows Terminal 配置文件，其已被更新。"
+		}
+	}
+	elseif(YorN "要添加 Eshell 到 Windows Terminal 吗？") {
+		New-Item -ItemType Directory -Force -Path $wtFragmentDir | Out-Null
+		Set-Content $wtFragmentDir/esh.json $wtFragmentJson -NoNewline
+	}
 }
-Remove-Variable @("profilesDir", "eshDir", "startScript", "universalProfile", "added", "profilEshDir", "eshDirFromEnv") -ErrorAction Ignore
-Remove-Item @("function:Choice", "function:checkLoaded", "function:Choice") -ErrorAction Ignore
+
+if ($PSVersionTable.PSVersion.Major -lt 6) {
+	if(-not (YorN "你需要知道：esh的运行需要PowerShell 6或以上")) {
+		Write-Host "爬。"
+	}
+}
+if ((-not $EshellUI) -and (YorN "要使用 Eshell 吗？")) {
+	if ($PSVersionTable.PSVersion.Major -lt 6) {
+		. $eshDir/run.cmd
+	}
+	else {
+		. $eshDir/run.ps1 -Invocation $MyInvocation
+	}
+}
+Remove-Variable @("profilesDir", "eshDir", "startScript", "universalProfile", "added", "wtFragmentJson", "profilEshDir", "eshDirFromEnv", "hasWT", "wtFragmentDir", "wtFragment", "UserPath", "BaseWtProfile", "RootWtProfile") -ErrorAction Ignore
+Remove-Item @("function:YorN", "function:checkLoaded") -ErrorAction Ignore

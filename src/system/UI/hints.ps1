@@ -1,4 +1,4 @@
-﻿$EshellUI.Hints = ValueEx @{
+$EshellUI.Hints = ValueEx @{
 	__type__ = [System.Collections.ArrayList]
 	'method:AddWithCommand' = {
 		param(

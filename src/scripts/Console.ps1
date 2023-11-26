@@ -1,4 +1,4 @@
-﻿# 导入Win32 API函数
+# 导入Win32 API函数
 Add-Type @"
 	using System;
 	using System.Runtime.InteropServices;

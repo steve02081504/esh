@@ -1,4 +1,4 @@
-﻿function global:mklink {
+function global:mklink {
 	param(
 		[Parameter(ValueFromRemainingArguments = $true)]
 		[string[]]$RemainingArguments

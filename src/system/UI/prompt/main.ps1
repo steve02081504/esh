@@ -1,4 +1,4 @@
-﻿$EshellUI.Prompt = ValueEx @{
+$EshellUI.Prompt = ValueEx @{
 	Parent = $EshellUI
 	Builders = @{}
 	BuildMethods = ValueEx @{

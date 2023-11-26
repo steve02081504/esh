@@ -1,4 +1,4 @@
-﻿function global:Install-apk {
+function global:Install-apk {
 	param(
 		[Parameter(Mandatory = $true)]
 		[string]$apkPath

@@ -1,4 +1,4 @@
-﻿function global:cmd_args_convert {
+function global:cmd_args_convert {
 	param(
 		$Arguments
 	)

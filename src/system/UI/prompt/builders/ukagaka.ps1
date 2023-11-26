@@ -1,4 +1,4 @@
-﻿. "$($EshellUI.Sources.Path)/src/scripts/Ukagaka.ps1"
+. "$($EshellUI.Sources.Path)/src/scripts/Ukagaka.ps1"
 $EshellUI.Prompt.Builders['ukagaka'] = {
 	param(
 		[Parameter(Mandatory = $true)]
