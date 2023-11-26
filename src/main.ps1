@@ -147,7 +147,7 @@ $EshellUI = ValueEx @{
 	'method:Reload' = {
 		$this.SaveVariables()
 		$this.Remove()
-		. "$($this.Sources.Path)/main.ps1"
+		. "$($this.Sources.Path)/src/main.ps1"
 		$EshellUI.LoadVariables()
 		$EshellUI.Start()
 	}

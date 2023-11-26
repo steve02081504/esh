@@ -15,7 +15,7 @@ $env:Path.Split(";") | ForEach-Object {
 }
 if (-not $eshDir) {
 	$eshDir =
-	if (Test-Path $EshellUI.Sources.Path) { $EshellUI.Sources.Path }
+	if ($EshellUI.Sources.Path -and (Test-Path $EshellUI.Sources.Path)) { $EshellUI.Sources.Path }
 	elseif (Test-Path $profilesDir/esh) { "$profilesDir/esh" }
 	elseif (Test-Path $PWD/path/esh) { $PWD }
 }
@@ -23,12 +23,19 @@ New-Item -ItemType Directory -Force -Path $profilesDir | Out-Null
 if (-not $eshDir) {
 	Remove-Item $profilesDir/esh -Confirm -ErrorAction Ignore -Recurse
 	Remove-Item $profilesDir/esh-master -Force -ErrorAction Ignore -Confirm:$false -Recurse
-	Invoke-WebRequest https://github.com/steve02081504/esh/archive/refs/heads/master.zip -OutFile Eshell.zip
+	try { Invoke-WebRequest https://github.com/steve02081504/esh/archive/refs/heads/master.zip -OutFile Eshell.zip }
+	catch {
+		Write-Host "下载错误 终止脚本"
+		exit 1
+	}
 	Expand-Archive Eshell.zip $profilesDir -Force
 	Remove-Item Eshell.zip -Force
 	Move-Item $profilesDir/esh-master $profilesDir/esh -Force
 	$eshDir = "$profilesDir/esh"
-	Invoke-WebRequest 'https://github.com/steve02081504/SAO-lib/raw/master/SAO-lib.txt' -OutFile "$eshDir/data/SAO-lib.txt"
+	try { Invoke-WebRequest 'https://github.com/steve02081504/SAO-lib/raw/master/SAO-lib.txt' -OutFile "$eshDir/data/SAO-lib.txt" }
+	catch {
+		Write-Host "啊哦 SAO-lib下载失败了`n这不会影响什么，不过你可以在Esh安装好后使用``Update-SAO-lib``来让Esh有机会显示更多骚话"
+	}
 }
 else {
 	Write-Host "检测到已安装 Esh 于 $eshDir"
