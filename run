@@ -33,3 +33,4 @@ if [[ -z "$command" ]]; then
 else
 	pwsh $parsed_args -nologo -Command ". $SCRIPT_DIR/run.ps1 ; & $command"
 fi
+exit $?

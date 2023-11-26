@@ -8,7 +8,7 @@ $env:Path.Split(";") | ForEach-Object {
 		Write-Warning "检测到无效的环境变量于$_，请考虑删除"
 		return
 	}
-	if ($_ -like "*[\\/]esh[\\/]path*") {
+	elseif ($_ -like "*[\\/]esh[\\/]path*") {
 		$eshDir = $_ -replace "[\\/]path[\\/]*$", ''
 		$eshDirFromEnv = $true
 	}
@@ -16,8 +16,8 @@ $env:Path.Split(";") | ForEach-Object {
 if (-not $eshDir) {
 	$eshDir =
 	if ($EshellUI.Sources.Path -and (Test-Path $EshellUI.Sources.Path)) { $EshellUI.Sources.Path }
+	elseif (Test-Path $PSScriptRoot/path/esh) { $PSScriptRoot }
 	elseif (Test-Path $profilesDir/esh) { "$profilesDir/esh" }
-	elseif (Test-Path $PWD/path/esh) { $PWD }
 }
 New-Item -ItemType Directory -Force -Path $profilesDir | Out-Null
 if (-not $eshDir) {
@@ -132,6 +132,7 @@ if ($PSVersionTable.PSVersion.Major -lt 6) {
 if ((-not $EshellUI) -and (YorN "要使用 Eshell 吗？")) {
 	if ($PSVersionTable.PSVersion.Major -lt 6) {
 		. $eshDir/run.cmd
+		[System.Environment]::Exit($LastExitCode)
 	}
 	else {
 		. $eshDir/run.ps1 -Invocation $MyInvocation
