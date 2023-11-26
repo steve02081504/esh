@@ -1,13 +1,13 @@
 # esh  
 
-原本只是个人配置文件来着 写着写着面向对象了 再写着写着成了一个方便安装的配置包  
+原本只是个人配置文件来着 写着写着面向对象了 再写着写着成了一个方便安装的配置包 再写着写着有点像一个基于另一个shell的shell了  
 究竟是为什么呢  
 
 ## 使用方法  
 
 - 在windows terminal中将字体设置为[`FriaCode Nerd Font`](https://github.com/ryanoasis/nerd-fonts/releases/latest/download/FiraCode.zip)
-- 你或许想追加`-NoProfileLoadTime -nologo`到powershell启动参数中
 - 运行`install.ps1`或下方的快速开始命令
+- 如果你把它加进了pwsh配置文件，你或许还想追加`-NoProfileLoadTime -nologo`到pwsh启动参数中
 - 修改`$EshellUI.MSYS.RootPath`为你的msys2安装路径并`$EshellUI.SaveVariables()`
 - 视需要修改其他文件内容
 
@@ -19,6 +19,8 @@
 (Invoke-WebRequest https://github.com/steve02081504/esh/raw/master/install.ps1).Content | Invoke-Expression
 
 ```
+
+![图片](https://github.com/steve02081504/esh/assets/31927825/39cdadc2-60e6-43f9-bcfc-ef5f973bd12d)
 
 如果你正在使用它，你可以这样更新：
 
@@ -32,16 +34,8 @@ Update-Eshell
 ## 分开esh和pwsh
 
 想要将esh和pwsh分开来进一步迷惑你的朋友吗？  
-参考[`/run.cmd`](./run.cmd)，使用`-NoExit -File`参数来指定pwsh的启动文件而避免将其加入到你的配置文件中  
-
-```cmd
-@echo off
-pwsh.exe %* -nologo -NoExit -File %~dp0\run.ps1
-@echo on
-
-```
-
-如果你已经将`esh/path`添加到了你的环境变量中，你可以直接在bash或cmd和pwsh中`esh`，或在windows terminal中`esh.cmd -WorkingDirectory ~`来启动esh  
+升级到esh `v0.0.0.5`以上来获取path子文件夹，然后将其添加到你的环境变量中！  
+如果你已经将`esh/path`添加到了你的环境变量中，你可以丢弃pwsh的profile中的esh加载，并直接在bash或cmd和pwsh中`esh`，或在windows terminal中`esh.cmd -WorkingDirectory ~`来启动esh  
 ![图片](https://github.com/steve02081504/esh/assets/31927825/f017dd02-80bf-4d1e-9cbc-2ee28d43ede9)
 
 ## 功能预览  
@@ -94,6 +88,75 @@ icacls superhavyrock /inheritance:r
 rm -rf superhavyrock
 ```
 
-![图片](https://github.com/steve02081504/esh/assets/31927825/b0b3a4ed-f6fd-446e-a65b-602399bd0abe)
+![图片](https://github.com/steve02081504/esh/assets/31927825/7f2f81a7-f48d-4b4b-a824-29a1aca8ce04)
+
+一键更新所有包管理器的所有软件包！
+
+![图片](https://github.com/steve02081504/esh/assets/31927825/55b75796-0745-4900-b596-d1f2e7decadb)
 
 由于我懒，`dirsync`等其他命令不做介绍，请自行查看`$EshellUI.ProvidedFunctions()`
+
+## Q&A
+
+### esh和pwsh的关系是？
+
+简单来说，鸿蒙和安卓的关系  
+esh是一个基于pwsh的由ps编写的一大堆脚本，你可以把它加入环境变量当作shell使用，它使用pwsh的语法和命令，但是它有自己的UI和一些特性  
+你也可以像这个项目本来的用途一样，将它作为pwsh的配置文件使用，这样你就可以让你的pwsh和esh一模一样了  
+
+### 为什么不基于bash？
+
+这个项目的原名是`my-powershell-profile`。  
+就只是我一开始在用pwsh，仅此而已。
+
+### 你为什么不用bash？
+
+语法反人类。
+
+### 你为什么不用zsh/fish/其他shell？
+
+没听过。
+
+### esh和VSCode的powershell扩展同时使用时PSReadLine会不停报错
+
+issue提过了 等修
+
+### 你为什么不用cmd？
+
+你玩原神吗？
+
+### 为什么esh固定显示`v1960.7.17`？这对你来说有什么意义吗？
+
+cooool就对了  
+意义是啥我也不知道
+
+### 这个项目的目的是什么？
+
+有句古话叫做“兵欲善其事，必先利其器”。  
+我想要一个更好的工作环境。
+
+### 这个shell不够严谨 整活内容太多了
+
+你说得对 关我啥事 我自己开心
+
+### 为什么你的代码这么烂
+
+糊屎 爽 能跑就行  
+有高见欢迎提交pr
+
+### E-tek是真实存在的公司吗？
+
+cooool就对了  
+我瞎写的 不过你如果查一下的话会发现这个公司是真的存在的 做牛肉  
+
+### esh和SAO-lib是什么关系？
+
+SAO-lib是一个公开的骚话库，esh使用它来随机骚话显示在logo下方  
+
+### 为什么你的骚话库里有这么多骚话？
+
+？
+
+### 你为什么不用linux而是用微软的技术栈？你是不是不喜欢开源？
+
+别笑 真有这种人
