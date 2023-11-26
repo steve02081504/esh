@@ -16,23 +16,12 @@
 ## 快速开始
 
 将以下命令复制粘贴到powershell中以快速开始  
-这段脚本将会在你的powershell配置文件中添加esh并启动它  
-你可以跳过`add2profile.ps1`来避免对配置文件的修改  
 
 ```powershell
-$PwshProFiles = Split-Path $PROFILE
-New-Item -ItemType Directory -Force -Path $PwshProFiles | Out-Null
-Remove-Item $PwshProFiles/esh -Confirm -ErrorAction Ignore -Recurse
-Remove-Item $PwshProFiles/esh-master -Force -ErrorAction Ignore -Confirm:$false -Recurse
-Invoke-WebRequest https://github.com/steve02081504/esh/archive/refs/heads/master.zip -OutFile Eshell.zip
-Expand-Archive Eshell.zip $PwshProFiles -Force
-Remove-Item Eshell.zip -Force
-Move-Item $PwshProFiles/esh-master $PwshProFiles/esh -Force
-& $PwshProFiles/esh/add2profile.ps1
-. $PwshProFiles/esh/run.ps1
-Remove-Variable PwshProFiles
+(Invoke-WebRequest https://github.com/steve02081504/esh/raw/master/install.ps1).Content | Invoke-Expression
 
 ```
+
 ![loading preview](https://github.com/steve02081504/esh/assets/31927825/c7ba3f3f-cdb2-4b93-8fdc-2f5901e0ce12)
 
 

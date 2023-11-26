@@ -125,7 +125,7 @@ $EshellUI = ValueEx @{
 		. $PSScriptRoot/system/UI/title.ps1
 		. $PSScriptRoot/system/UI/icon.ps1
 
-		. $PSScriptRoot/system/CodePageFixer.ps1
+		. $PSScriptRoot/system/Fixer.ps1
 		. $PSScriptRoot/system/linux.ps1
 
 		. $PSScriptRoot/system/UI/prompt/main.ps1

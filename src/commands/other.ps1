@@ -210,3 +210,17 @@ function global:code {
 		Write-Host "VS Code not found."
 	}
 }
+
+function global:Clear-UserPath {
+	$UserPath = [Environment]::GetEnvironmentVariable("Path", "User").Split(';')
+	$SystemPath = [Environment]::GetEnvironmentVariable("Path", "Machine").Split(';')
+	$UserPath.Split(';') | ForEach-Object {
+		if ($SystemPath -contains $_) {
+			$UserPath = $UserPath -ne $_
+			Write-Warning "已自用户变量中移除在系统变量中的路径$_"
+		}
+	} | Out-Null
+	$UserPath = $UserPath | Select-Object -Unique
+	$UserPath = $UserPath -join ';'
+	[Environment]::SetEnvironmentVariable("Path", $UserPath, "User")
+}

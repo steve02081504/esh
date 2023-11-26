@@ -11,4 +11,6 @@
 	TestAndSet $CodingBackUp
 	Write-Host $(' ' * $TestText.Length * 2)
 	$host.UI.RawUI.CursorPosition = $CursorPosBackUp
+	Remove-Variable @('CursorPosBackUp', 'CodingBackUp', 'TestText', 'TestAndSet')
+	Remove-Item function:TestAndSet
 }
