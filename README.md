@@ -16,7 +16,7 @@
 将以下命令复制粘贴到powershell中以快速开始  
 
 ```powershell
-(Invoke-WebRequest https://github.com/steve02081504/esh/raw/master/install.ps1).Content | Invoke-Expression
+{ (Invoke-WebRequest https://github.com/steve02081504/esh/raw/master/install.ps1).Content | Invoke-Expression }.Invoke()
 
 ```
 
@@ -45,7 +45,7 @@ Update-Eshell
 
 支持VSCode的powershell扩展  
 tips: 配置`Microsoft.VSCode_profile.ps1`可以让你**仅**在VSCode中自动加载esh，而不会影响到你的日常pwsh使用  
-![图片](https://github.com/steve02081504/esh/assets/31927825/f32cdef8-a1fc-42f0-ad1b-64ad87f70a05)
+![图片](https://github.com/steve02081504/esh/assets/31927825/8b51aa95-3e86-42ad-af2f-045c748d3937)
 
 ### 提示符
 

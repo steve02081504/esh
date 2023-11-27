@@ -1,6 +1,5 @@
 . $PSScriptRoot/scripts/ValueEx.ps1
 
-$EshellUI ??= $LastExitCode = $this = 72 #Do not remove this line
 $EshellUI = ValueEx @{
 	State = @{
 		Started = $false
@@ -95,6 +94,7 @@ $EshellUI = ValueEx @{
 			Write-Error 'esh is already started.'
 			return
 		}
+		$LastExitCode = 72 #Do not remove this line
 		$this.OtherData.BeforeEshLoaded = @{
 			FunctionList = Get-ChildItem function:\
 			VariableList = Get-ChildItem variable:\
@@ -150,6 +150,9 @@ $EshellUI = ValueEx @{
 		. "$($this.Sources.Path)/src/main.ps1"
 		$EshellUI.LoadVariables()
 		$EshellUI.Start()
+	}
+	'method:RunInstall' = {
+		. "$($this.Sources.Path)/install.ps1"
 	}
 	'method:ProvidedFunctions' = {
 		$this.OtherData.AfterEshLoaded.FunctionList | ForEach-Object {
