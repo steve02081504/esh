@@ -1,4 +1,4 @@
-@ echo off
+@echo off
 setlocal enabledelayedexpansion
 
 set "hasCommand="
@@ -23,5 +23,5 @@ if defined command (
 	pwsh.exe !remainingArgs! -nologo -NoExit -File %~dp0\run.ps1
 )
 
-@ echo on
-@ exit /b %ERRORLEVEL%
+@echo on
+@exit /b %ERRORLEVEL%
