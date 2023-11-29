@@ -35,7 +35,7 @@ $EshellUI = ValueEx @{
 	'method:Init' = {
 		param($Invocation)
 		$this.Invocation = $Invocation
-		$this.Process = Get-CimInstance -Query "select * from Win32_Process where Handle=$pid"
+		$this.Process = Get-CimInstance -Query "select * from Win32_Process where Handle=$PID"
 		$this.ParentProcess = Get-CimInstance -Query "select * from Win32_Process where Handle=$($this.Process.ParentProcessId)"
 		$this.Im.StartedFrom = @{
 			WindowsTerminal = $this.ParentProcess.Name -eq 'WindowsTerminal.exe'
@@ -113,6 +113,10 @@ $EshellUI = ValueEx @{
 			if ($EshellUI.BackgroundLoadingJobs.Count) {
 				$EshellUI.BackgroundLoadingJobs.PopAndRun()
 			}
+			else{
+				Unregister-Event -SubscriptionId $EshellUI.OtherData.IdleEvent.SubscriptionId -Force
+				$EshellUI.OtherData.Remove('IdleEvent')
+			}
 		}
 		$EventList = Get-EventSubscriber -Force
 		$this.OtherData.ExitingEvent = $EventList[$EventList.Count-2]
@@ -177,7 +181,7 @@ $EshellUI = ValueEx @{
 		$this.SaveVariables()
 		$function:prompt = $this.OtherData.BeforeEshLoaded.promptBackup
 		Unregister-Event -SubscriptionId $this.OtherData.ExitingEvent.SubscriptionId -Force
-		Unregister-Event -SubscriptionId $this.OtherData.IdleEvent.SubscriptionId -Force
+		Unregister-Event -SubscriptionId $($this.OtherData.IdleEvent.SubscriptionId ?? 0) -Force
 		$this.ProvidedFunctions() | ForEach-Object { Remove-Item function:\$($_.Name) }
 		$this.ProvidedVariables() | ForEach-Object { Remove-Item variable:\$($_.Name) }
 		$this.ProvidedAliases() | ForEach-Object { Remove-Item alias:\$($_.Name) }
