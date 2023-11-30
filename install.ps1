@@ -128,9 +128,10 @@ else {
 if ($IsWindows) {
 	$wtFragmentDir = "$env:LOCALAPPDATA\Microsoft\Windows Terminal\Fragments\esh"
 	$WtProfileBase = @{
-		commandline = @("$eshDir/path/")[$eshDirFromEnv] + "esh.cmd -WorkingDirectory ~"
-		icon        = "ms-appx:///ProfileIcons/{0caa0dad-35be-5f56-a8ff-afceeeaa6101}.png"
-		hidden      = $false
+		commandline       = @("$eshDir/path/")[$eshDirFromEnv] + "esh.cmd"
+		icon              = "ms-appx:///ProfileIcons/{0caa0dad-35be-5f56-a8ff-afceeeaa6101}.png"
+		startingDirectory = "~"
+		hidden            = $false
 	}
 	$wtFragment = @{
 		schema   = "https://aka.ms/terminal-profiles-schema"
@@ -141,7 +142,7 @@ if ($IsWindows) {
 	}
 	$wtFragmentJson = ($wtFragment | ConvertTo-Json).Replace("`r`n", "`n")
 	if (Test-Path $wtFragmentDir/esh.json) {
-		if (-not (Compare-Object (Get-Content $wtFragmentDir/esh.json | ConvertFrom-Json) $wtFragment)) {
+		if ((Get-Content $wtFragmentDir/esh.json -Raw) -ne $wtFragmentJson) {
 			Set-Content $wtFragmentDir/esh.json $wtFragmentJson -NoNewline
 			Write-Warning "检测到旧的 Eshell Windows Terminal 配置文件，其已被更新。"
 		}
