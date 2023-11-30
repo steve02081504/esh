@@ -128,10 +128,8 @@ else {
 if ($IsWindows) {
 	$wtFragmentDir = "$env:LOCALAPPDATA\Microsoft\Windows Terminal\Fragments\esh"
 	$WtProfileBase = @{
-		commandline       = @("$eshDir/path/")[$eshDirFromEnv] + "esh.cmd"
-		icon              = "ms-appx:///ProfileIcons/{0caa0dad-35be-5f56-a8ff-afceeeaa6101}.png"
-		startingDirectory = "~"
-		hidden            = $false
+		commandline = @("$eshDir/path/")[$eshDirFromEnv] + "esh.cmd"; startingDirectory = "~"
+		icon = "ms-appx:///ProfileIcons/{0caa0dad-35be-5f56-a8ff-afceeeaa6101}.png"
 	}
 	$wtFragment = @{
 		schema   = "https://aka.ms/terminal-profiles-schema"

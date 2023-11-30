@@ -74,9 +74,8 @@ function global:sudo {
 		try {
 			$Shadow=Get-Content "$env:Temp/sudo_shadows/$UUID.txt"
 			Remove-Item "$env:Temp/sudo_shadows/$UUID.txt"
-			$Shadow = $Shadow | Select-Object -Skip 4 -SkipLast 4
+			$Shadow = ($Shadow | Select-Object -Skip 4 -SkipLast 4) -join "`n"
 			#由于Start-Transcript会将宽字符重复写入，所以对于每一个字符在$Shadow中进行渲染以获取其宽度，去除多余的字符
-			$Shadow = $Shadow -join "`n"
 			$Font = New-Object System.Drawing.Font('cascadia mono', 128)
 			$Width = 0
 			$ShadowHandled=($Shadow.ToCharArray() | ForEach-Object {
