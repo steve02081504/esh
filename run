@@ -31,6 +31,6 @@ fi
 if [[ -z "$command" ]]; then
 	pwsh $parsed_args -nologo -NoExit -File "$SCRIPT_DIR/run.ps1"
 else
-	pwsh $parsed_args -nologo -Command ". $SCRIPT_DIR/run.ps1 ; & $command"
+	pwsh $parsed_args -nologo -Command ". $SCRIPT_DIR/run.ps1 ; Invoke-Expression $command"
 fi
 exit $?

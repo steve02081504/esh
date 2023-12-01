@@ -29,7 +29,7 @@ $env:Path.Split(";") | ForEach-Object {
 # 使用if判断+赋值：我们不能使用??=因为用户可能以winpwsh运行该脚本
 if (-not $eshDir) {
 	$eshDir =
-	if ($EshellUI.Sources.Path -and (Test-Path $EshellUI.Sources.Path/path/esh)) { $EshellUI.Sources.Path }
+	if ($EshellUI.Sources.Path -and (Test-Path "${EshellUI.Sources.Path}/path/esh")) { $EshellUI.Sources.Path }
 	elseif (Test-Path $PSScriptRoot/path/esh) { $PSScriptRoot }
 	elseif (Test-Path $env:LOCALAPPDATA/esh) { "$env:LOCALAPPDATA/esh" }
 }
@@ -126,9 +126,10 @@ else {
 	}
 }
 if ($IsWindows) {
+	$EshCmd = @("$eshDir/path/")[$eshDirFromEnv] + "esh.cmd"
 	$wtFragmentDir = "$env:LOCALAPPDATA\Microsoft\Windows Terminal\Fragments\esh"
 	$WtProfileBase = @{
-		commandline = @("$eshDir/path/")[$eshDirFromEnv] + "esh.cmd"; startingDirectory = "~"
+		commandline = $EshCmd; startingDirectory = "~"
 		icon = "ms-appx:///ProfileIcons/{0caa0dad-35be-5f56-a8ff-afceeeaa6101}.png"
 	}
 	$wtFragment = @{
@@ -148,6 +149,18 @@ if ($IsWindows) {
 	else {
 		New-Item -ItemType Directory -Force -Path $wtFragmentDir | Out-Null
 		Set-Content $wtFragmentDir/esh.json $wtFragmentJson -NoNewline
+	}
+	$startScript = "@$eshDir/run.cmd -Command 1000-7"
+	$LoaderPath = "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Startup\Esh_loader.cmd"
+	if (Test-Path $LoaderPath) {
+		if ((Get-Content $LoaderPath -Raw) -ne $startScript) {
+			Set-Content $LoaderPath $startScript -NoNewline
+			Write-Warning "检测到旧的 Eshell 预启动器，其已被更新。"
+		}
+	}
+	else {
+		New-Item -ItemType Directory -Force -Path (Split-Path $LoaderPath) | Out-Null
+		Set-Content $LoaderPath $startScript -NoNewline
 	}
 }
 
