@@ -22,7 +22,7 @@ $EshellUI.Prompt.Builders['git'] = {
 			}
 		}
 		if ($git_prompt_str) {
-			$prompt_str = $BuildMethods.AddBlock($prompt_str,$git_prompt_str)
+			$prompt_str = $BuildMethods.AddBlock($prompt_str, $git_prompt_str)
 		}
 	}
 	$prompt_str

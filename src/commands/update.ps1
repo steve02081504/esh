@@ -8,7 +8,7 @@ function global:Update-SAO-lib {
 }
 
 function global:Update-gcc-Kawaii {
-	if (-not (Test-PathEx /usr/share/locale/zh_CN/LC_MESSAGES/gcc.mo.bak)){
+	if (-not (Test-PathEx /usr/share/locale/zh_CN/LC_MESSAGES/gcc.mo.bak)) {
 		Write-Information "the original gcc.mo file is now backed up to gcc.mo.bak"
 		mv /usr/share/locale/zh_CN/LC_MESSAGES/gcc.mo /usr/share/locale/zh_CN/LC_MESSAGES/gcc.mo.bak
 	}

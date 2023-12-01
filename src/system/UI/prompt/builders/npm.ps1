@@ -27,7 +27,7 @@ $EshellUI.Prompt.Builders['npm'] = {
 		}
 	}
 	if ($npm_prompt_str) {
-		$prompt_str = $BuildMethods.AddBlock($prompt_str,$npm_prompt_str)
+		$prompt_str = $BuildMethods.AddBlock($prompt_str, $npm_prompt_str)
 	}
 	$prompt_str
 }

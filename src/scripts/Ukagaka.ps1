@@ -14,7 +14,7 @@ function global:Get-Ukagaka-Description-File-HashTable {
 		$LineArray = $Line -split ','
 		$Key = $LineArray[0].Trim()
 		$Value = $Line.Substring($LineArray[0].Length + 1).Trim()
-		$Description.Add($Key,$Value)
+		$Description.Add($Key, $Value)
 	}
 	$Description
 }

@@ -43,7 +43,7 @@ function global:poweron {
 function global:power {
 	param(
 		#off / on
-		[ValidateSet('off','on')]
+		[ValidateSet('off', 'on')]
 		[string]$action
 	)
 	switch ($action) {
@@ -182,11 +182,11 @@ function global:fsize {
 			Get-ChildItem $_ -Force | ForEach-Object {
 				if ($_.PSIsContainer) {
 					$size = (Get-ChildItem $_ -Recurse -Force | Measure-Object -Property Length -Sum).Sum
-					"{0,10} {1}" -f (size_format $size),$_.Name
+					"{0,10} {1}" -f (size_format $size), $_.Name
 				}
 				else {
 					$size = $_.Length
-					"{0,10} {1}" -f (size_format $size),$_.Name
+					"{0,10} {1}" -f (size_format $size), $_.Name
 				}
 			}
 		}
@@ -194,7 +194,7 @@ function global:fsize {
 		elseif (Test-Path $_) {
 			#输出文件大小
 			$size = (Get-Item $_).Length
-			"{0,10} {1}" -f (size_format $size),$_
+			"{0,10} {1}" -f (size_format $size), $_
 		}
 	}
 }

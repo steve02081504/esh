@@ -5,7 +5,8 @@ function global:Install-Copilot {
 			try {
 				winget install GitHub.cli
 				gh extension install github/gh-copilot
-			} catch {
+			}
+			catch {
 				#install failed
 				Write-Error 'Error: Install github cli failed.'
 				throw

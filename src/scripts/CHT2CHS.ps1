@@ -24,7 +24,7 @@ function global:CHS2CHT {
 	[string]$Result = CHS2CHT.base $str
 	if ($Result.Length -gt 1) {
 		${CHS2CHT.data.words}.Keys | ForEach-Object {
-			$Result = $Result -replace $_,${CHS2CHT.data.words}[$_]
+			$Result = $Result -replace $_, ${CHS2CHT.data.words}[$_]
 		}
 	}
 	return $Result
@@ -48,7 +48,7 @@ function global:CHT2CHS {
 	[string]$Result = CHT2CHS.base $str
 	if ($Result.Length -gt 1) {
 		${CHT2CHS.data.words}.Keys | ForEach-Object {
-			$Result = $Result -replace $_,${CHT2CHS.data.words}[$_]
+			$Result = $Result -replace $_, ${CHT2CHS.data.words}[$_]
 		}
 	}
 	return $Result
@@ -56,14 +56,14 @@ function global:CHT2CHS {
 
 ${CHSCHT.oridata.alphas}.Keys | ForEach-Object {
 	$Key = $_
-	$Value = ${CHSCHT.oridata.alphas}[$Key].ToCharArray();
+	$Value = ${CHSCHT.oridata.alphas}[$Key].ToCharArray()
 	if ($Value.Count -gt 0) {
 		if ($Value[0] -ne ' ') {
-			${CHS2CHT.data.alphas}.Add($Key[0],$Value[0])
+			${CHS2CHT.data.alphas}.Add($Key[0], $Value[0])
 		}
 		$Value | ForEach-Object {
 			if ($_ -ne ' ') {
-				${CHT2CHS.data.alphas}.Add($_,$Key[0])
+				${CHT2CHS.data.alphas}.Add($_, $Key[0])
 			}
 		}
 	}
@@ -74,11 +74,11 @@ ${CHSCHT.oridata.words}.Keys | ForEach-Object {
 	$Value = ${CHSCHT.oridata.words}[$Key].Trim()
 	$S = CHT2CHS.base $Value
 	if (($S -ne $Key) -and ($Value.Length -eq ${CHSCHT.oridata.words}[$Key].Length)) {
-		${CHT2CHS.data.words}.Add($S,$Key)
+		${CHT2CHS.data.words}.Add($S, $Key)
 	}
 	$S = CHS2CHT.base $Key
 	if ($S -ne $Value) {
-		${CHS2CHT.data.words}.Add($S,$Value)
+		${CHS2CHT.data.words}.Add($S, $Value)
 	}
 }
 Remove-Variable -Name 'CHSCHT.oridata.words' -Scope Global

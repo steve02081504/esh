@@ -85,8 +85,8 @@ function global:WindowsPathToLinuxPath {
 	if ($Path.StartsWith($EshellUI.MSYS.RootPath)) {
 		#则转换为linux路径
 		$Path = $Path.Substring($EshellUI.MSYS.RootPath.Length)
-		if(-not $Path){ $Path = '/' }
-		$Path = $Path.Replace("\","/")
+		if (-not $Path) { $Path = '/' }
+		$Path = $Path.Replace("\", "/")
 		if ($Path.StartsWith("/home/$env:UserName")) {
 			$Path = "~" + $Path.Substring(("/home/$env:UserName").Length)
 		}
@@ -95,13 +95,13 @@ function global:WindowsPathToLinuxPath {
 		$Path = "~" + $Path.Substring($HOME.Length)
 	}
 	elseif ($Path.Length -lt 2) {}
-	elseif ($Path.Substring(1,1) -eq ":") {
+	elseif ($Path.Substring(1, 1) -eq ":") {
 		#否则根据盘符转换
-		$DriveLetter = $Path.Substring(0,1)
+		$DriveLetter = $Path.Substring(0, 1)
 		$Path = $Path.Substring(3)
 		$Path = "/${DriveLetter}/${Path}"
 	}
-	$Path = $Path.Replace("\","/")
+	$Path = $Path.Replace("\", "/")
 	return $Path
 }
 
@@ -163,7 +163,7 @@ Set-PSReadLineKeyHandler -Key Enter -ScriptBlock {
 	#获取当前行
 	$OriLine = $null
 	$Cursor = $null
-	[Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$OriLine,[ref]$Cursor)
+	[Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$OriLine, [ref]$Cursor)
 	$Line = $OriLine.Trim()
 	#自行首获取可执行文件路径
 	$Executable = $Line.Split(" ")[0]
@@ -209,10 +209,10 @@ Set-PSReadLineKeyHandler -Key Tab -ScriptBlock {
 	#获取当前行
 	$OriLine = $null
 	$Cursor = $null
-	[Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$OriLine,[ref]$Cursor)
+	[Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$OriLine, [ref]$Cursor)
 	$Line = $OriLine
 	#自光标位置分隔出当前单词
-	$BeforeCursor = $Line.Substring(0,$Cursor)
+	$BeforeCursor = $Line.Substring(0, $Cursor)
 	$Rest = $Line.Substring($Cursor)
 	$WordToComplete = $BeforeCursor.Split(" ")[-1]
 	#处理"
@@ -220,9 +220,9 @@ Set-PSReadLineKeyHandler -Key Tab -ScriptBlock {
 	if ($WordToComplete.EndsWith('"')) {
 		$HasQuote = $true
 		while (-not $WordToComplete.StartsWith('"')) {
-			$WordToComplete = $BeforeCursor.Substring(0,$BeforeCursor.Length - $WordToComplete.Length - 1).Split(" ")[-1] + " " + $WordToComplete
+			$WordToComplete = $BeforeCursor.Substring(0, $BeforeCursor.Length - $WordToComplete.Length - 1).Split(" ")[-1] + " " + $WordToComplete
 		}
-		$WordToComplete = $WordToComplete.Substring(1,$WordToComplete.Length - 2)
+		$WordToComplete = $WordToComplete.Substring(1, $WordToComplete.Length - 2)
 	}
 	#若当前单词以/开头
 	if ($WordToComplete.StartsWith("/") -or $WordToComplete.StartsWith("~")) {
@@ -233,18 +233,18 @@ Set-PSReadLineKeyHandler -Key Tab -ScriptBlock {
 		}
 		$CursorOfBegin = $Cursor - $WordToComplete.Length
 		$CursorOfEnd = $Cursor - $CursorOfBegin + $WordAfterComplete.Length
-		[Microsoft.PowerShell.PSConsoleReadLine]::Replace($CursorOfBegin,$WordToComplete.Length,$WordAfterComplete)
+		[Microsoft.PowerShell.PSConsoleReadLine]::Replace($CursorOfBegin, $WordToComplete.Length, $WordAfterComplete)
 		[Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition($CursorOfEnd)
 		[Microsoft.PowerShell.PSConsoleReadLine]::MenuComplete()
-		[Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$OriLine,[ref]$Cursor)
+		[Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$OriLine, [ref]$Cursor)
 		$BeginIndex = $OriLine.IndexOf($WordAfterComplete)
 		if ($BeginIndex -ne -1) {
 			$CursorOfBegin = $BeginIndex
 		}
 		$CursorOfEnd = $OriLine.Length - $CursorOfBegin - $Rest.Length
-		$WordToComplete = $OriLine.Substring($CursorOfBegin,$CursorOfEnd)
+		$WordToComplete = $OriLine.Substring($CursorOfBegin, $CursorOfEnd)
 		$WordAfterComplete = WindowsPathToLinuxPath $WordToComplete
-		[Microsoft.PowerShell.PSConsoleReadLine]::Replace($CursorOfBegin,$CursorOfEnd,$WordAfterComplete)
+		[Microsoft.PowerShell.PSConsoleReadLine]::Replace($CursorOfBegin, $CursorOfEnd, $WordAfterComplete)
 		[Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition($CursorOfBegin + $WordAfterComplete.Length)
 	}
 	else {

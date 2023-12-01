@@ -9,14 +9,14 @@ Add-Type @"
 "@
 
 # 设置窗口icon
-function Set-WindowIcon ($hWnd,$iconPath) {
+function Set-WindowIcon ($hWnd, $iconPath) {
 	$icon = [System.Drawing.Icon]::ExtractAssociatedIcon($iconPath)
 	$hIcon = $icon.Handle
 	$WM_SETICON = 0x0080
 	$ICON_SMALL = 0
 	$ICON_BIG = 1
-	[Win32]::SendMessage($hWnd,$WM_SETICON,$ICON_SMALL,$hIcon) | Out-Null
-	[Win32]::SendMessage($hWnd,$WM_SETICON,$ICON_BIG,$hIcon) | Out-Null
+	[Win32]::SendMessage($hWnd, $WM_SETICON, $ICON_SMALL, $hIcon) | Out-Null
+	[Win32]::SendMessage($hWnd, $WM_SETICON, $ICON_BIG, $hIcon) | Out-Null
 }
 
 # 封装函数

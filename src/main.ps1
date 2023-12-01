@@ -113,7 +113,7 @@ $EshellUI = ValueEx @{
 			if ($EshellUI.BackgroundLoadingJobs.Count) {
 				$EshellUI.BackgroundLoadingJobs.PopAndRun()
 			}
-			else{
+			else {
 				Unregister-Event -SubscriptionId $EshellUI.OtherData.IdleEvent.SubscriptionId -Force
 				$EshellUI.OtherData.Remove('IdleEvent')
 			}
@@ -205,10 +205,10 @@ $EshellUI = ValueEx @{
 			}
 			$HistoryId++
 			$local:myInvocation = [System.Management.Automation.InvocationInfo]::Create(
-				[System.Management.Automation.CmdletInfo]::new('Esh-Repl',[System.Management.Automation.PSCmdLet]),
+				[System.Management.Automation.CmdletInfo]::new('Esh-Repl', [System.Management.Automation.PSCmdLet]),
 				[System.Management.Automation.Language.ScriptExtent]::new(
-					[System.Management.Automation.Language.ScriptPosition]::new('esh',$HistoryId,1,$expr),
-					[System.Management.Automation.Language.ScriptPosition]::new('esh',$HistoryId,$expr.Length,$expr)
+					[System.Management.Automation.Language.ScriptPosition]::new('esh', $HistoryId, 1, $expr),
+					[System.Management.Automation.Language.ScriptPosition]::new('esh', $HistoryId, $expr.Length, $expr)
 				)
 			)
 			$StartExecutionTime = Get-Date

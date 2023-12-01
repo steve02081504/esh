@@ -37,7 +37,7 @@ function global:cd {
 	#cd是bash提供的内置命令，没有单独的可执行文件
 	#所以我们只能通过Set-Location来模拟cd的行为
 	$IsLinuxBin = $Path.Length -eq 0
-	function baseCD ($Path,[switch]$IsFollowSymbolicLink = $true) {
+	function baseCD ($Path, [switch]$IsFollowSymbolicLink = $true) {
 		if ($Path.Length -eq 0) {
 			Set-Location ~
 		}
@@ -75,7 +75,7 @@ function global:cd {
 	}
 	#cd: usage: cd [-L|[-P [-e]] [-@]] [dir]
 	if (-not $IsLinuxBin) {
-		$LinuxBinArguments = @("-L","-P","-e","-@","--help","--version")
+		$LinuxBinArguments = @("-L", "-P", "-e", "-@", "--help", "--version")
 		$RemainingArguments | ForEach-Object {
 			$arg = $_
 			$LinuxBinArguments | ForEach-Object {
@@ -170,7 +170,7 @@ function global:ls {
 		}
 		return
 	}
-	$LinuxBinArguments = @("-a","--all","-A","--almost-all","-b","--escape","-B","--ignore-backups","-c","--time=ctime","-C","--format=vertical","-d","--directory","-D","--dired","-f","--format=across","-F","--classify","-g","--group-directories-first","-G","--no-group","-h","--human-readable","-H","--si","-i","--inode","-I","--ignore=","-k","--kibibytes","-l","--format=long","-L","--dereference","-m","--format=commas","-n","--numeric-uid-gid","-N","--literal","-o","-1","--format=single-column","-p","--indicator-style=slash","-q","--hide-control-chars","-Q","--quote-name","-r","--reverse","-R","--recursive","-s","--size","-S","--sort=size","-t","--sort=time","-T","--tabsize=COLS","-u","--time=atime","-U","--sort=atime","-v","--sort=version","-w","--width=COLS","-x","--format=across","-X","--sort=extension","-Z","--context","--help","--version")
+	$LinuxBinArguments = @("-a", "--all", "-A", "--almost-all", "-b", "--escape", "-B", "--ignore-backups", "-c", "--time=ctime", "-C", "--format=vertical", "-d", "--directory", "-D", "--dired", "-f", "--format=across", "-F", "--classify", "-g", "--group-directories-first", "-G", "--no-group", "-h", "--human-readable", "-H", "--si", "-i", "--inode", "-I", "--ignore=", "-k", "--kibibytes", "-l", "--format=long", "-L", "--dereference", "-m", "--format=commas", "-n", "--numeric-uid-gid", "-N", "--literal", "-o", "-1", "--format=single-column", "-p", "--indicator-style=slash", "-q", "--hide-control-chars", "-Q", "--quote-name", "-r", "--reverse", "-R", "--recursive", "-s", "--size", "-S", "--sort=size", "-t", "--sort=time", "-T", "--tabsize=COLS", "-u", "--time=atime", "-U", "--sort=atime", "-v", "--sort=version", "-w", "--width=COLS", "-x", "--format=across", "-X", "--sort=extension", "-Z", "--context", "--help", "--version")
 	$RemainingArguments | ForEach-Object {
 		$arg = $_
 		$LinuxBinArguments | ForEach-Object {
@@ -256,7 +256,7 @@ function global:rm {
 		Remove-Item $Path
 		return
 	}
-	$LinuxBinArguments = @("-f","--force","-i","--interactive","-I","--interactive=once","--one-file-system","--no-preserve-root","--preserve-root","-r","-R","--recursive","--help","--version")
+	$LinuxBinArguments = @("-f", "--force", "-i", "--interactive", "-I", "--interactive=once", "--one-file-system", "--no-preserve-root", "--preserve-root", "-r", "-R", "--recursive", "--help", "--version")
 	$RemainingArguments | ForEach-Object {
 		$arg = $_
 		$LinuxBinArguments | ForEach-Object {
@@ -352,7 +352,7 @@ function global:mv {
 		Move-Item $Path -Destination $Destination
 		return
 	}
-	$LinuxBinArguments = @("-b","--backup","-f","--force","-i","--interactive","-n","--no-clobber","-u","--update","-v","--verbose","--help","--version")
+	$LinuxBinArguments = @("-b", "--backup", "-f", "--force", "-i", "--interactive", "-n", "--no-clobber", "-u", "--update", "-v", "--verbose", "--help", "--version")
 	$RemainingArguments | ForEach-Object {
 		$arg = $_
 		$LinuxBinArguments | ForEach-Object {
@@ -448,7 +448,7 @@ function global:cp {
 		Copy-Item $Path -Destination $Destination
 		return
 	}
-	$LinuxBinArguments = @("-a","--archive","-b","--backup","-f","--force","-i","--interactive","-l","--link","-L","--dereference","-n","--no-clobber","-P","--no-dereference","-p","--preserve","-R","-r","--recursive","-s","--symbolic-link","-S","--suffix=SUFFIX","-t","--target-directory=DIRECTORY","-T","--no-target-directory","-u","--update","-v","--verbose","--help","--version")
+	$LinuxBinArguments = @("-a", "--archive", "-b", "--backup", "-f", "--force", "-i", "--interactive", "-l", "--link", "-L", "--dereference", "-n", "--no-clobber", "-P", "--no-dereference", "-p", "--preserve", "-R", "-r", "--recursive", "-s", "--symbolic-link", "-S", "--suffix=SUFFIX", "-t", "--target-directory=DIRECTORY", "-T", "--no-target-directory", "-u", "--update", "-v", "--verbose", "--help", "--version")
 	$RemainingArguments | ForEach-Object {
 		$arg = $_
 		$LinuxBinArguments | ForEach-Object {
@@ -525,7 +525,7 @@ function global:mkdir {
 		New-Item $Path -ItemType Directory
 		return
 	}
-	$LinuxBinArguments = @("-m","--mode=MODE","-p","--parents","-v","--verbose","--help","--version")
+	$LinuxBinArguments = @("-m", "--mode=MODE", "-p", "--parents", "-v", "--verbose", "--help", "--version")
 	$RemainingArguments | ForEach-Object {
 		$arg = $_
 		$LinuxBinArguments | ForEach-Object {
@@ -602,7 +602,7 @@ function global:touch {
 		New-Item $Path -ItemType File
 		return
 	}
-	$LinuxBinArguments = @("-a","--time=access","-c","--no-create","-d","--date=STRING","-f","--force","-h","--no-dereference","-m","--time=modification","-r","--reference=FILE","-t","--time=WORD","-v","--verbose","--help","--version")
+	$LinuxBinArguments = @("-a", "--time=access", "-c", "--no-create", "-d", "--date=STRING", "-f", "--force", "-h", "--no-dereference", "-m", "--time=modification", "-r", "--reference=FILE", "-t", "--time=WORD", "-v", "--verbose", "--help", "--version")
 	$RemainingArguments | ForEach-Object {
 		$arg = $_
 		$LinuxBinArguments | ForEach-Object {
@@ -683,7 +683,7 @@ function global:cat {
 		Get-Content $Path
 		return
 	}
-	$LinuxBinArguments = @("-A","--show-all","-b","--number-nonblank","-e","--show-ends","-E","--show-ends","-n","--number","-s","--squeeze-blank","-t","--show-tabs","-T","--show-tabs","-u","--unbuffered","-v","--show-nonprinting","-w","--width=COLS","--help","--version")
+	$LinuxBinArguments = @("-A", "--show-all", "-b", "--number-nonblank", "-e", "--show-ends", "-E", "--show-ends", "-n", "--number", "-s", "--squeeze-blank", "-t", "--show-tabs", "-T", "--show-tabs", "-u", "--unbuffered", "-v", "--show-nonprinting", "-w", "--width=COLS", "--help", "--version")
 	$RemainingArguments | ForEach-Object {
 		$arg = $_
 		$LinuxBinArguments | ForEach-Object {

@@ -37,23 +37,24 @@ function global:Show-apks {
 		$Orientation = $_.orientation
 		$IconPath = "C:\Program Files\BlueStacks_nxt\Engine\Pie64\AppCache\$IconFileName"
 		$apk = @{
-			appLabel = $AppLabel
-			package = $Package
-			versionName = $VersionName
-			versionCode = $VersionCode
-			installDate = $InstallDate
+			appLabel     = $AppLabel
+			package      = $Package
+			versionName  = $VersionName
+			versionCode  = $VersionCode
+			installDate  = $InstallDate
 			iconFileName = $IconFileName
-			activity = $Activity
+			activity     = $Activity
 			isFullScreen = $IsFullScreen
-			isHomeApp = $IsHomeApp
-			orientation = $Orientation
-			IconPath = $IconPath
+			isHomeApp    = $IsHomeApp
+			orientation  = $Orientation
+			IconPath     = $IconPath
 		}
 		$apkList += $apk
 	}
 	if ($MyInvocation.InvocationName -eq '.') {
 		$apkList | Format-Table
-	} else {
+	}
+	else {
 		return $apkList
 	}
 }
