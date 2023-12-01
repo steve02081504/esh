@@ -18,9 +18,9 @@ for %%i in (%*) do (
 )
 
 if defined command (
-	pwsh.exe !remainingArgs! -nologo -Command ". %~dp0\run.ps1; Invoke-Expression !command!"
+	pwsh !remainingArgs! -nologo -Command ". %~dp0\run.ps1; Invoke-Expression !command!"
 ) else (
-	pwsh.exe !remainingArgs! -nologo -NoExit -File %~dp0\run.ps1
+	pwsh !remainingArgs! -nologo -NoExit -File "%~dp0\run.ps1"
 )
 
 @echo on

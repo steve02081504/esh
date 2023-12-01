@@ -156,7 +156,10 @@ $EshellUI = ValueEx @{
 		$EshellUI.Start()
 	}
 	'method:RunInstall' = {
-		. "$($this.Sources.Path)/install.ps1"
+		. "$($this.Sources.Path)/opt/install.ps1"
+	}
+	'method:RunUnInstall' = {
+		. "$($this.Sources.Path)/opt/uninstall.ps1"
 	}
 	'method:ProvidedFunctions' = {
 		$this.OtherData.AfterEshLoaded.FunctionList | ForEach-Object {

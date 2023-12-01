@@ -24,7 +24,7 @@ parsed_args="${remaining_args[@]}"
 # 测试/c/Windows以确定是否在Windows上运行
 if [[ -d "/c/Windows" ]]; then
 	# 对$SCRIPT_DIR进行Windows路径转换
-	# 我们不能使用wslpath，因为它不是所有Linux发行版或msys的一部分
+	# 我们不能使用wslpath，因为它不是msys的一部分
 	SCRIPT_DIR=$(echo "$SCRIPT_DIR" | sed -e 's/\/c/C:/g' -e 's/\//\\/g' -e 's/^\\//g')
 fi
 

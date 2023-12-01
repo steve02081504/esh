@@ -1,4 +1,2 @@
-@echo off
-%~dp0\..\run.cmd %*
-@echo on
+@%~dp0\..\opt\run %*
 @exit /b %ERRORLEVEL%

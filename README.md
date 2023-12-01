@@ -6,23 +6,30 @@
 ## 使用方法  
 
 - 在windows terminal中将字体设置为[`FriaCode Nerd Font`](https://github.com/ryanoasis/nerd-fonts/releases/latest/download/FiraCode.zip)
-- 运行`install.ps1`或下方的快速开始命令
+- 运行`opt/install`：参见下方的快速开始命令
 - 如果你把它加进了pwsh配置文件，你或许还想追加`-NoProfileLoadTime -nologo`到pwsh启动参数中
 - 修改`$EshellUI.MSYS.RootPath`为你的msys2安装路径并`$EshellUI.SaveVariables()`
 - 视需要修改其他文件内容
 
 ## 快速开始
 
-将以下命令复制粘贴到powershell中以快速开始  
+运行`opt/install`以快速开始（你甚至不需要clone这个项目）：
 
 ```powershell
-{ (Invoke-WebRequest https://github.com/steve02081504/esh/raw/master/install.ps1).Content | Invoke-Expression }.Invoke()
+{ (Invoke-WebRequest https://github.com/steve02081504/esh/raw/master/opt/install.ps1).Content | Invoke-Expression }.Invoke()
 
 ```
 
 ![图片](https://github.com/steve02081504/esh/assets/31927825/39cdadc2-60e6-43f9-bcfc-ef5f973bd12d)
 
-如果你正在使用它，你可以这样更新：
+或者通过git进行安装：
+
+```bash
+git clone https://github.com/steve02081504/esh && cd esh && opt/install
+
+```
+
+如果你正在使用它，你可以这样更新（或者直接通过git来pull）：
 
 ```powershell
 Update-Eshell
@@ -36,7 +43,8 @@ Update-Eshell
 想要将esh和pwsh分开来进一步迷惑你的朋友吗？  
 升级到esh `v0.0.0.5`以上来获取path子文件夹，然后将其添加到你的环境变量中！  
 如果你已经将`esh/path`添加到了你的环境变量中，你可以丢弃pwsh的profile中的esh加载，并直接在bash或cmd和pwsh中`esh`，或在windows terminal中`esh.cmd -WorkingDirectory ~`来启动esh  
-![图片](https://github.com/steve02081504/esh/assets/31927825/f017dd02-80bf-4d1e-9cbc-2ee28d43ede9)
+![图片](https://github.com/steve02081504/esh/assets/31927825/f017dd02-80bf-4d1e-9cbc-2ee28d43ede9)  
+这不止可以让你的朋友困惑 在你需要纯粹的pwsh时你会感激曾经这样设置的自己  
 
 ## 功能预览  
 
@@ -95,6 +103,48 @@ rm -rf superhavyrock
 ![图片](https://github.com/steve02081504/esh/assets/31927825/55b75796-0745-4900-b596-d1f2e7decadb)
 
 由于我懒，`dirsync`等其他命令不做介绍，请自行查看`$EshellUI.ProvidedFunctions()`
+
+## 目录结构
+
+```tree
+───esh
+   ├───.github #github配置文件夹
+   │   └───workflows #github actions配置文件夹
+   ├───.vscode #vscode配置文件夹
+   ├───data #数据文件夹
+   │   ├───SAO-lib.txt #SAO-lib骚话库
+   │   ├───formatxml #xml格式化数据
+   │   └───vars #变量数据存储
+   ├───src #esh源码
+   │   ├───system #esh基础架构文件夹
+   │   │   └───UI #UI文件夹
+   │   │       └───prompt #提示符构建文件夹
+   │   │           └───builders #提示符构建器文件夹
+   │   ├───commands #命令脚本文件夹
+   │   │   └───special #特殊命令脚本
+   │   └───scripts #收录脚本工具
+   ├───img #图片资源
+   ├───opt #安装 卸载 启动脚本
+   └───path #用于加入环境变量的文件夹
+```
+
+### 卸载
+
+如果你想卸载esh，你可以运行`esh -Command $EshellUI.RunUnInstall()`
+或者如同安装时一样运行`opt/uninstall`：
+
+```powershell
+{ (Invoke-WebRequest https://github.com/steve02081504/esh/raw/master/opt/uninstall.ps1).Content | Invoke-Expression }.Invoke()
+
+```
+
+或者
+
+```pwsh
+cd $EshellUI.Sources.Path
+opt/uninstall
+
+```
 
 ## Q&A
 

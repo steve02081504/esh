@@ -2,9 +2,13 @@
 	"terminal.integrated.defaultProfile.windows": "Eshell",
 	"terminal.integrated.profiles.windows": {
 		"Eshell": {
-			"path": ["${workspaceFolder}/run.cmd"],
+			"path": ["${workspaceFolder}/opt/run.cmd"],
 			"icon": "terminal",
 			"overrideName": true
 		}
+	},
+	"files.exclude": {
+		"**/desktop.ini": true,
+		"**/placeholder": true,
 	}
 }

@@ -1,5 +1,6 @@
 #!/usr/bin/env pwsh
 using namespace System.Management.Automation.Host
+[CmdletBinding()]param([switch]$FromScript=$false)
 
 # 假如在win8以下的系统上运行，那么我们需要先检查和修复一下输出编码
 if ($IsWindows -and ([System.Environment]::OSVersion.Version.Major -le 7)) {
@@ -67,6 +68,10 @@ else {
 	Write-Host "检测到已安装 Esh 于 $eshDir"
 	if ($EshellUI) { Write-Host "（并且你正在使用它 :)）" }
 }
+#对于每个desktop.ini进行+s +h操作
+Get-ChildItem $eshDir -Recurse -Filter desktop.ini | ForEach-Object {
+	$_.Attributes = 'Hidden', 'System'
+}
 function YorN($message, $helpMessageY = "", $helpMessageN = "", [switch]$defaultN = $false) {
 	do {
 		$response = $Host.UI.PromptForChoice("", $message, @(
@@ -87,7 +92,7 @@ if ($PSVersionTable.PSVersion.Major -lt 6) {
 }
 else {
 	$profilesDir = Split-Path $PROFILE
-	$startScript = ". $eshDir/run.ps1"
+	$startScript = ". $eshDir/opt/run.ps1"
 	$universalProfile = "$profilesDir/profile.ps1"
 	function checkLoaded ($theProfile) { (Get-Content $theProfile -ErrorAction Ignore) -contains $startScript }
 	$added = $false
@@ -150,7 +155,7 @@ if ($IsWindows) {
 		New-Item -ItemType Directory -Force -Path $wtFragmentDir | Out-Null
 		Set-Content $wtFragmentDir/esh.json $wtFragmentJson -NoNewline
 	}
-	$startScript = "@$eshDir/run.cmd -Command 1000-7"
+	$startScript = "@$eshDir/opt/run -Command 1000-7"
 	$LoaderPath = "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Startup\Esh_loader.cmd"
 	if (Test-Path $LoaderPath) {
 		if ((Get-Content $LoaderPath -Raw) -ne $startScript) {
@@ -168,9 +173,9 @@ if (-not (Get-Command pwsh -ErrorAction Ignore)) {
 	$Host.UI.WriteErrorLine("esh的运行需要PowerShell 6或以上`n访问 https://aka.ms/pscore6 来获取PowerShell 6+ 并使得``pwsh``命令在环境中可用以使得esh能够正常工作")
 }
 elseif ((-not $EshellUI) -and (YorN "要使用 Eshell 吗？")) {
-	if ($PSVersionTable.PSVersion.Major -lt 6) {
-		. $eshDir/run.cmd
+	if ($FromScript -or ($PSVersionTable.PSVersion.Major -lt 6)) {
+		. $eshDir/opt/run
 		[System.Environment]::Exit($LastExitCode)
 	}
-	else { . $eshDir/run.ps1 -Invocation $MyInvocation }
+	else { . $eshDir/opt/run.ps1 -Invocation $MyInvocation }
 }

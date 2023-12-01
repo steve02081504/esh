@@ -53,7 +53,7 @@ if ($eshDirFromEnv) {
 
 # 移除 PowerShell 配置文件中的 Eshell 加载语句
 $profilesDir = Split-Path $PROFILE
-$startScript = ". $eshDir/run.ps1"
+$startScript = ". $eshDir/opt/run.ps1"
 
 Get-ChildItem $profilesDir -Filter *profile.ps1 | ForEach-Object {
 	$theprofile = $_.FullName

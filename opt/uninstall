@@ -2,5 +2,5 @@
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
-$SCRIPT_DIR/../opt/run "$@"
+pwsh -nologo -File "$SCRIPT_DIR/uninstall.ps1" "$@"
 exit $?
