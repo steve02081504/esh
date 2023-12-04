@@ -58,7 +58,7 @@ $EshellUI = ValueEx @{
 	MSYS = @{
 		RootPath = 'C:\msys64'
 	}
-	BackgroundLoadingJobs = ValueEx @{
+	BackgroundJobs = ValueEx @{
 		__type__ = [System.Collections.ArrayList]
 		'method:Pop' = {
 			$job = $this[0]
@@ -121,12 +121,8 @@ $EshellUI = ValueEx @{
 		}
 		#注册事件以在空闲时执行后台任务
 		Register-EngineEvent PowerShell.OnIdle -SupportEvent -Action {
-			if ($EshellUI.BackgroundLoadingJobs.Count) {
-				$EshellUI.BackgroundLoadingJobs.PopAndRun()
-			}
-			else {
-				Unregister-Event -SubscriptionId $EshellUI.OtherData.IdleEvent.SubscriptionId -Force
-				$EshellUI.OtherData.Remove('IdleEvent')
+			if ($EshellUI.BackgroundJobs.Count) {
+				$EshellUI.BackgroundJobs.PopAndRun()
 			}
 		}
 		$EventList = Get-EventSubscriber -Force
@@ -198,7 +194,7 @@ $EshellUI = ValueEx @{
 		}
 		$this.SaveVariables()
 		$function:prompt = $this.OtherData.BeforeEshLoaded.promptBackup
-		Unregister-Event -SubscriptionId $this.OtherData.ExitingEvent.SubscriptionId -Force
+		Unregister-Event -SubscriptionId $($this.OtherData.ExitingEvent.SubscriptionId ?? 0) -Force
 		Unregister-Event -SubscriptionId $($this.OtherData.IdleEvent.SubscriptionId ?? 0) -Force
 		$this.ProvidedFunctions() | ForEach-Object { Remove-Item function:\$($_.Name) }
 		$this.ProvidedVariables() | ForEach-Object { Remove-Item variable:\$($_.Name) }

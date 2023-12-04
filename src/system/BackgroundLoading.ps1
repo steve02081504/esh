@@ -1,4 +1,4 @@
-$EshellUI.BackgroundLoadingJobs.AddRange(@(
+$EshellUI.BackgroundJobs.AddRange(@(
 	{
 		Update-FormatData -PrependPath "$($EshellUI.Sources.Path)/data/formatxml/ls.bare.format.ps1xml"
 		if ($Host.UI.SupportsVirtualTerminal) {
@@ -68,3 +68,11 @@ $EshellUI.BackgroundLoadingJobs.AddRange(@(
 		}
 	}
 ))
+
+# fixer of https://github.com/PowerShell/vscode-powershell/issues/4851
+if ($EshellUI.Im.VSCodeExtension) {
+	$EshellUI.BackgroundJobs.Add({
+		Unregister-Event -SubscriptionId $EshellUI.OtherData.IdleEvent.SubscriptionId -Force
+		$EshellUI.OtherData.Remove('IdleEvent')
+	}) | Out-Null
+}

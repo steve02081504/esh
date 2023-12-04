@@ -4,14 +4,8 @@ if (-not $EshellUI.MSYS.RootPath -or -not (Test-Path $EshellUI.MSYS.RootPath)) {
 	$DriveLetters = Get-PSDrive -PSProvider FileSystem | ForEach-Object { $_.Name }
 	$DriveLetters | ForEach-Object {
 		#若该盘符下存在msys路径
-		if (Test-Path "${_}:\msys64") {
-			#则设置为该路径
-			$EshellUI.MSYS.RootPath = "${_}:\msys64"
-		}
-		elseif (Test-Path "${_}:\msys") {
-			#或者设置为该路径
-			$EshellUI.MSYS.RootPath = "${_}:\msys"
-		}
+		$EshellUI.MSYS.RootPath ??= if (Test-Path "${_}:\msys64") { "${_}:\msys64" }
+		elseif (Test-Path "${_}:\msys") { "${_}:\msys" }
 	}
 }
 
@@ -23,9 +17,7 @@ function global:Test-PathEx {
 	param(
 		[string]$Path
 	)
-	if ($Path.StartsWith("/") -or $Path.StartsWith("~")) {
-		$Path = LinuxPathToWindowsPath $Path
-	}
+	if (IsLinuxPath $Path) { $Path = LinuxPathToWindowsPath $Path }
 	return Test-Path $Path
 }
 
