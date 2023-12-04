@@ -31,7 +31,7 @@ else {
 			$added = $true
 		}
 	}
-	if ((-not $added) -and (YorN "要添加 Eshell 到 PowerShell 配置文件吗？" -defaultN:($Host.Name -ne 'Visual Studio Code Host') -helpMessageY "powershell将表现得与Esh相同" -helpMessageN "让powershell保持原样，你仍然可以通过``esh``命令来使用Esh")) {
+	if ((-not $added) -and (YorN "要添加 Eshell 到 PowerShell 配置文件吗？" -defaultN:($Host.Name -ne 'Visual Studio Code Host') -helpMessageY "powershell将表现得与Esh相同" -helpMessageN "让powershell保持原样，你仍然可以通过``esh``命令来使用Esh（推荐）")) {
 		@(
 			$universalProfile
 			$profile
