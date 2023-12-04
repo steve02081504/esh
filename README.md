@@ -122,6 +122,7 @@ rm -rf superhavyrock
    │   │           └───builders #提示符构建器文件夹
    │   ├───commands #命令脚本文件夹
    │   │   └───special #特殊命令脚本
+   │   ├───opt #安装 卸载 启动脚本 基础文件
    │   └───scripts #收录脚本工具
    ├───img #图片资源
    ├───opt #安装 卸载 启动脚本

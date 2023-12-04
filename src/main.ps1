@@ -1,5 +1,6 @@
 . $PSScriptRoot/scripts/ValueEx.ps1
 
+$EshellUI ??= 72 #Do not remove this line
 $EshellUI = ValueEx @{
 	State = @{
 		Started = $false
@@ -8,7 +9,7 @@ $EshellUI = ValueEx @{
 	Sources = @{
 		Path = Split-Path $PSScriptRoot
 	}
-	Im = @{
+	Im = ValueEx @{
 		Sudo = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]“Administrator”)
 		VSCodeExtension = [bool]($psEditor) -and ($Host.Name -eq 'Visual Studio Code Host')
 		Editor = [bool]($psEditor)
@@ -17,6 +18,16 @@ $EshellUI = ValueEx @{
 		FirstLoading = $EshellUI -eq $LastExitCode
 		WindowsTerminal = [bool]$env:WT_SESSION
 		InScope = $EshellUI -ne $global:EshellUI
+		"method:InEnvPath" = {
+			param($Path=$env:Path)
+			$result = $false
+			$Path.Split(";") | ForEach-Object {
+				if ($_ -like "$([regex]::Escape($this.Sources.Path))[\\/]path*") {
+					$result = $true
+				}
+			}
+			$result
+		}
 	}
 	'method:GetMyFrom' = {
 		param($Invocation)
@@ -156,10 +167,14 @@ $EshellUI = ValueEx @{
 		$EshellUI.Start()
 	}
 	'method:RunInstall' = {
-		. "$($this.Sources.Path)/opt/install.ps1"
+		$eshDir = $this.Sources.Path
+		$eshDirFromEnv = $this.Im.InEnvPath()
+		. $PSScriptRoot/opt/install.ps1
 	}
 	'method:RunUnInstall' = {
-		. "$($this.Sources.Path)/opt/uninstall.ps1"
+		$eshDir = $this.Sources.Path
+		$eshDirFromEnv = $this.Im.InEnvPath()
+		. $PSScriptRoot/opt/uninstall.ps1
 	}
 	'method:ProvidedFunctions' = {
 		$this.OtherData.AfterEshLoaded.FunctionList | ForEach-Object {
