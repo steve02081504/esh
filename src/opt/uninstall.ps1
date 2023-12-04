@@ -50,7 +50,7 @@ if ($EshellUI) {
 	Remove-Variable EshellUI -Scope Global
 }
 
-if (YorN "要删除 Esh 安装目录吗？" -helpMessageY "将会删除 $eshDir" -helpMessageN "将会保留 $eshDir") {
+if (YorN "要删除 Esh 安装目录吗？" -helpMessageY "将会删除 $eshDir" -helpMessageN "将会保留 $eshDir" -defaultN:($eshDir -match "workspace|workstation")) {
 	Remove-Item $eshDir -Recurse -Force
 	Write-Host "已删除 Esh 安装目录。"
 }
