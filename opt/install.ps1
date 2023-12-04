@@ -31,7 +31,7 @@ $env:Path.Split(";") | ForEach-Object {
 if (-not $eshDir) {
 	$eshDir =
 	if ($EshellUI.Sources.Path -and (Test-Path "${EshellUI.Sources.Path}/path/esh")) { $EshellUI.Sources.Path }
-	elseif (Test-Path $PSScriptRoot/path/esh) { $PSScriptRoot }
+	elseif (Test-Path $PSScriptRoot/../path/esh) { $PSScriptRoot }
 	elseif (Test-Path $env:LOCALAPPDATA/esh) { "$env:LOCALAPPDATA/esh" }
 }
 if (-not $eshDir) {
