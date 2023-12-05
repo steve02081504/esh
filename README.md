@@ -16,16 +16,16 @@
 运行`opt/install`以快速开始（你甚至不需要clone这个项目）：
 
 ```powershell
-{ (Invoke-WebRequest https://github.com/steve02081504/esh/raw/master/opt/install.ps1).Content | Invoke-Expression }.Invoke()
+{ (Invoke-WebRequest https://bit.ly/EshInstall).Content | Invoke-Expression }.Invoke()
 
 ```
 
 ![图片](https://github.com/steve02081504/esh/assets/31927825/39cdadc2-60e6-43f9-bcfc-ef5f973bd12d)
 
-或者通过git进行安装：
+或者通过git进行安装（**一旦安装后删除esh文件夹将导致esh无法正常运行和卸载**）：
 
 ```bash
-git clone https://github.com/steve02081504/esh && cd esh && opt/install
+git clone https://github.com/steve02081504/esh && cd esh && ./opt/install
 
 ```
 
@@ -37,14 +37,6 @@ Update-Eshell
 ```
 
 这将清除`esh/src`文件夹和`esh/data/SAO-lib.txt`并重新下载最新的esh和SAO-lib
-
-## 分开esh和pwsh
-
-想要将esh和pwsh分开来进一步迷惑你的朋友吗？  
-升级到esh `v0.0.0.5`以上来获取path子文件夹，然后将其添加到你的环境变量中！  
-如果你已经将`esh/path`添加到了你的环境变量中，你可以丢弃pwsh的profile中的esh加载，并直接在bash或cmd和pwsh中`esh`，或在windows terminal中`esh.cmd -WorkingDirectory ~`来启动esh  
-![图片](https://github.com/steve02081504/esh/assets/31927825/f017dd02-80bf-4d1e-9cbc-2ee28d43ede9)  
-这不止可以让你的朋友困惑 在你需要纯粹的pwsh时你会感激曾经这样设置的自己  
 
 ## 功能预览  
 
@@ -135,7 +127,7 @@ rm -rf superhavyrock
 或者如同安装时一样运行`opt/uninstall`：
 
 ```powershell
-{ (Invoke-WebRequest https://github.com/steve02081504/esh/raw/master/opt/uninstall.ps1).Content | Invoke-Expression }.Invoke()
+{ (Invoke-WebRequest https://bit.ly/EshUnInstall).Content | Invoke-Expression }.Invoke()
 
 ```
 
@@ -143,7 +135,7 @@ rm -rf superhavyrock
 
 ```pwsh
 cd $EshellUI.Sources.Path
-opt/uninstall
+./opt/uninstall
 
 ```
 

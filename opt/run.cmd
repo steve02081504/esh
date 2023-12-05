@@ -18,6 +18,7 @@ for %%i in (%*) do (
 )
 
 if defined command (
+	set "command=!command:"=""!"
 	pwsh !remainingArgs! -nologo -Command ". %~dp0\run.ps1; Invoke-Expression !command!"
 ) else (
 	pwsh !remainingArgs! -nologo -NoExit -File "%~dp0\run.ps1"

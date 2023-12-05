@@ -1,5 +1,10 @@
 function global:Update-SAO-lib {
 	$espath = $EshellUI.Sources.Path
+	# 如果"$espath/data/SAO-lib.txt"是链接
+	if ((Get-Item "$espath/data/SAO-lib.txt").Attributes -match 'ReparsePoint') {
+		Write-Information "SAO-lib.txt is a link, Skip updating"
+		return
+	}
 	try {
 		#下载最新的SAO-lib
 		Invoke-WebRequest 'https://github.com/steve02081504/SAO-lib/raw/master/SAO-lib.txt' -OutFile "$espath/data/SAO-lib.txt"
@@ -22,6 +27,15 @@ function global:Update-gcc-Kawaii {
 function global:Update-EShell {
 	Update-SAO-lib
 	$espath = $EshellUI.Sources.Path
+	# 如果"$espath"是git仓库
+	if (Test-Path "$espath/.git/config") {
+		$pathNow = $PWD
+		Set-Location $espath
+		git pull
+		Set-Location $pathNow
+		reload
+		return
+	}
 	$praentpath = Split-Path $espath
 	$datapath = "$espath/data"
 	try {

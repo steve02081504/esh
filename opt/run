@@ -31,6 +31,7 @@ fi
 if [[ -z "$command" ]]; then
 	pwsh $parsed_args -nologo -NoExit -File "$SCRIPT_DIR/run.ps1"
 else
+	command=$(echo "$command" | sed -e 's/"/`"/g')
 	pwsh $parsed_args -nologo -Command ". $SCRIPT_DIR/run.ps1 ; Invoke-Expression $command"
 fi
 exit $?
