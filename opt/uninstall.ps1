@@ -1,13 +1,12 @@
 #!/usr/bin/env pwsh
 
-if((Get-ExecutionPolicy) -eq 'Restricted'){ Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Force }
 function illusionlimb($path) {
-	Invoke-Expression $(if (Test-Path $PSScriptRoot/../path/esh) { (Get-Content "$PSScriptRoot/$path") -join "`n" }
+	Invoke-Expression $(if (Test-Path $PSScriptRoot/../path/esh) { Get-Content "$PSScriptRoot/$path" -Raw }
 	else { (Invoke-WebRequest "https://github.com/steve02081504/esh/raw/master/opt/$path").Content })
 }
 
 illusionlimb ../src/fixers/CodePageFixer.ps1
-illusionlimb ../src/opt/EshFinder.ps1
+illusionlimb opt_init.ps1
 
 if (-not $eshDir) {
 	Write-Host "未找到 Esh 安装目录，无法卸载。"
