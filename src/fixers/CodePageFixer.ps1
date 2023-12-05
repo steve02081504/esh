@@ -1,4 +1,5 @@
-if ([System.Environment]::OSVersion.Version.Major -le 7) {
+# 假如在win8以下的系统上运行，那么我们需要检查和修复输出编码
+if ($IsWindows -and ([System.Environment]::OSVersion.Version.Major -le 7)) {
 	$CursorPosBackUp = $host.UI.RawUI.CursorPosition
 	$CodingBackUp = [Console]::OutputEncoding
 	$TestText = '中文测试你好小笼包我是冰激凌'

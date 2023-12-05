@@ -1,37 +1,14 @@
 #!/usr/bin/env pwsh
 
-# 假如在win8以下的系统上运行，那么我们需要先检查和修复一下输出编码
-if ($IsWindows -and ([System.Environment]::OSVersion.Version.Major -le 7)) {
-	$CursorPosBackUp = $host.UI.RawUI.CursorPosition
-	$CodingBackUp = [Console]::OutputEncoding
-	$TestText = '中文测试你好小笼包我是冰激凌'
-	function TestAndSet ($Encoding) {
-		try { Write-Host $TestText }
-		catch { $error.RemoveAt(0); [Console]::OutputEncoding = $Encoding }
-		$host.UI.RawUI.CursorPosition = $CursorPosBackUp
-	}
-	TestAndSet ([System.Text.Encoding]::GetEncoding(936))
-	TestAndSet $CodingBackUp
-	Write-Host $(' ' * $TestText.Length * 2)
-	$host.UI.RawUI.CursorPosition = $CursorPosBackUp
+if((Get-ExecutionPolicy) -eq 'Restricted'){ Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Force }
+function illusionlimb($path) {
+	Invoke-Expression $(if (Test-Path $PSScriptRoot/../path/esh) { (Get-Content "$PSScriptRoot/$path") -join "`n" }
+	else { (Invoke-WebRequest "https://github.com/steve02081504/esh/raw/master/opt/$path").Content })
 }
-# 遍历环境变量
-$env:Path.Split(";") | ForEach-Object {
-	if ($_ -and (-not (Test-Path $_ -PathType Container))) {
-		Write-Warning "检测到无效的环境变量于$_，请考虑删除"
-	}
-	elseif ($_ -like "*[\\/]esh[\\/]path*") {
-		$eshDir = $_ -replace "[\\/]path[\\/]*$", ''
-		$eshDirFromEnv = $true
-	}
-}
-# 使用if判断+赋值：我们不能使用??=因为用户可能以winpwsh运行该脚本
-if (-not $eshDir) {
-	$eshDir =
-	if ($EshellUI.Sources.Path -and (Test-Path "${EshellUI.Sources.Path}/path/esh")) { $EshellUI.Sources.Path }
-	elseif (Test-Path $PSScriptRoot/../path/esh) { $PSScriptRoot }
-	elseif (Test-Path $env:LOCALAPPDATA/esh) { "$env:LOCALAPPDATA/esh" }
-}
+
+illusionlimb ../src/fixers/CodePageFixer.ps1
+illusionlimb ../src/opt/EshFinder.ps1
+
 if (-not $eshDir) {
 	Write-Host "未找到 Esh 安装目录，无法卸载。"
 	exit 1

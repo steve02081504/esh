@@ -136,7 +136,6 @@ $EshellUI = ValueEx @{
 		. $PSScriptRoot/system/UI/title.ps1
 		. $PSScriptRoot/system/UI/icon.ps1
 
-		. $PSScriptRoot/system/Fixer.ps1
 		. $PSScriptRoot/system/linux.ps1
 
 		. $PSScriptRoot/system/UI/prompt/main.ps1
@@ -144,7 +143,7 @@ $EshellUI = ValueEx @{
 		. $PSScriptRoot/system/BackgroundLoading.ps1
 
 		Get-ChildItem "$PSScriptRoot/commands" *.ps1 | ForEach-Object { . $_.FullName }
-
+		Get-ChildItem "$PSScriptRoot/Fixers" *.ps1 | ForEach-Object { . $_.FullName }
 		. $PSScriptRoot/system/UI/loaded.ps1
 
 		$this.State.Started = $true

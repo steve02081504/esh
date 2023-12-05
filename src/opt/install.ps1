@@ -2,13 +2,28 @@ using namespace System.Management.Automation.Host
 
 . $PSScriptRoot/base.ps1
 
+# 运行环境中完全可能没有pwsh（用户用winpwsh运行该脚本），所以我们需要进行一些额外的检查
+try {
+	if (-not (Get-Command pwsh -ErrorAction Ignore)) {
+		# tiny10或tiny11完全可能没有winget，额外的代码来修复它
+		if (-not (Get-Command winget -ErrorAction Ignore)) {
+			# 这段if的大前提已经是在winpwsh中了 不需要额外的判断来确定是否使用-UseWindowsPowerShell flag导入Appx
+			Import-Module Appx
+			Add-AppxPackage -RegisterByFamilyName -MainPackage Microsoft.DesktopAppInstaller_8wekyb3d8bbwe
+		}
+		# 额外的判断：在win8以下的系统中，最后一个能运行的pwsh版本是7.2.15
+		Invoke-Expression "winget install --id Microsoft.Powershell $(
+			if([System.Environment]::OSVersion.Version.Major -le 7){'-v 7.2.15'}
+		)"
+	}
+}catch{}
 #对于每个desktop.ini进行+s +h操作
 Get-ChildItem $eshDir -Recurse -Filter desktop.ini | ForEach-Object {
 	$_.Attributes = 'Hidden', 'System'
 }
 if ((-not $eshDirFromEnv) -and (YorN "要安装 Esh 到环境变量吗？" -helpMessageY "将可以在任何地方使用``esh``或``EShell``命令")) {
-	$env:Path += ";$eshDir/path"
-	$UserPath = [Environment]::GetEnvironmentVariable("Path", "User") + ";$eshDir/path"
+	$env:Path += "`;$eshDir/path"
+	$UserPath = [Environment]::GetEnvironmentVariable("Path", "User") + "`;$eshDir/path"
 	[Environment]::SetEnvironmentVariable("Path", $UserPath, "User")
 	Write-Host "安装成功！`n现在可以在任何地方使用 ``esh`` 或 ``EShell`` 命令了。"
 	$eshDirFromEnv = $true
