@@ -16,7 +16,7 @@
 运行`opt/install`以快速开始（你甚至不需要clone这个项目）：
 
 ```powershell
-{ (Invoke-WebRequest https://bit.ly/EshInstall).Content | Invoke-Expression }.Invoke()
+& { (Invoke-WebRequest https://bit.ly/EshInstall).Content | Invoke-Expression }
 
 ```
 
@@ -127,7 +127,7 @@ rm -rf superhavyrock
 或者如同安装时一样运行`opt/uninstall`：
 
 ```powershell
-{ (Invoke-WebRequest https://bit.ly/EshUnInstall).Content | Invoke-Expression }.Invoke()
+& { (Invoke-WebRequest https://bit.ly/EshUnInstall).Content | Invoke-Expression }
 
 ```
 

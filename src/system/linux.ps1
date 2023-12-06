@@ -168,7 +168,7 @@ Set-PSReadLineKeyHandler -Key Enter -ScriptBlock {
 	}
 	#若当前行以/开头
 	if ($Executable.StartsWith("/") -or $Executable.StartsWith("~")) {
-		Write-Host ""
+		Write-Host
 		[Microsoft.PowerShell.PSConsoleReadLine]::CancelLine()
 		Write-Host "`b`b  "
 		#则转换为windows路径
@@ -176,7 +176,7 @@ Set-PSReadLineKeyHandler -Key Enter -ScriptBlock {
 		#求值并输出
 		$StartExecutionTime = Get-Date
 		try { Invoke-Expression "$Executable $Rest *>&1" | Out-Default }
-		catch { $Host.UI.WriteErrorLine($_) }
+		catch { Out-Error $_ }
 		$EndExecutionTime = Get-Date
 		[Microsoft.PowerShell.PSConsoleReadLine]::AddToHistory($OriLine)
 		[PSCustomObject](@{

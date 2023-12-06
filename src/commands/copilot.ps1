@@ -4,19 +4,26 @@ function global:Install-Copilot {
 		if (Test-Command winget) {
 			try {
 				winget install GitHub.cli
-				gh extension install github/gh-copilot
 			}
 			catch {
-				#install failed
-				Write-Error 'Error: Install github cli failed.'
+				Out-Error 'Install github cli failed.'
 				throw
 			}
 		}
 		else {
 			#winget not found
-			Write-Error 'Please install github cli first.'
-			throw
+			try {
+				Import-Module Appx -UseWindowsPowerShell
+				Add-AppxPackage -RegisterByFamilyName -MainPackage Microsoft.DesktopAppInstaller_8wekyb3d8bbwe
+			}
+			catch {
+				Out-Error 'Install github cli -> Install winget failed.'
+				throw
+			}
 		}
+	}
+	if (-not(gh extension list | Select-String 'github/gh-copilot')) {
+		gh extension install github/gh-copilot
 	}
 }
 

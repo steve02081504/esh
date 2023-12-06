@@ -7,3 +7,7 @@ if ($error.Count -eq $EshellUI.OtherData.BeforeEshLoaded.Errors.Count) {
 
 . $PSScriptRoot/logo.ps1
 $EshellUI.Logo.Print()
+if($EshellUI.LoadingLog.Count) {
+	$EshellUI.LoadingLog.Print()
+	Write-Host
+}

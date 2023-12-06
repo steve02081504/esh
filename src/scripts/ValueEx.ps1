@@ -19,8 +19,11 @@ function global:ValueEx ($ValueAndMethods) {
 		if ($_.Key.StartsWith('method:') -and ($_.Value -is [scriptblock])) {
 			Add-Member -InputObject $ValueExed -MemberType ScriptMethod -Name $_.Key.Substring(7) -Value $_.Value -Force
 		}
-		else {
+		elseif ($ValueExed -is [HashTable]) {
 			$ValueExed[$_.Key] = $_.Value
+		}
+		else {
+			Add-Member -InputObject $ValueExed -MemberType NoteProperty -Name $_.Key -Value $_.Value -Force
 		}
 	}
 	return ,$ValueExed

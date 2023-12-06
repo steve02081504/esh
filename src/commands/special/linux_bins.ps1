@@ -50,7 +50,7 @@ function global:cd {
 				$PreviousPath = Join-Path $PreviousPath $CurrentPath
 				$Path = $ChildPath
 				if (-not (Test-Path $PreviousPath)) {
-					$Host.UI.WriteErrorLine("bash: cd: ${PreviousPath}: No such file or directory")
+					Out-Error "bash: cd: ${PreviousPath}: No such file or directory"
 				}
 				#若是符号链接
 				if ((Get-Item $PreviousPath).Attributes -band [System.IO.FileAttributes]::ReparsePoint) {
@@ -64,7 +64,7 @@ function global:cd {
 			Set-Location $Path
 		}
 		else {
-			$Host.UI.WriteErrorLine("bash: cd: ${Path}: No such file or directory")
+			Out-Error "bash: cd: ${Path}: No such file or directory"
 		}
 		return
 	}

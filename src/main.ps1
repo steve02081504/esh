@@ -55,6 +55,35 @@ $EshellUI = ValueEx @{
 		$this.Im.From = $this.GetMyFrom($Invocation)
 	}
 
+	LoadingLog = ValueEx @{
+		__type__ = [System.Collections.ArrayList]
+		ErrorLevel = &{enum ErrorLevel{
+				Info
+				Warning
+				Error
+		};[ErrorLevel]}
+		'method:AddLog' = {
+			param($What, $Level)
+			$this.Add([PSCustomObject]@{
+				What = $What
+				Level = $Level
+			}) | Out-Null
+		}
+		'method:AddInfo' = {param($What);$this.AddLog($What, $this.ErrorLevel::Info)}
+		'method:AddWarning' = {param($What);$this.AddLog($What, $this.ErrorLevel::Warning)}
+		'method:AddError' = {param($What);$this.AddLog($What, $this.ErrorLevel::Error)}
+		'method:Print' = {
+			$this | ForEach-Object {
+				$What = $_.What # 这个变量是必须的，$_在switch中会被更新为switch的参数
+				switch ($_.Level) {
+					$this.ErrorLevel::Info { Out-Info $What }
+					$this.ErrorLevel::Warning { Out-Warning $What }
+					$this.ErrorLevel::Error { Out-Error $What }
+				}
+			}
+		}
+	}
+
 	MSYS = @{
 		RootPath = 'C:\msys64'
 	}
@@ -68,7 +97,7 @@ $EshellUI = ValueEx @{
 		'method:PopAndRun' = {
 			$OriginalPref = $ProgressPreference # Default is 'Continue'
 			$ProgressPreference = 'SilentlyContinue'
-			$this.Pop().Invoke()
+			& $this.Pop()
 			$ProgressPreference = $OriginalPref
 		}
 	}
@@ -226,7 +255,7 @@ $EshellUI = ValueEx @{
 			)
 			$StartExecutionTime = Get-Date
 			try { Invoke-Expression $expr | Out-Default }
-			catch { $Host.UI.WriteErrorLine($_) }
+			catch { Out-Error $_ }
 			$EndExecutionTime = Get-Date
 			[PSCustomObject](@{
 				CommandLine = $expr

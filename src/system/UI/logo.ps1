@@ -17,11 +17,11 @@ $EshellUI.Logo = ValueEx @{
 			}
 			Write-Host -NoNewline "$($VirtualTerminal.Colors.Magenta) For $($VirtualTerminal.Styles.Italic)Windows Terminal $($VirtualTerminal.Styles.NoItalic)v$(Get-WindowsTerminalVersion)"
 		}#>
-		Write-Host ""
+		Write-Host
 		Write-Host "$($VirtualTerminal.Styles.Italic)$($VirtualTerminal.Colors.BrightMagenta)(c)$($VirtualTerminal.Colors.Reset) E-tek Corporation.$($VirtualTerminal.Styles.NoItalic) $($VirtualTerminal.Styles.Underline)All rights reserved$($VirtualTerminal.Styles.NoUnderline)."
 
 		$EshellUI.Hints.PrintRandom()
 
-		Write-Host ""
+		Write-Host
 	}
 }
