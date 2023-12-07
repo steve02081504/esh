@@ -1,27 +1,51 @@
 using namespace System.Management.Automation.Host
+param(
+	[switch]$Force=$false,
+	[ValidateSet('yes', 'no', 'ask', 'auto')][string]$StartEsh='auto',
+	[parameter(DontShow)][switch]$FromScript=$false
+)
 
 . $PSScriptRoot/base.ps1
 
-# 运行环境中完全可能没有pwsh（用户用winpwsh运行该脚本），所以我们需要进行一些额外的检查
-try {
-	if (-not (Get-Command pwsh -ErrorAction Ignore)) {
-		# tiny10或tiny11完全可能没有winget，额外的代码来修复它
-		if (-not (Get-Command winget -ErrorAction Ignore)) {
-			# 这段if的大前提已经是在winpwsh中了 不需要额外的判断来确定是否使用-UseWindowsPowerShell flag导入Appx
-			Import-Module Appx
-			Add-AppxPackage -RegisterByFamilyName -MainPackage Microsoft.DesktopAppInstaller_8wekyb3d8bbwe
+if ($IsWindows) {
+	# 运行环境中完全可能没有pwsh（用户用winpwsh运行该脚本），所以我们需要进行一些额外的检查
+	try {
+		if (-not (Get-Command pwsh -ErrorAction Ignore)) {
+			# tiny10或tiny11完全可能没有winget，额外的代码来修复它
+			if (-not (Get-Command winget -ErrorAction Ignore)) {
+				# 这段if的大前提已经是在winpwsh中了 不需要额外的判断来确定是否使用-UseWindowsPowerShell flag导入Appx
+				Import-Module Appx
+				Add-AppxPackage -RegisterByFamilyName -MainPackage Microsoft.DesktopAppInstaller_8wekyb3d8bbwe
+			}
+			# 额外的判断：在win8以下的系统中，最后一个能运行的pwsh版本是7.2.15
+			Invoke-Expression "winget install --id Microsoft.Powershell $(
+				if([System.Environment]::OSVersion.Version.Major -le 7){'-v 7.2.15'}
+			)"
 		}
-		# 额外的判断：在win8以下的系统中，最后一个能运行的pwsh版本是7.2.15
-		Invoke-Expression "winget install --id Microsoft.Powershell $(
-			if([System.Environment]::OSVersion.Version.Major -le 7){'-v 7.2.15'}
-		)"
+	}catch{}
+	if ((Test-Path "$eshDir/.git") -and (-not (Test-Path "$eshDir/.git/desktop.ini"))) {
+		Copy-Item "$eshDir/data/git_icon.ini" "$eshDir/.git/desktop.ini" -Force
 	}
-}catch{}
-#对于每个desktop.ini进行+s +h操作
-Get-ChildItem $eshDir -Recurse -Filter desktop.ini | ForEach-Object {
-	$_.Attributes = 'Hidden', 'System'
+	Get-ChildItem $eshDir -Recurse -Filter desktop.ini -Force | ForEach-Object {
+		$Dir = Get-Item $(Split-Path $_.FullName) -Force
+		$Dir.Attributes = $Dir.Attributes -bor [System.IO.FileAttributes]::ReadOnly -bor [System.IO.FileAttributes]::Directory
+		$_.Attributes = $_.Attributes -bor [System.IO.FileAttributes]::Hidden -bor [System.IO.FileAttributes]::System
+	}
+	Get-ChildItem $eshDir -Recurse -Filter .* | ForEach-Object {
+		$_.Attributes = $_.Attributes -bor [System.IO.FileAttributes]::Hidden
+	}
+	if ((Test-Path "$eshDir/../SAO-lib/SAO-lib.txt") -and (-not (Test-Path "$eshDir/data/SAO-lib.txt"))) {
+		if (([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]'Administrator')) {
+			New-Item -ItemType SymbolicLink -Path "$eshDir/data/SAO-lib.txt" -Target "$eshDir/../SAO-lib/SAO-lib.txt" -Force
+		}
+		else{
+			try{
+				Start-Process -Wait -FilePath cmd.exe -ArgumentList "/c mklink `"$eshDir/data/SAO-lib.txt`" `"$eshDir/../SAO-lib/SAO-lib.txt`"" -Verb runas
+			}catch{}
+		}
+	}
 }
-if ((-not $eshDirFromEnv) -and (YorN "要安装 Esh 到环境变量吗？" -helpMessageY "将可以在任何地方使用``esh``或``EShell``命令")) {
+if ((-not $eshDirFromEnv) -and (YorN "要安装 Esh 到环境变量吗？" -helpMessageY "将可以在任何地方使用``esh``或``EShell``命令" -SkipAsDefault:$Force)) {
 	$env:Path += "`;$eshDir/path"
 	$UserPath = [Environment]::GetEnvironmentVariable("Path", "User") + "`;$eshDir/path"
 	[Environment]::SetEnvironmentVariable("Path", $UserPath, "User")
@@ -46,7 +70,7 @@ else {
 			$added = $true
 		}
 	}
-	if ((-not $added) -and (YorN "要添加 Eshell 到 PowerShell 配置文件吗？" -defaultN:($Host.Name -ne 'Visual Studio Code Host') -helpMessageY "powershell将表现得与Esh相同" -helpMessageN "让powershell保持原样，你仍然可以通过``esh``命令来使用Esh（推荐）")) {
+	if ((-not $added) -and (YorN "要添加 Eshell 到 PowerShell 配置文件吗？" -defaultN:($Host.Name -ne 'Visual Studio Code Host') -helpMessageY "powershell将表现得与Esh相同" -helpMessageN "让powershell保持原样，你仍然可以通过``esh``命令来使用Esh（推荐）" -SkipAsDefault:$Force)) {
 		@(
 			$universalProfile
 			$profile
@@ -58,12 +82,14 @@ else {
 			}
 		}
 		if (-not $added) {
-			do {
-				$response = $Host.UI.PromptForChoice("未找到可用的profile文件", "选择你想要新建并添加Esh加载的配置文件", @(
-						[ChoiceDescription]::new("&0`b通用配置文件", $universalProfile),
-						[ChoiceDescription]::new("&1`b当前应用针对性配置文件", $profile)
-					), 1)
-			} until ($response -ne -1)
+			if(-not $Force){
+				do {
+					$response = $Host.UI.PromptForChoice("未找到可用的profile文件", "选择你想要新建并添加Esh加载的配置文件", @(
+							[ChoiceDescription]::new("&0`b当前应用针对性配置文件", $profile),
+							[ChoiceDescription]::new("&1`b通用配置文件", $universalProfile)
+						), 0)
+				} until ($response -ne -1)
+			}
 			$theProfile = @($universalProfile, $profile)[$response]
 			New-Item -ItemType Directory -Force -Path $profilesDir | Out-Null
 			Write-Information "在${theProfile}中添加了esh加载语句"
@@ -74,18 +100,19 @@ else {
 if ($IsWindows) {
 	$EshCmd = @("$eshDir/path/")[$eshDirFromEnv] + "esh.cmd"
 	$wtFragmentDir = "$env:LOCALAPPDATA\Microsoft\Windows Terminal\Fragments\esh"
-	$WtProfileBase = @{
+	$WtProfileBase = [ordered]@{
 		commandline = $EshCmd; startingDirectory = "~"
-		icon = "ms-appx:///ProfileIcons/{0caa0dad-35be-5f56-a8ff-afceeeaa6101}.png"
+		icon = "$eshDir/img/esh.ico"
 	}
-	$wtFragment = @{
-		schema   = "https://aka.ms/terminal-profiles-schema"
+	$wtFragment = [ordered]@{
+		'$help' = "https://aka.ms/terminal-documentation"
+		'$schema' = "https://aka.ms/terminal-profiles-schema"
 		profiles = @(
-			@{name = "Eshell" } + $WtProfileBase
-			@{name = "Eshell (Root)" ; elevate = $true } + $WtProfileBase
+			[ordered]@{name = "Eshell" } + $WtProfileBase
+			[ordered]@{name = "Eshell (Root)" ; elevate = $true } + $WtProfileBase
 		)
 	}
-	$wtFragmentJson = ($wtFragment | ConvertTo-Json).Replace("`r`n", "`n")
+	$wtFragmentJson = ($wtFragment | ConvertTo-Json).Replace("`r`n", "`n").Replace("  ", "`t")+ "`n"
 	if (Test-Path $wtFragmentDir/esh.json) {
 		if ((Get-Content $wtFragmentDir/esh.json -Raw) -ne $wtFragmentJson) {
 			Set-Content $wtFragmentDir/esh.json $wtFragmentJson -NoNewline
@@ -108,4 +135,22 @@ if ($IsWindows) {
 		New-Item -ItemType Directory -Force -Path (Split-Path $LoaderPath) | Out-Null
 		Set-Content $LoaderPath $startScript -NoNewline
 	}
+}
+
+if (-not (Get-Command pwsh -ErrorAction Ignore)) {
+	$Host.UI.WriteErrorLine("esh的运行需要PowerShell 6或以上`n访问 https://aka.ms/pscore6 来获取PowerShell 6+ 并使得``pwsh``命令在环境中可用以使得esh能够正常工作")
+}
+else{
+	$StartEsh = (-not $EshellUI) -and $(switch ($StartEsh) {
+		no { $false }
+		yes { $true }
+		default { YorN "要使用 Eshell 吗？" -SkipAsDefault:($Force -and $StartEsh -eq 'auto') }
+	})
+}
+if ($StartEsh) {
+	if ($FromScript -or ($PSVersionTable.PSVersion.Major -lt 6)) {
+		. $eshDir/opt/run
+		[System.Environment]::Exit($LastExitCode)
+	}
+	else { . $eshDir/opt/run.ps1 -Invocation $MyInvocation }
 }

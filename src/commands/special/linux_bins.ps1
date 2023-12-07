@@ -38,10 +38,8 @@ function global:cd {
 	#所以我们只能通过Set-Location来模拟cd的行为
 	$IsLinuxBin = $Path.Length -eq 0
 	function baseCD ($Path, [switch]$IsFollowSymbolicLink = $true) {
-		if ($Path.Length -eq 0) {
-			Set-Location ~
-		}
-		elseif (-not $IsFollowSymbolicLink) {
+		$Path ??= '~'
+		if (-not $IsFollowSymbolicLink) {
 			#循环分割路径，检查每一级路径是否是符号链接
 			$PreviousPath = ""
 			while ($Path) {

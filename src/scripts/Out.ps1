@@ -10,8 +10,7 @@ ${global:Out-Performance} = @{
 	}
 }
 
-function global:Out-Error {
-	param ($Value)
+function global:Out-Error($Value) {
 	$Host.UI.WriteErrorLine(
 		$VirtualTerminal.Colors[
 			${global:Out-Performance}.Error.Color ??
@@ -22,8 +21,7 @@ function global:Out-Error {
 	)
 }
 
-function global:Out-Warning {
-	param ($Value)
+function global:Out-Warning($Value) {
 	$Host.UI.WriteWarningLine(
 		$VirtualTerminal.Colors[
 			${global:Out-Performance}.Warning.Color ??
@@ -34,8 +32,7 @@ function global:Out-Warning {
 	)
 }
 
-function global:Out-Info {
-	param ($Value)
+function global:Out-Info($Value) {
 	$Host.UI.WriteLine(
 		$VirtualTerminal.Colors[
 			${global:Out-Performance}.Info.Color ?? 'Default'

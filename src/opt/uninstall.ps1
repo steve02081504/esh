@@ -1,3 +1,8 @@
+param(
+	[switch]$Force=$false,
+	[ValidateSet('no', 'yes', 'ask', 'auto')][string]$RemoveDir='auto'
+)
+
 . $PSScriptRoot/base.ps1
 
 # 移除环境变量
@@ -13,7 +18,7 @@ if ($eshDirFromEnv) {
 $profilesDir = Split-Path $PROFILE
 $startScript = ". $eshDir/opt/run.ps1"
 
-Get-ChildItem $profilesDir -Filter *profile.ps1 | ForEach-Object {
+Get-ChildItem $profilesDir -Filter *profile.ps1 -ErrorAction Ignore | ForEach-Object {
 	$theprofile = $_.FullName
 	$profileContent = Get-Content $theprofile
 	if ($profileContent -contains $startScript) {
@@ -50,7 +55,12 @@ if ($EshellUI) {
 	Remove-Variable EshellUI -Scope Global
 }
 
-if (YorN "要删除 Esh 安装目录吗？" -helpMessageY "将会删除 $eshDir" -defaultN:($eshDir -match "workspace|workstation")) {
+$RemoveEshDir = switch ($RemoveDir) {
+	yes { $true }
+	no { $false }
+	default { YorN "要删除 Esh 安装目录吗？" -helpMessageY "将会删除 $eshDir" -defaultN:($eshDir -match "workspace|workstation")  -SkipAsDefault:($Force -and $RemoveDir -eq 'auto') }
+}
+if ($RemoveEshDir) {
 	Remove-Item $eshDir -Recurse -Force
 	Write-Host "已删除 Esh 安装目录。"
 }

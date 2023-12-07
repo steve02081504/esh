@@ -1,5 +1,8 @@
 #!/usr/bin/env pwsh
-
+[CmdletBinding()]param(
+	[switch]$Force=$false,
+	[ValidateSet('no', 'yes', 'ask', 'auto')][string]$RemoveDir='auto'
+)
 function illusionlimb($path) {
 	Invoke-Expression $(if (Test-Path $PSScriptRoot/../path/esh) { Get-Content "$PSScriptRoot/$path" -Raw }
 	else { (Invoke-WebRequest "https://github.com/steve02081504/esh/raw/master/opt/$path").Content })
@@ -17,4 +20,4 @@ else {
 	if ($EshellUI) { Write-Host "（并且你正在使用它 :(）" }
 }
 
-. $eshDir/src/opt/uninstall.ps1
+. $eshDir/src/opt/uninstall.ps1 -Force:$Force -RemoveDir:$RemoveDir

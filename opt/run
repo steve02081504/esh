@@ -9,7 +9,16 @@ while [[ $# -gt 0 ]]; do
 				command="$2"
 				shift 2
 			else
-				echo "Error: Missing argument after -Command"
+				echo "Error: Missing argument after -Command" >&2
+				exit 1
+			fi
+			;;
+		-File)
+			if [[ $# -gt 1 ]]; then
+				File="$2"
+				shift 2
+			else
+				echo "Error: Missing argument after -File" >&2
 				exit 1
 			fi
 			;;
@@ -29,9 +38,19 @@ if [[ -d "/c/Windows" ]]; then
 fi
 
 if [[ -z "$command" ]]; then
-	pwsh $parsed_args -nologo -NoExit -File "$SCRIPT_DIR/run.ps1"
+	if [[ -z "$File" ]]; then
+		pwsh $parsed_args -nologo -NoExit -File "$SCRIPT_DIR/run.ps1"
+	else
+		File=$(echo "$File" | sed -e 's/"/`"/g')
+		pwsh $parsed_args -nologo -NoExit -Command ". $SCRIPT_DIR/run.ps1 ; . $File"
+	fi
 else
 	command=$(echo "$command" | sed -e 's/"/`"/g')
-	pwsh $parsed_args -nologo -Command ". $SCRIPT_DIR/run.ps1 ; Invoke-Expression $command"
+	if [[ -z "$File" ]]; then
+		pwsh $parsed_args -nologo -Command ". $SCRIPT_DIR/run.ps1 ; Invoke-Expression $command"
+	else
+		File=$(echo "$File" | sed -e 's/"/`"/g')
+		pwsh $parsed_args -nologo -Command ". $SCRIPT_DIR/run.ps1 ; . $File ; Invoke-Expression $command"
+	fi
 fi
 exit $?

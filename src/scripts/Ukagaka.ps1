@@ -1,20 +1,8 @@
-function global:Get-Ukagaka-Description-File-HashTable {
-	param(
-		[Parameter(Mandatory = $true)]
-		$Content
-	)
-	#首先以换行符分割
-	$Content = $Content -split "`n"
-	#去除末尾可能的`r
-	$Content = $Content -replace "`r$"
-	#去除空行
-	$Content = $Content -ne ""
+function global:Get-Ukagaka-Description-File-HashTable($Content) {
 	$Description = @{}
-	foreach ($Line in $Content) {
-		$LineArray = $Line -split ','
-		$Key = $LineArray[0].Trim()
-		$Value = $Line.Substring($LineArray[0].Length + 1).Trim()
-		$Description.Add($Key, $Value)
+	$Content ?? $Input -split '\r?\n' -ne '' | ForEach-Object {
+		$Key,$Value = $_ -split ','
+		$Description.Add($Key.Trim(), $Value -join ',')
 	}
 	$Description
 }
@@ -23,53 +11,33 @@ function global:Read-Ukagaka-Description-File {
 		[Parameter(Mandatory = $true)]
 		[string]$Path
 	)
-	$Content = Get-Content $Path -Encoding UTF8
-	$Description = Get-Ukagaka-Description-File-HashTable -Content $Content
+	. ($Read={$Description = Get-Content $Path -Encoding UTF8 | Get-Ukagaka-Description-File-HashTable})
 	#若charset不是UTF-8或其大小写变体，则重新读取
-	if (($Description['charset']) -and ($Description['charset'] -notmatch 'UTF-?8')) {
-		$Content = Get-Content $Path -Encoding $Description['charset']
-		$Description = Get-Ukagaka-Description-File-HashTable -Content $Content
-	}
+	if ($Description.charset -and $Description.charset -notmatch 'UTF-?8' ) { . $Read }
 	$Description
 }
-function global:Test-Ukagaka-Directory-Base {
+. "$($EshellUI.Sources.Path)/src/scripts/DiggingPath.ps1"
+function global:Test-Ukagaka-Common-Directory {
 	param(
 		[Parameter(Mandatory = $true)]
 		[string]$Path,
 		[string]$CheckPath = 'descript.txt'
 	)
-	$DescriptionPath = Join-Path $Path $CheckPath
-	if (Test-Path $DescriptionPath) {
-		Read-Ukagaka-Description-File $DescriptionPath
-	}
-	else {
-		#测试父目录直至根目录
-		$ParentPath = Split-Path $Path
-		if ($ParentPath) {
-			Test-Ukagaka-Directory-Base $ParentPath $CheckPath
-		}
-		else {
-			$null
-		}
-	}
+	DiggingPath { Read-Ukagaka-Description-File $_ } $Path $CheckPath
 }
 function global:Test-Ukagaka-Ghost-Directory {
 	param(
 		[Parameter(Mandatory = $true)]
 		[string]$Path
 	)
-	Test-Ukagaka-Directory-Base $Path 'ghost/master/descript.txt'
+	Test-Ukagaka-Common-Directory $Path 'ghost/master/descript.txt'
 }
 function global:Test-Ukagaka-Directory {
 	param(
 		[Parameter(Mandatory = $true)]
 		[string]$Path
 	)
-	$result = Test-Ukagaka-Directory-Base $Path
-	if (-not $result) {
-		Test-Ukagaka-Ghost-Directory $Path
-	}
-	else {
-		$result
-	}
+	
+	if ($result = Test-Ukagaka-Common-Directory $Path) { $result }
+	else { Test-Ukagaka-Ghost-Directory $Path }
 }

@@ -1,5 +1,6 @@
 using namespace System.Management.Automation.Host
-function YorN($message, $helpMessageY = "", $helpMessageN = "", [switch]$defaultN = $false) {
+function YorN($message, $helpMessageY = "", $helpMessageN = "", [switch]$defaultN = $false, [switch]$SkipAsDefault=$false) {
+	if($SkipAsDefault) { return -not $defaultN }
 	do {
 		$response = $Host.UI.PromptForChoice("", $message, @(
 				[ChoiceDescription]::new('&Yes', $helpMessageY), [ChoiceDescription]::new('&No', $helpMessageN)

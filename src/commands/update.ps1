@@ -31,7 +31,7 @@ function global:Update-EShell {
 	if (Test-Path "$espath/.git/config") {
 		$pathNow = $PWD
 		Set-Location $espath
-		git pull
+		git pull --rebase
 		Set-Location $pathNow
 		reload
 		return
@@ -41,8 +41,8 @@ function global:Update-EShell {
 	try {
 		#下载最新的EShell
 		Invoke-WebRequest 'https://github.com/steve02081504/esh/archive/refs/heads/master.zip' -OutFile "$datapath/master.zip"
-		#删除旧的src以确保干净
-		Remove-Item "$espath/src" -Recurse -Force
+		#删除除了data和desktop.ini文件夹以外的所有文件
+		Get-ChildItem "$espath" -Force | Where-Object { $_.Name -notin @('data', 'desktop.ini') } | Remove-Item -Recurse -Force
 		#更新文件
 		Rename-Item "$espath" "$praentpath/esh-master"
 		Expand-Archive "$praentpath/esh-master/data/master.zip" "$praentpath" -Force

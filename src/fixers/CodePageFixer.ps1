@@ -1,17 +1,12 @@
-# 假如在win8以下的系统上运行，那么我们需要检查和修复输出编码
-if ($IsWindows -and ([System.Environment]::OSVersion.Version.Major -le 7)) {
+if ($IsWindows -and ([Console]::OutputEncoding -ne [System.Text.Encoding]::UTF8)) {
 	$CursorPosBackUp = $host.UI.RawUI.CursorPosition
-	$CodingBackUp = [Console]::OutputEncoding
 	$TestText = '中文测试你好小笼包我是冰激凌'
-	function TestAndSet ($Encoding) {
-		try { Write-Host $TestText }
-		catch { $error.RemoveAt(0); [Console]::OutputEncoding = $Encoding }
-		$host.UI.RawUI.CursorPosition = $CursorPosBackUp
+	foreach ($Encoding in [System.Text.Encoding]::GetEncodings()) {
+		try { Write-Host $TestText;break }
+		catch { $error.RemoveAt(0);[Console]::OutputEncoding = $Encoding }
+		try{ $host.UI.RawUI.CursorPosition = $CursorPosBackUp } catch { $Error.RemoveAt(0) }
 	}
-	TestAndSet ([System.Text.Encoding]::GetEncoding(936))
-	TestAndSet $CodingBackUp
 	Write-Host $(' ' * $TestText.Length * 2)
-	$host.UI.RawUI.CursorPosition = $CursorPosBackUp
-	Remove-Variable @('CursorPosBackUp', 'CodingBackUp', 'TestText')
-	Remove-Item function:TestAndSet
+	try{ $host.UI.RawUI.CursorPosition = $CursorPosBackUp } catch { $Error.RemoveAt(0) }
+	Remove-Variable @('CursorPosBackUp', 'TestText')
 }

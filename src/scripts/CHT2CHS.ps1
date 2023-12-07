@@ -8,16 +8,12 @@
 
 function global:CHS2CHT.base {
 	param([string]$str)
-	[string]$Result = ""
-	for ($i = 0; $i -lt $str.Length; $i++) {
-		if (([int]$str[$i] -gt 255) -and ${CHS2CHT.data.alphas}.Contains($str[$i])) {
-			$Result += ${CHS2CHT.data.alphas}[$str[$i]]
+	($str.ToCharArray() | ForEach-Object {
+		if (($_ -ge 256) -and ${CHS2CHT.data.alphas}.Contains($_)) {
+			${CHS2CHT.data.alphas}[$_]
 		}
-		else {
-			$Result += $str[$i]
-		}
-	}
-	return $Result
+		else { $_ }
+	}) -join ''
 }
 function global:CHS2CHT {
 	param([string]$str)
@@ -32,16 +28,12 @@ function global:CHS2CHT {
 
 function global:CHT2CHS.base {
 	param([string]$str)
-	[string]$Result = ""
-	for ($i = 0; $i -lt $str.Length; $i++) {
-		if (([int]$str[$i] -gt 255) -and ${CHT2CHS.data.alphas}.Contains($str[$i])) {
-			$Result += ${CHT2CHS.data.alphas}[$str[$i]]
+	($str.ToCharArray() | ForEach-Object {
+		if (($_ -ge 256) -and ${CHT2CHS.data.alphas}.Contains($_)) {
+			${CHT2CHS.data.alphas}[$_]
 		}
-		else {
-			$Result += $str[$i]
-		}
-	}
-	return $Result
+		else { $_ }
+	}) -join ''
 }
 function global:CHT2CHS {
 	param([string]$str)

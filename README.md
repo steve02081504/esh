@@ -13,7 +13,10 @@
 
 ## 快速开始
 
-运行`opt/install`以快速开始（你甚至不需要clone这个项目）：
+运行[`esh.exe`](https://github.com/steve02081504/esh/releases/latest/download/esh.exe)以在不进行安装的情况下开始  
+对于单文件exe 你可以通过`esh -Command $EshellUI.RunInstall()`来安装esh到系统环境中  
+
+或者运行`opt/install`以快速开始（你甚至不需要clone这个项目）：
 
 ```powershell
 & { (Invoke-WebRequest https://bit.ly/EshInstall).Content | Invoke-Expression }
@@ -116,6 +119,7 @@ rm -rf superhavyrock
    │   │   └───special #特殊命令脚本
    │   ├───opt #安装 卸载 启动脚本 基础文件
    │   └───scripts #收录脚本工具
+   ├───runner #exe文件编译文件夹 包含源码和构建脚本
    ├───img #图片资源
    ├───opt #安装 卸载 启动脚本
    └───path #用于加入环境变量的文件夹

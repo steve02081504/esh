@@ -9,19 +9,42 @@ for %%i in (%*) do (
 		set "command=%%i"
 		set "hasCommand="
 	) else (
-		if "%%i"=="-Command" (
-			set "hasCommand=true"
-		) else (
+		if defined hasFile (
+			set "hasFile="
 			set "remainingArgs=!remainingArgs! %%i"
+		) else (
+			if "%%i"=="-Command" (
+				set "hasCommand=true"
+			) else (
+				if "%%i"=="-File" (
+					set "hasFile=true"
+				) else (
+					set "remainingArgs=!remainingArgs! %%i"
+				)
+			)
 		)
 	)
 )
 
 if defined command (
 	set "command=!command:"=""!"
-	pwsh !remainingArgs! -nologo -Command ". %~dp0\run.ps1; Invoke-Expression !command!"
+)
+if defined File (
+	set "File=!File:"=""!"
+)
+
+if defined command (
+	if defined File (
+		pwsh !remainingArgs! -nologo -Command ". %~dp0\run.ps1; . !File!; Invoke-Expression !command!"
+	) else (
+		pwsh !remainingArgs! -nologo -Command ". %~dp0\run.ps1; Invoke-Expression !command!"
+	)
 ) else (
-	pwsh !remainingArgs! -nologo -NoExit -File "%~dp0\run.ps1"
+	if defined File (
+		pwsh !remainingArgs! -nologo -Command ". %~dp0\run.ps1; . !File!"
+	) else (
+		pwsh !remainingArgs! -nologo -NoExit -File "%~dp0\run.ps1"
+	)
 )
 
 @echo on

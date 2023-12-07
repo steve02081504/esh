@@ -31,12 +31,11 @@ function global:ValueEx ($ValueAndMethods) {
 function global:IndexEx ($Value, $Index, [switch]$Set = $false, $ValueToSet) {
 	if (-not $Index) { return , $Value }
 	if ($Index.Contains('.')) {
-		while ($Index.Contains('.')) {
-			$Pos = $Index.IndexOf('.')
-			$SubIndex = $Index.Substring(0, $Pos)
-			$Index = $Index.Substring($Pos + 1)
-			$Value = IndexEx $Value $SubIndex
+		$Index = $Index -split '\.'
+		$Index | Select-Object -SkipLast 1 | ForEach-Object {
+			$Value = IndexEx $Value $_
 		}
+		$Index = $Index[-1]
 	}
 	if ($Set) {
 		if ($Value.__arec_set__) { $Value.__arec_set__($Index, $ValueToSet) }

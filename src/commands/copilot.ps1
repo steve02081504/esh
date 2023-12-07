@@ -2,9 +2,7 @@ function global:Install-Copilot {
 	if (-not (Test-Command gh)) {
 		#github cli not found
 		if (Test-Command winget) {
-			try {
-				winget install GitHub.cli
-			}
+			try { winget install GitHub.cli }
 			catch {
 				Out-Error 'Install github cli failed.'
 				throw

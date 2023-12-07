@@ -1,5 +1,9 @@
 #!/usr/bin/env pwsh
-[CmdletBinding()]param([switch]$FromScript=$false)
+[CmdletBinding()]param(
+	[switch]$Force=$false,
+	[ValidateSet('yes', 'no', 'ask', 'auto')][string]$StartEsh='auto',
+	[parameter(DontShow)][switch]$FromScript=$false
+)
 
 function illusionlimb($path) {
 	Invoke-Expression $(if (Test-Path $PSScriptRoot/../path/esh) { Get-Content "$PSScriptRoot/$path" -Raw }
@@ -31,15 +35,4 @@ else {
 	if ($EshellUI) { Write-Host "（并且你正在使用它 :)）" }
 }
 
-. $eshDir/src/opt/install.ps1
-
-if (-not (Get-Command pwsh -ErrorAction Ignore)) {
-	$Host.UI.WriteErrorLine("esh的运行需要PowerShell 6或以上`n访问 https://aka.ms/pscore6 来获取PowerShell 6+ 并使得``pwsh``命令在环境中可用以使得esh能够正常工作")
-}
-elseif ((-not $EshellUI) -and (YorN "要使用 Eshell 吗？")) {
-	if ($FromScript -or ($PSVersionTable.PSVersion.Major -lt 6)) {
-		. $eshDir/opt/run
-		[System.Environment]::Exit($LastExitCode)
-	}
-	else { . $eshDir/opt/run.ps1 -Invocation $MyInvocation }
-}
+. $eshDir/src/opt/install.ps1 -Force:$Force -StartEsh:$StartEsh -FromScript:$FromScript

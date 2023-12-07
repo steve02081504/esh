@@ -10,7 +10,7 @@ $EshellUI = ValueEx @{
 		Path = Split-Path $PSScriptRoot
 	}
 	Im = ValueEx @{
-		Sudo = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]“Administrator”)
+		Sudo = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]'Administrator')
 		VSCodeExtension = [bool]($psEditor) -and ($Host.Name -eq 'Visual Studio Code Host')
 		Editor = [bool]($psEditor)
 		WindowsPowerShell = (Split-Path $(Split-Path $PROFILE) -Leaf) -eq 'WindowsPowerShell'
@@ -144,20 +144,25 @@ $EshellUI = ValueEx @{
 			TabHandler = (Get-PSReadLineKeyHandler Tab).Function
 			EnterHandler = (Get-PSReadLineKeyHandler Enter).Function
 		}
-		#注册事件以在退出时保存数据
-		Register-EngineEvent PowerShell.Exiting -SupportEvent -Action {
-			$EshellUI.SaveVariables()
-		}
-		#注册事件以在空闲时执行后台任务
-		Register-EngineEvent PowerShell.OnIdle -SupportEvent -Action {
-			if ($EshellUI.BackgroundJobs.Count) {
-				$EshellUI.BackgroundJobs.PopAndRun()
+		$this.RegisteredEvents=@{
+			ExitingEvent = @{
+				ID = 'PowerShell.Exiting'
+				Action = {$EshellUI.SaveVariables()}
+			}
+			IdleEvent = @{
+				ID = 'PowerShell.OnIdle'
+				Action = {
+					if ($EshellUI.BackgroundJobs.Count) {
+						$EshellUI.BackgroundJobs.PopAndRun()
+					}
+				}
 			}
 		}
-		$EventList = Get-EventSubscriber -Force
-		$this.OtherData.ExitingEvent = $EventList[$EventList.Count-2]
-		$this.OtherData.IdleEvent = $EventList[$EventList.Count-1]
-		Remove-Variable EventList
+		$this.RegisteredEvents.GetEnumerator() | ForEach-Object {
+			$_ = $_.Value
+			Register-EngineEvent $_.ID -SupportEvent -Action $_.Action
+			$_.RawData = (Get-EventSubscriber -Force)[-1]
+		}
 
 		. $PSScriptRoot/system/base.ps1
 
@@ -165,6 +170,7 @@ $EshellUI = ValueEx @{
 		. $PSScriptRoot/system/UI/title.ps1
 		. $PSScriptRoot/system/UI/icon.ps1
 
+		Set-PSReadLineKeyHandler -Key Tab -Function MenuComplete
 		. $PSScriptRoot/system/linux.ps1
 
 		. $PSScriptRoot/system/UI/prompt/main.ps1
@@ -187,6 +193,7 @@ $EshellUI = ValueEx @{
 		$this.SaveVariables()
 		$this.Remove()
 		. "$($this.Sources.Path)/src/main.ps1"
+		$EshellUI.Init($this.Invocation)
 		$EshellUI.LoadVariables()
 		$EshellUI.Start()
 	}
@@ -222,8 +229,9 @@ $EshellUI = ValueEx @{
 		}
 		$this.SaveVariables()
 		$function:prompt = $this.OtherData.BeforeEshLoaded.promptBackup
-		Unregister-Event -SubscriptionId $($this.OtherData.ExitingEvent.SubscriptionId ?? 0) -Force
-		Unregister-Event -SubscriptionId $($this.OtherData.IdleEvent.SubscriptionId ?? 0) -Force
+		$this.RegisteredEvents.GetEnumerator() | Where-Object { $_.Value.RawData } | ForEach-Object {
+			Unregister-Event -SubscriptionId $_.Value.RawData.SubscriptionId -Force
+		}
 		$this.ProvidedFunctions() | ForEach-Object { Remove-Item function:\$($_.Name) }
 		$this.ProvidedVariables() | ForEach-Object { Remove-Item variable:\$($_.Name) }
 		$this.ProvidedAliases() | ForEach-Object { Remove-Item alias:\$($_.Name) }
@@ -289,5 +297,22 @@ $EshellUI = ValueEx @{
 			$EshellUI.Remove()
 			throw $_
 		}
+	}
+	'method:CompileExeFile' = {
+		param($OutputFile)
+		if(IsLinuxPath $OutputFile){
+			$OutputFile = LinuxPathToWindowsPath $OutputFile
+		}
+		if (Test-Path $OutputFile -PathType Container) {
+			$OutputFile = Join-Path $OutputFile 'esh.exe'
+		}
+		if (Test-Path $OutputFile) {
+			try{ Remove-Item $OutputFile -Force -ErrorAction Stop }
+			catch{
+				Write-Error "Failed to remove $OutputFile"
+				return
+			}
+		}
+		. "$($this.Sources.Path)/runner/build.ps1" -OutputFile $OutputFile | Out-Null
 	}
 }
