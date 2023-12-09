@@ -19,15 +19,24 @@ if (-not $eshDir) {
 
 if (-not $eshDir) {
 	Remove-Item $env:LOCALAPPDATA/esh -Confirm -ErrorAction Ignore -Recurse
-	Remove-Item $env:TEMP/esh-master -Force -ErrorAction Ignore -Confirm:$false -Recurse
-	try { Invoke-WebRequest https://bit.ly/Esh-zip -OutFile $env:TEMP/Eshell.zip }
-	catch {
-		$Host.UI.WriteErrorLine("下载错误 终止程序")
-		exit 1
+	if (Get-Command git -ErrorAction Ignore) {
+		try { git clone https://github.com/steve02081504/esh $env:LOCALAPPDATA/esh --depth 1 }
+		catch {
+			$Host.UI.WriteErrorLine("下载错误 终止程序")
+			exit 1
+		}
 	}
-	Expand-Archive $env:TEMP/Eshell.zip $env:TEMP -Force
-	Remove-Item $env:TEMP/Eshell.zip -Force
-	Move-Item $env:TEMP/esh-master $env:LOCALAPPDATA/esh -Force
+	else{
+		Remove-Item $env:TEMP/esh-master -Force -ErrorAction Ignore -Confirm:$false -Recurse
+		try { Invoke-WebRequest https://bit.ly/Esh-zip -OutFile $env:TEMP/Eshell.zip }
+		catch {
+			$Host.UI.WriteErrorLine("下载错误 终止程序")
+			exit 1
+		}
+		Expand-Archive $env:TEMP/Eshell.zip $env:TEMP -Force
+		Remove-Item $env:TEMP/Eshell.zip -Force
+		Move-Item $env:TEMP/esh-master $env:LOCALAPPDATA/esh -Force
+	}
 	$eshDir = "$env:LOCALAPPDATA/esh"
 	try { Invoke-WebRequest 'https://bit.ly/SAO-lib' -OutFile "$eshDir/data/SAO-lib.txt" }
 	catch {
@@ -36,7 +45,7 @@ if (-not $eshDir) {
 }
 
 if ($RunInstall){
-	. $eshDir/src/opt/install.ps1 $RemainingArguments
+	Invoke-Expression "&$eshDir/src/opt/install.ps1 $RemainingArguments"
 	exit
 }
 if (-not (Get-Command pwsh -ErrorAction Ignore)) {

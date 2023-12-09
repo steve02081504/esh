@@ -107,6 +107,11 @@ function global:WindowsPathToLinuxPath($Path) {
 	$Path = $Path.Replace("\", "/")
 	return $Path
 }
+function global:AutoShortPath($Path) {
+	if ($Path.StartsWith($HOME) -or $Path.StartsWith($EshellUI.MSYS.RootPath)) {
+		WindowsPathToLinuxPath $Path
+	}
+}
 
 if (Test-Command rm.exe) {
 	. "$($EshellUI.Sources.Path)/src/commands/special/linux_bins.ps1"

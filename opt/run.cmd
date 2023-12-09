@@ -26,26 +26,21 @@ for %%i in (%*) do (
 	)
 )
 
-if defined command (
-	set "command=!command:"=""!"
-)
+set "Noexit=-NoExit"
+set "pwshCommand="
+
 if defined File (
 	set "File=!File:"=""!"
+	set "pwshCommand=!pwshCommand! ; . !File!"
+	set "Noexit="
+)
+if defined command (
+	set "command=!command:"=""!"
+	set "pwshCommand=!pwshCommand! ; Invoke-Expression !command!"
+	set "Noexit="
 )
 
-if defined command (
-	if defined File (
-		pwsh !remainingArgs! -nologo -Command ". %~dp0\run.ps1; . !File!; Invoke-Expression !command!"
-	) else (
-		pwsh !remainingArgs! -nologo -Command ". %~dp0\run.ps1; Invoke-Expression !command!"
-	)
-) else (
-	if defined File (
-		pwsh !remainingArgs! -nologo -Command ". %~dp0\run.ps1; . !File!"
-	) else (
-		pwsh !remainingArgs! -nologo -NoExit -File "%~dp0\run.ps1"
-	)
-)
+pwsh.exe %remainingArgs% %Noexit% -nologo -Command ". %~dp0\run.ps1; !pwshCommand!"
 
 @echo on
 @exit /b %ERRORLEVEL%

@@ -1,13 +1,13 @@
 function global:Update-SAO-lib {
-	$espath = $EshellUI.Sources.Path
-	# 如果"$espath/data/SAO-lib.txt"是链接
-	if ((Get-Item "$espath/data/SAO-lib.txt").Attributes -match 'ReparsePoint') {
+	$eshDir = $EshellUI.Sources.Path
+	# 如果"$eshDir/data/SAO-lib.txt"是链接
+	if ((Get-Item "$eshDir/data/SAO-lib.txt").Attributes -match 'ReparsePoint') {
 		Write-Information "SAO-lib.txt is a link, Skip updating"
 		return
 	}
 	try {
 		#下载最新的SAO-lib
-		Invoke-WebRequest 'https://github.com/steve02081504/SAO-lib/raw/master/SAO-lib.txt' -OutFile "$espath/data/SAO-lib.txt"
+		Invoke-WebRequest 'https://github.com/steve02081504/SAO-lib/raw/master/SAO-lib.txt' -OutFile "$eshDir/data/SAO-lib.txt"
 	}
 	catch {}
 }
@@ -17,42 +17,57 @@ function global:Update-gcc-Kawaii {
 		Write-Information "the original gcc.mo file is now backed up to gcc.mo.bak"
 		mv /usr/share/locale/zh_CN/LC_MESSAGES/gcc.mo /usr/share/locale/zh_CN/LC_MESSAGES/gcc.mo.bak
 	}
-	$espath = $EshellUI.Sources.Path
-	Invoke-WebRequest 'https://github.com/Bill-Haku/kawaii-gcc/raw/main/gcc-zh.po' -OutFile "$espath/data/gcc-zh.po"
-	msgfmt "$espath/data/gcc-zh.po" -o /usr/share/locale/zh_CN/LC_MESSAGES/gcc.mo
-	Remove-Item "$espath/data/gcc-zh.po" -Force
+	$eshDir = $EshellUI.Sources.Path
+	Invoke-WebRequest 'https://github.com/Bill-Haku/kawaii-gcc/raw/main/gcc-zh.po' -OutFile "$eshDir/data/gcc-zh.po"
+	msgfmt "$eshDir/data/gcc-zh.po" -o /usr/share/locale/zh_CN/LC_MESSAGES/gcc.mo
+	Remove-Item "$eshDir/data/gcc-zh.po" -Force
 	gcc
 }
 
 function global:Update-EShell {
 	Update-SAO-lib
-	$espath = $EshellUI.Sources.Path
-	# 如果"$espath"是git仓库
-	if (Test-Path "$espath/.git/config") {
+	$eshDir = $EshellUI.Sources.Path
+	# 如果"$eshDir"是git仓库
+	if (Test-Path "$eshDir/.git/config") {
 		$pathNow = $PWD
-		Set-Location $espath
+		Set-Location $eshDir
 		git pull --rebase
 		Set-Location $pathNow
-		reload
-		return
 	}
-	$praentpath = Split-Path $espath
-	$datapath = "$espath/data"
-	try {
-		#下载最新的EShell
-		Invoke-WebRequest 'https://github.com/steve02081504/esh/archive/refs/heads/master.zip' -OutFile "$datapath/master.zip"
-		#删除除了data和desktop.ini文件夹以外的所有文件
-		Get-ChildItem "$espath" -Force | Where-Object { $_.Name -notin @('data', 'desktop.ini') } | Remove-Item -Recurse -Force
-		#更新文件
-		Rename-Item "$espath" "$praentpath/esh-master"
-		Expand-Archive "$praentpath/esh-master/data/master.zip" "$praentpath" -Force
-		Rename-Item "$praentpath/esh-master" "$espath"
-		#删除压缩包
-		Remove-Item "$datapath/master.zip" -Force
-		#重载EShell
-		reload
+	else{
+		$praentpath = Split-Path $eshDir
+		$datapath = "$eshDir/data"
+		try {
+			if (Test-Command git){
+				# 升级到git仓库
+				git clone https://github.com/steve02081504/esh $datapath/esh --depth 1 --no-checkout
+				#移动并覆盖文件
+				Move-Item "$datapath/esh/.git" $eshDir -Force
+				Remove-Item "$datapath/esh" -Force -Recurse
+				#恢复文件
+				$pathNow = $PWD
+				Set-Location $eshDir
+				git reset --hard HEAD
+				Set-Location $pathNow
+			}
+			else{
+				#下载最新的EShell
+				Invoke-WebRequest 'https://github.com/steve02081504/esh/archive/refs/heads/master.zip' -OutFile "$datapath/master.zip"
+				#删除除了data和desktop.ini文件夹以外的所有文件
+				Get-ChildItem "$eshDir" -Force | Where-Object { $_.Name -notin @('data', 'desktop.ini') } | Remove-Item -Recurse -Force
+				#更新文件
+				Rename-Item "$eshDir" "$praentpath/esh-master"
+				Expand-Archive "$praentpath/esh-master/data/master.zip" "$praentpath" -Force
+				#删除压缩包
+				Remove-Item "$datapath/master.zip" -Force
+				Rename-Item "$praentpath/esh-master" "$eshDir"
+			}
+		}
+		catch {}
 	}
-	catch {}
+	$eshDirFromEnv = $EshellUI.Im.InEnvPath()
+	. $eshDir/src/opt/install.ps1 -Fix
+	reload
 }
 
 function global:Update-All-Paks {

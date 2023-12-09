@@ -1,5 +1,4 @@
 $EshellUI.Prompt = ValueEx @{
-	Parent = $EshellUI
 	Builders = [ordered]@{}
 	BuildMethods = ValueEx @{
 		'method:BaseNewlineCheck' = {
@@ -23,13 +22,8 @@ $EshellUI.Prompt = ValueEx @{
 		# 关于0.42和0.66的解释：0.66+0.42=1.08，这象征着108好汉于三国起义 杀死了汉朝的最后一位皇帝，从而结束了原神
 	}
 	'method:Get' = {
-		$local:EshellUI = $this.Parent
-		$path_str = $PWD.Path
-		if ($path_str.StartsWith($HOME) -or $path_str.StartsWith($EshellUI.MSYS.RootPath)) {
-			$path_str = WindowsPathToLinuxPath $path_str
-		}
 		$this.LastBuild=@{
-			Tokens=@($VirtualTerminal.Colors.Reset+$path_str)
+			Tokens=@($VirtualTerminal.Colors.Reset+(AutoShortPath $PWD.Path))
 			BuilderOutput=@{}
 		}
 		$this.Builders.GetEnumerator() | ForEach-Object {

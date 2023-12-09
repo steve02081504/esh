@@ -2,5 +2,5 @@
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
-pwsh -nologo -File "$SCRIPT_DIR/install.ps1" -FromScript "$@"
+pwsh -nologo -File "$SCRIPT_DIR/install.ps1" "$@"
 exit $?

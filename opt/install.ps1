@@ -1,8 +1,8 @@
 #!/usr/bin/env pwsh
 [CmdletBinding()]param(
 	[switch]$Force=$false,
-	[ValidateSet('yes', 'no', 'ask', 'auto')][string]$StartEsh='auto',
-	[parameter(DontShow)][switch]$FromScript=$false
+	[switch]$Fix=$false,
+	[ValidateSet('yes', 'no', 'ask', 'auto')][string]$StartEsh='auto'
 )
 
 function illusionlimb($path) {
@@ -15,15 +15,24 @@ illusionlimb opt_init.ps1
 
 if (-not $eshDir) {
 	Remove-Item $env:LOCALAPPDATA/esh -Confirm -ErrorAction Ignore -Recurse
-	Remove-Item $env:TEMP/esh-master -Force -ErrorAction Ignore -Confirm:$false -Recurse
-	try { Invoke-WebRequest https://bit.ly/Esh-zip -OutFile $env:TEMP/Eshell.zip }
-	catch {
-		$Host.UI.WriteErrorLine("下载错误 终止脚本")
-		exit 1
+	if (Get-Command git -ErrorAction Ignore) {
+		try { git clone https://github.com/steve02081504/esh $env:LOCALAPPDATA/esh --depth 1 }
+		catch {
+			$Host.UI.WriteErrorLine("下载错误 终止脚本")
+			exit 1
+		}
 	}
-	Expand-Archive $env:TEMP/Eshell.zip $env:TEMP -Force
-	Remove-Item $env:TEMP/Eshell.zip -Force
-	Move-Item $env:TEMP/esh-master $env:LOCALAPPDATA/esh -Force
+	else{
+		Remove-Item $env:TEMP/esh-master -Force -ErrorAction Ignore -Confirm:$false -Recurse
+		try { Invoke-WebRequest https://bit.ly/Esh-zip -OutFile $env:TEMP/Eshell.zip }
+		catch {
+			$Host.UI.WriteErrorLine("下载错误 终止脚本")
+			exit 1
+		}
+		Expand-Archive $env:TEMP/Eshell.zip $env:TEMP -Force
+		Remove-Item $env:TEMP/Eshell.zip -Force
+		Move-Item $env:TEMP/esh-master $env:LOCALAPPDATA/esh -Force
+	}
 	$eshDir = "$env:LOCALAPPDATA/esh"
 	try { Invoke-WebRequest 'https://bit.ly/SAO-lib' -OutFile "$eshDir/data/SAO-lib.txt" }
 	catch {
@@ -35,4 +44,4 @@ else {
 	if ($EshellUI) { Write-Host "（并且你正在使用它 :)）" }
 }
 
-. $eshDir/src/opt/install.ps1 -Force:$Force -StartEsh:$StartEsh -FromScript:$FromScript
+. $eshDir/src/opt/install.ps1 -Force:$Force -StartEsh:$StartEsh -Fix:$Fix

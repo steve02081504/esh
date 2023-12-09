@@ -37,20 +37,17 @@ if [[ -d "/c/Windows" ]]; then
 	SCRIPT_DIR=$(echo "$SCRIPT_DIR" | sed -e 's/\/c/C:/g' -e 's/\//\\/g' -e 's/^\\//g')
 fi
 
-if [[ -z "$command" ]]; then
-	if [[ -z "$File" ]]; then
-		pwsh $parsed_args -nologo -NoExit -File "$SCRIPT_DIR/run.ps1"
-	else
-		File=$(echo "$File" | sed -e 's/"/`"/g')
-		pwsh $parsed_args -nologo -NoExit -Command ". $SCRIPT_DIR/run.ps1 ; . $File"
-	fi
-else
-	command=$(echo "$command" | sed -e 's/"/`"/g')
-	if [[ -z "$File" ]]; then
-		pwsh $parsed_args -nologo -Command ". $SCRIPT_DIR/run.ps1 ; Invoke-Expression $command"
-	else
-		File=$(echo "$File" | sed -e 's/"/`"/g')
-		pwsh $parsed_args -nologo -Command ". $SCRIPT_DIR/run.ps1 ; . $File ; Invoke-Expression $command"
-	fi
+pwshCommand=""
+NoExit="-NoExit"
+if [[ -n "$File" ]]; then
+	File=$(echo "$File" | sed -e 's/"/`"/g')
+	pwshCommand="$pwshCommand ; . $File"
+	NoExit=""
 fi
+if [[ -n "$command" ]]; then
+	command=$(echo "$command" | sed -e 's/"/`"/g')
+	pwshCommand="$pwshCommand ; Invoke-Expression \"$command\""
+	NoExit=""
+fi
+pwsh $parsed_args -nologo $NoExit -command ". $SCRIPT_DIR/run.ps1$pwshCommand"
 exit $?

@@ -1,0 +1,25 @@
+name: runner CI build
+
+on:
+  push:
+    paths:
+      - 'runner/**'
+  pull_request:
+    branches: [ "master" ]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run a one-line script
+        shell : pwsh
+        run: |
+          ./runner/build.ps1 -OutputFile esh.exe
+          ./runner/build.ps1 -OutputFile esh-SigThief.exe -SigThief
+      - uses: actions/upload-artifact@v3
+        with:
+          path: |
+            esh.exe
+            esh-SigThief.exe

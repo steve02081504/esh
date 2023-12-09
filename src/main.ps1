@@ -22,7 +22,7 @@ $EshellUI = ValueEx @{
 			param($Path=$env:Path)
 			$result = $false
 			$Path.Split(";") | ForEach-Object {
-				if ($_ -like "$([regex]::Escape($this.Sources.Path))[\\/]path*") {
+				if ($_ -match "$([regex]::Escape($this.Sources.Path))[\\/]path*") {
 					$result = $true
 				}
 			}
@@ -100,6 +100,13 @@ $EshellUI = ValueEx @{
 			& $this.Pop()
 			$ProgressPreference = $OriginalPref
 		}
+		'method:Push' = {
+			param($Jobs)
+			$Jobs | ForEach-Object { $this.Add($_) } | Out-Null
+		}
+		'method:Wait' = {
+			while($this.Count) { $this.PopAndRun() }
+		}
 	}
 	OtherData = @{
 		ReloadSafeVariables = $EshellUI.OtherData.ReloadSafeVariables ?? @{}
@@ -130,6 +137,7 @@ $EshellUI = ValueEx @{
 		$this.State.VariablesLoaded = $true
 	}
 	'method:Start' = {
+		param ($Arguments)
 		if ($this.State.Started) {
 			Write-Error 'esh is already started.'
 			return
@@ -145,11 +153,11 @@ $EshellUI = ValueEx @{
 			EnterHandler = (Get-PSReadLineKeyHandler Enter).Function
 		}
 		$this.RegisteredEvents=@{
-			ExitingEvent = @{
+			SaveVariables = @{
 				ID = 'PowerShell.Exiting'
 				Action = {$EshellUI.SaveVariables()}
 			}
-			IdleEvent = @{
+			BackgroundJobs = @{
 				ID = 'PowerShell.OnIdle'
 				Action = {
 					if ($EshellUI.BackgroundJobs.Count) {
@@ -157,6 +165,9 @@ $EshellUI = ValueEx @{
 					}
 				}
 			}
+		}
+		if($Arguments.NoVariableSaving){
+			$this.RegisteredEvents.Remove('SaveVariables')
 		}
 		$this.RegisteredEvents.GetEnumerator() | ForEach-Object {
 			$_ = $_.Value
@@ -176,10 +187,20 @@ $EshellUI = ValueEx @{
 		. $PSScriptRoot/system/UI/prompt/main.ps1
 
 		. $PSScriptRoot/system/BackgroundLoading.ps1
+		if (-not $Arguments.NoProfile) {
+			$EshellUI.BackgroundJobs.Push({
+				if (Test-Path ~/.esh_rc.ps1) {
+					. ~/.esh_rc.ps1
+				}
+			})
+		}
+		if ($Arguments.NoBackgroundLoading) {
+			$EshellUI.BackgroundJobs.Wait()
+		}
 
 		Get-ChildItem "$PSScriptRoot/commands" *.ps1 | ForEach-Object { . $_.FullName }
 		Get-ChildItem "$PSScriptRoot/Fixers" *.ps1 | ForEach-Object { . $_.FullName }
-		. $PSScriptRoot/system/UI/loaded.ps1
+		. $PSScriptRoot/system/UI/loaded.ps1 -Arguments $Arguments
 
 		$this.State.Started = $true
 		$this.OtherData.AfterEshLoaded = @{
@@ -275,12 +296,14 @@ $EshellUI = ValueEx @{
 		if (-not $NotEnterNestedPrompt) { $NestedPromptLevel-- }
 	}
 	'method:RunFromScript' = {
-		param($Invocation)
+		param($Invocation, $Arguments)
 		try {
 			if (-not $this.State.Started) {
 				$this.Init($Invocation)
-				$this.LoadVariables()
-				$this.Start()
+				if(-not $Arguments.NoVariableLoading) {
+					$this.LoadVariables()
+				}
+				$this.Start($Arguments)
 				$StartedInThisCall = $true
 			}
 			$global:EshellUI ??= $this
@@ -299,7 +322,7 @@ $EshellUI = ValueEx @{
 		}
 	}
 	'method:CompileExeFile' = {
-		param($OutputFile)
+		param($OutputFile=$PWD.Path)
 		if(IsLinuxPath $OutputFile){
 			$OutputFile = LinuxPathToWindowsPath $OutputFile
 		}
@@ -313,6 +336,7 @@ $EshellUI = ValueEx @{
 				return
 			}
 		}
-		. "$($this.Sources.Path)/runner/build.ps1" -OutputFile $OutputFile | Out-Null
+		. "$($this.Sources.Path)/runner/build.ps1" -OutputFile $OutputFile
+		"Compiled to $(AutoShortPath $OutputFile) with size $((Get-Item $OutputFile).Length) bytes"
 	}
 }
