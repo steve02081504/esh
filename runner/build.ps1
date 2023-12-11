@@ -18,7 +18,7 @@ process {
 		Write-Host "Downloading $ToolAuthor/$ToolName..."
 		try{
 			if (Get-Command git -ErrorAction Ignore) {
-				git clone https://github.com/$ToolAuthor/$ToolName "$PSScriptRoot/tools/$ToolName"
+				git clone https://github.com/$ToolAuthor/$ToolName "$PSScriptRoot/tools/$ToolName" --depth 1
 			}
 			else{
 				Invoke-WebRequest -Uri https://github.com/$ToolAuthor/$ToolName/archive/refs/heads/master.zip -OutFile "$PSScriptRoot/tools/$ToolName.zip"
