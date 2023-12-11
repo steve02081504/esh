@@ -45,7 +45,7 @@ if (-not $eshDir) {
 }
 
 if ($RunInstall){
-	Invoke-Expression "&$eshDir/src/opt/install.ps1 $RemainingArguments"
+	Invoke-Expression "&'$eshDir/src/opt/install.ps1' $RemainingArguments"
 	exit
 }
 if (-not (Get-Command pwsh -ErrorAction Ignore)) {

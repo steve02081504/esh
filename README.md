@@ -43,6 +43,10 @@ Update-Eshell
 
 ## 功能预览  
 
+自举（确信）  
+![图片](https://github.com/steve02081504/esh/assets/31927825/f2f3e380-af4d-47dd-a3f7-d2257d52a66f)
+
+
 最低兼容PS7.2.15和Windows 6.1.7601（自动纠正编码设置）  
 ![图片](https://github.com/steve02081504/esh/assets/31927825/e87b0407-f874-4d33-9a04-bda6f8c1658c)
 
