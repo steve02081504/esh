@@ -95,10 +95,12 @@ $EshellUI = ValueEx @{
 			$job
 		}
 		'method:PopAndRun' = {
+			$LastExitCodeBackup = $global:LastExitCode
 			$OriginalPref = $ProgressPreference # Default is 'Continue'
 			$ProgressPreference = 'SilentlyContinue'
 			& $this.Pop()
 			$ProgressPreference = $OriginalPref
+			$global:LastExitCode = $LastExitCodeBackup
 		}
 		'method:Push' = {
 			param($Jobs)

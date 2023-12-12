@@ -38,6 +38,7 @@ $EshellUI.Prompt = ValueEx @{
 Get-ChildItem $PSScriptRoot/builders *.ps1 | Sort-Object -Property Name | ForEach-Object { . $_.FullName }
 
 function global:prompt {
+	$LastExitCodeBackup = $global:LastExitCode
 	try{
 		$EshellUI.Prompt.Get()
 	}
@@ -45,4 +46,5 @@ function global:prompt {
 		$_ | Out-Error
 		"err >"
 	}
+	$global:LastExitCode = $LastExitCodeBackup
 }
