@@ -12,7 +12,12 @@ $env:Path.Split(";") | ForEach-Object {
 # 使用if判断+赋值：我们不能使用??=因为用户可能以winpwsh运行该脚本
 if (-not $eshDir) {
 	$Script:eshDir =
-	if ($EshellUI.Sources.Path -and (Test-Path "${EshellUI.Sources.Path}/path/esh")) { $EshellUI.Sources.Path }
+	#_if PSScript #在PSEXE中不可能有$EshellUI，而$PSScriptRoot无效
+	if (Test-Path "$($EshellUI.Sources.Path)/path/esh") { $EshellUI.Sources.Path }
 	elseif (Test-Path $PSScriptRoot/../path/esh) { "$PSScriptRoot/.." }
-	elseif (Test-Path $env:LOCALAPPDATA/esh) { "$env:LOCALAPPDATA/esh" }
+	elseif
+	#_else
+		#_!!if
+	#_endif
+	(Test-Path $env:LOCALAPPDATA/esh) { "$env:LOCALAPPDATA/esh" }
 }

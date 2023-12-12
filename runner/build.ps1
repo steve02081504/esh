@@ -42,7 +42,7 @@ process {
 		GetToolFromGit psminnifyer
 	}
 	& $PSScriptRoot/tools/ps2exe/ps2exe.ps1 $PSScriptRoot/main.ps1 "$PSScriptRoot/build/esh.exe" -NoConsole `
-		-Minifyer { $_ | &$PSScriptRoot/tools/psminnifyer/psminnifyer.ps1 } `
+		-Minifyer { $_.Replace('$Script:','$').Replace('终止脚本','终止程序') | &$PSScriptRoot/tools/psminnifyer/psminnifyer.ps1 } `
 		-TempDir "$PSScriptRoot/build" -iconFile $PSScriptRoot/../img/esh.ico `
 		-title 'E-Shell' -description 'E-Shell' -version '1960.7.17.13' `
 		-company 'E-tek' -product 'E-Sh' -copyright '(c) E-tek Corporation. All rights reserved.' | Out-Default

@@ -4,12 +4,12 @@
 	[ValidateSet('no', 'yes', 'ask', 'auto')][string]$RemoveDir='auto'
 )
 function illusionlimb($path) {
-	Invoke-Expression $(if (Test-Path $PSScriptRoot/../path/esh) { Get-Content "$PSScriptRoot/$path" -Raw }
-	else { (Invoke-WebRequest "https://github.com/steve02081504/esh/raw/master/opt/$path").Content })
+	Invoke-Expression $(if (Test-Path $PSScriptRoot/../path/esh) { Get-Content "$PSScriptRoot/../src/$path" -Raw }
+	else { (Invoke-WebRequest "https://github.com/steve02081504/esh/raw/master/src/$path").Content })
 }
 
-illusionlimb ../src/fixers/CodePageFixer.ps1
-illusionlimb opt_init.ps1
+illusionlimb fixers/CodePageFixer.ps1
+illusionlimb opt/opt_init.ps1
 
 if (-not $eshDir) {
 	Write-Host "未找到 Esh 安装目录，无法卸载。"
