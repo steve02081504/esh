@@ -80,7 +80,7 @@ function global:LinuxPathToWindowsPath($Path) {
 	}
 	else {
 		#否则根据msys的rootpath来转换
-		return Join-Path $EshellUI.MSYS.RootPath $Path
+		return Join-Path "root:\" $Path
 	}
 }
 function global:WindowsPathToLinuxPath($Path) {
@@ -93,6 +93,10 @@ function global:WindowsPathToLinuxPath($Path) {
 		if ($Path.StartsWith("/home/$env:UserName")) {
 			$Path = "~" + $Path.Substring(("/home/$env:UserName").Length)
 		}
+	}
+	elseif ($Path.StartsWith('root:')) {
+		$Path = $Path.Substring(5)
+		if (-not $Path) { $Path = '/' }
 	}
 	elseif ($Path.StartsWith($HOME)) {
 		$Path = "~" + $Path.Substring($HOME.Length)
@@ -108,7 +112,8 @@ function global:WindowsPathToLinuxPath($Path) {
 	return $Path
 }
 function global:AutoShortPath($Path) {
-	if ($Path.StartsWith($HOME) -or $Path.StartsWith($EshellUI.MSYS.RootPath)) {
+	[regex]$matcher = "^($([regex]::Escape($HOME))|root:|$([regex]::Escape($EshellUI.MSYS.RootPath)))"
+	if ($matcher.IsMatch($Path)) {
 		WindowsPathToLinuxPath $Path
 	}
 }
