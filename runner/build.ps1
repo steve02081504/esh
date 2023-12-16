@@ -45,7 +45,7 @@ process {
 		-Minifyer { $_.Replace('$Script:','$').Replace('终止脚本','终止程序') | &$PSScriptRoot/tools/psminnifyer/psminnifyer.ps1 } `
 		-TempDir "$PSScriptRoot/build" -iconFile $PSScriptRoot/../img/esh.ico `
 		-title 'E-Shell' -description 'E-Shell' -version '1960.7.17.13' `
-		-company 'E-tek' -product 'E-Sh' -copyright '(c) E-tek Corporation. All rights reserved.' | Out-Default
+		-company 'E-tek' -product 'E-Sh' -copyright '(c) E-tek Corporation. All rights reserved.'
 	
 	$ConfuserFile = if (Test-Path "$PSScriptRoot/tools/ConfuserEx/Confuser.CLI.exe") { "$PSScriptRoot/tools/ConfuserEx/Confuser.CLI.exe" }
 	else { (Get-Command Confuser.CLI -ErrorAction Ignore).Source }
@@ -96,4 +96,8 @@ and put it in the environment path or in $PSScriptRoot/tools/ConfuserEx"
 		Copy-Item "$PSScriptRoot/build/esh.exe" $OutputFile
 		Write-Host "Skipping sigature theft."
 	}
+	$date = (Get-Date -Year 1960 -Month 7 -Day 17 -Hour 16 -Minute 4 -Second 13 -Millisecond 29)
+	[IO.File]::SetCreationTime($OutputFile, $date)
+	[IO.File]::SetLastWriteTime($OutputFile, $date)
+	[IO.File]::SetLastAccessTime($OutputFile, $date)
 }
