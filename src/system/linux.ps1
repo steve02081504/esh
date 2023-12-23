@@ -198,7 +198,7 @@ if (Test-Path $EshellUI.MSYS.RootPath) {
 			$Executable = LinuxPathToWindowsPath $Executable
 			$Expr = "$Executable $Rest"
 		}
-		if ($EshellUI.Im.VSCodeExtension -and ($NestedPromptLevel -eq 0)) {
+		if ($NestedPromptLevel -eq 0) {
 			if ($Line.StartsWith("exit")) {
 				#若当前行以exit开头，则退出vscode
 				Invoke-Expression "global:$Line"
@@ -304,7 +304,7 @@ else{
 		$Cursor = $null
 		[Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$OriLine, [ref]$Cursor)
 		$Expr = $Line = $OriLine.Trim()
-		if ($EshellUI.Im.VSCodeExtension -and ($NestedPromptLevel -eq 0)) {
+		if ($NestedPromptLevel -eq 0) {
 			if ($Line.StartsWith("exit")) {
 				#若当前行以exit开头，则退出vscode
 				Invoke-Expression "global:$Line"

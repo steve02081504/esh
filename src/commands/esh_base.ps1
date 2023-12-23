@@ -76,11 +76,8 @@ if($IsWindows -and -not(Test-Command sudo)){
 	}
 }
 
-if ($EshellUI.Im.VSCodeExtension) {
-	function global:exit($exitCode = 0) {
-		#抠我退出键是吧
-		[System.Environment]::Exit($exitCode)
-	}
+function global:exit($exitCode = 0) {
+	[System.Environment]::Exit($exitCode)
 }
 
 function global:reload { $EshellUI.Reload() }
