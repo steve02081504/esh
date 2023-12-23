@@ -123,6 +123,10 @@ if (Test-Command rm.exe) {
 }
 
 
+$global:ans ??= 72
+function global:ans { $global:ans }
+function global:err { $global:err }
+
 if (Test-Path $EshellUI.MSYS.RootPath) {
 	New-PSDrive -PSProvider FileSystem -Root $EshellUI.MSYS.RootPath -Name 'root' -Scope Global | Out-Null
 	#一个补全提供器用于补全linux路径
@@ -201,15 +205,24 @@ if (Test-Path $EshellUI.MSYS.RootPath) {
 				return
 			}
 		}
+		if(Test-Command $Executable) {
+			if ($Executable.StartsWith($EshellUI.MSYS.RootPath)) {
+				$Expr = "($Expr) *>&1"
+			}
+			else{
+				[Microsoft.PowerShell.PSConsoleReadLine]::AcceptLine()
+				return
+			}
+		}
 		#求值并输出
 		[Microsoft.PowerShell.PSConsoleReadLine]::CancelLine()
 		Write-Host "`b`b  "
 		do{
 			try {
 				$StartExecutionTime = Get-Date
-				($global:ans=if($Expr){
-					Invoke-Expression "($Expr) *>&1"
-				} else { $global:ans ?? 72 }) | Out-Default
+				$(if($Expr){
+					Invoke-Expression $Expr -OutVariable global:ans
+				} else { $global:ans }) | Out-Host
 				$EndExecutionTime = Get-Date
 			}
 			catch {
@@ -298,16 +311,19 @@ else{
 				return
 			}
 		}
+		if(Test-Command $Executable) {
+			[Microsoft.PowerShell.PSConsoleReadLine]::AcceptLine()
+			return
+		}
 		#求值并输出
 		[Microsoft.PowerShell.PSConsoleReadLine]::CancelLine()
 		Write-Host "`b`b  "
-		if(!$Expr){ $Expr = $null }
 		do{
 			try {
 				$StartExecutionTime = Get-Date
-				($global:ans=if($Expr){
-					Invoke-Expression "($Expr) *>&1"
-				} else { $global:ans ?? 72 }) | Out-Default
+				$(if($Expr){
+					Invoke-Expression $Expr -OutVariable global:ans
+				} else { $global:ans }) | Out-Host
 				$EndExecutionTime = Get-Date
 			}
 			catch {

@@ -184,20 +184,49 @@ $EshellUI = ValueEx @{
 		. $PSScriptRoot/system/UI/icon.ps1
 
 		Set-PSReadLineKeyHandler -Key Tab -Function MenuComplete
+		if($this.Im.WindowsTerminal) {
+			$WindowsTerminalVersion = [regex]::match((Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\wt.exe").Path, "_(.*?)_").Groups[1].Value
+			if($WindowsTerminalVersion -eq "") {
+				$WindowsTerminalVersion = "$((Get-AppXPackage "Microsoft.WindowsTerminal").Version)" # super slow
+				# auto fix registry
+				$FileName = "Microsoft.WindowsTerminal_${WindowsTerminalVersion}_x64__8wekyb3d8bbwe\wt.exe"
+				if(Test-Path "C:\Program Files\WindowsApps\$FileName") {
+					try{
+						New-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\wt.exe" -Force -ErrorAction Stop | Out-Null
+						New-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\wt.exe" -Name 'Path' -Value "C:\Program Files\WindowsApps\$FileName" -PropertyType "String" -Force | Out-Null
+						$this.LoadingLog.AddInfo("Fixed Windows Terminal registry `"HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\wt.exe`"")
+					}
+					catch{
+						$this.LoadingLog.AddWarning("Since failed to get Windows Terminal version from the registry, use Get-AppXPackage instead, which is extremely slow.`nEsh tried to fix this but failed.(See ``error`` for more info.)`nPlease consider repairing the Windows Terminal installation or run esh as root.")
+					}
+				}
+				else {
+					$this.LoadingLog.AddWarning("Since failed to get Windows Terminal version from the registry, use Get-AppXPackage instead, which is extremely slow.`nPlease consider repairing the Windows Terminal installation.")
+				}
+			}
+			if($WindowsTerminalVersion -eq "") {
+				$WindowsTerminalVersion = "Unknown"
+				$this.LoadingLog.AddError("Failed to get Windows Terminal version from the registry and Get-AppXPackage failed too.`nPlease consider repairing the Windows Terminal installation.")
+			}
+			$this.OtherData.WindowsTerminalVersion = $WindowsTerminalVersion
+		}
 		. $PSScriptRoot/system/linux.ps1
 
 		. $PSScriptRoot/system/UI/prompt/main.ps1
 
 		. $PSScriptRoot/system/BackgroundLoading.ps1
 		if (-not $Arguments.NoProfile) {
-			$EshellUI.BackgroundJobs.Push({
+			$this.BackgroundJobs.Push({
+				if (Test-Path "$($EshellUI.Sources.Path)/data/profile.ps1") {
+					. "$($EshellUI.Sources.Path)/data/profile.ps1"
+				}
 				if (Test-Path ~/.esh_rc.ps1) {
 					. ~/.esh_rc.ps1
 				}
 			})
 		}
 		if ($Arguments.NoBackgroundLoading) {
-			$EshellUI.BackgroundJobs.Wait()
+			$this.BackgroundJobs.Wait()
 		}
 
 		Get-ChildItem "$PSScriptRoot/commands" *.ps1 | ForEach-Object { . $_.FullName }

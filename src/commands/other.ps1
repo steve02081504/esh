@@ -58,44 +58,23 @@ function global:power {
 function global:clear-emptys {
 	param(
 		[switch]$recursive,
+		[int]$depth = -1,
 		[Parameter(ValueFromRemainingArguments = $true)]
 		[string[]]$paths
 	)
-	#若参数为空
-	if ($paths.Length -eq 0) {
-		#默认为当前目录下的所有文件
-		$paths = Get-ChildItem | ForEach-Object { $_.FullName }
-	}
-	#对于每个参数
-	$paths = $paths | ForEach-Object {
-		#若参数是linux路径
+	($paths ?? '.') | ForEach-Object {
 		if (IsLinuxPath $_) {
-			#转换为windows路径
 			LinuxPathToWindowsPath $_
-		}
-		else {
-			$_
-		}
-	}
-	#对于每个参数
-	$paths | ForEach-Object {
-		#若参数是文件夹，且文件夹不为空（测试隐藏文件）
-		if ($recursive -and (Test-Path $_) -and (Get-ChildItem $_ -Force | Measure-Object).Count -gt 0) {
-			#对于每个子文件
-			Get-ChildItem $_ -Force | ForEach-Object {
-				clear-emptys -recursive -paths $_
+		} else { $_ }
+	} | ForEach-Object {
+		if((Get-Item $_).PSIsContainer){
+			$Count = {(Get-ChildItem $_ -Force | Measure-Object).Count}
+			if ((&$Count) -gt 0 -and $recursive -and $depth -ne 0) {
+				clear-emptys -recursive -depth $($depth - 1) -paths $((Get-ChildItem $_ -Force).FullName)
 			}
+			if ((&$Count) -eq 0) { Remove-Item $_ }
 		}
-		#若参数是文件夹，且文件夹为空
-		if ((Test-Path $_) -and (Get-ChildItem $_ -Force | Measure-Object).Count -eq 0) {
-			#删除文件夹
-			Remove-Item $_
-		}
-		#若参数是文件，且文件大小为0
-		elseif ((Test-Path $_) -and (Get-Item $_).Length -eq 0) {
-			#删除文件
-			Remove-Item $_
-		}
+		elseif ((Get-Item $_).Length -eq 0) { Remove-Item $_ }
 	}
 }
 

@@ -26,7 +26,7 @@ if($IsWindows -and -not(Test-Command sudo)){
 		$baseBinary = @('pwsh.exe', 'esh.cmd')[$HasEsh]
 		function runas($baseBinary, $Arguments) {
 			if (Test-Command wt.exe) {
-				$Arguments = (@($baseBinary) + $Arguments) | ForEach-Object { $_.Replace('"', '\"') }
+				$Arguments = (@($baseBinary) + $Arguments -ne $null) | ForEach-Object { $_.Replace('"', '\"') }
 				$baseBinary = 'wt.exe'
 			}
 			try { Start-Process -Wait -FilePath $baseBinary -ArgumentList $Arguments -Verb runas }
