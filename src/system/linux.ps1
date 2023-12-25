@@ -53,8 +53,13 @@ function global:IsLinuxPath([string]$Path) {
 
 #一个函数以处理linux路径到windows路径的转换
 function global:LinuxPathToWindowsPath($Path) {
-	if (($PWD.Path -eq $env:USERPROFILE) -and $Path.StartsWith("./")) {
-		$Path = "~" + $Path.Substring(1)
+	if ($PWD.Path -eq $env:USERPROFILE){
+		if($Path.StartsWith("./")) {
+			$Path = "~" + $Path.Substring(1)
+		}
+		elseif ($Path.StartsWith(".")) {
+			$Path = "~/" + $Path
+		}
 	}
 	#若path以/（单个字母）/开头，则对应windows盘符
 	if (($Path -match "^/([a-zA-Z])/") -or ($Path -match "^/([a-zA-Z])$")) {

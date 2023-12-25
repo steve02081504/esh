@@ -115,6 +115,38 @@ $EshellUI = ValueEx @{
 		VariableSaveList = @{
 			'MSYSRootPath' = 'MSYS.RootPath'
 		}
+		PartsMemoryUsage = ValueEx @{
+			__type__ = [System.Collections.Specialized.OrderedDictionary]
+			'#pushing_array' = [System.Collections.ArrayList]@()
+			PwshBase = (Get-Process -ID $PID).WorkingSet64
+			'method:BeginAdd' = {
+				param ($Name)
+				$this['#pushing_array'].Add((Get-Process -ID $PID).WorkingSet64) | Out-Null
+				$this[$Name] = -1
+			}
+			'method:EndAdd' = {
+				param ($Name)
+				$this[$Name] = ((Get-Process -ID $PID).WorkingSet64 - $this['#pushing_array'][-1])
+				$this['#pushing_array'].RemoveAt($this['#pushing_array'].Count - 1)
+				for ($i = 0; $i -lt $this['#pushing_array'].Count; $i++) {
+					$this['#pushing_array'][$i] += $this[$Name]
+				}
+			}
+			'method:View' = {
+				$Total = 0
+				$this.GetEnumerator() | ForEach-Object {
+					$Name = $_.Key
+					if($_.Value){
+						$Total += $_.Value
+						$Value = if($_.Value/1024 -gt 1024){
+							"$($_.Value/1024/1024) MB"
+						}else{"$($_.Value/1024) KB"}
+						@{ $Name = $Value }
+					}
+				}
+				@{ Total = "$($Total/1024/1024) MB" }
+			}
+		}
 	}
 	'method:LoadVariable' = {
 		param($FileName)
@@ -144,7 +176,12 @@ $EshellUI = ValueEx @{
 			Write-Error 'esh is already started.'
 			return
 		}
+
+		$this.OtherData.PartsMemoryUsage.BeginAdd('EshellBase')
+
 		$LastExitCode = 72 #Do not remove this line
+		
+		$this.OtherData.PartsMemoryUsage.BeginAdd('BeforeEshLoadRecord')
 		$this.OtherData.BeforeEshLoaded = @{
 			FunctionList = Get-ChildItem function:\
 			VariableList = Get-ChildItem variable:\
@@ -154,6 +191,9 @@ $EshellUI = ValueEx @{
 			TabHandler = (Get-PSReadLineKeyHandler Tab).Function
 			EnterHandler = (Get-PSReadLineKeyHandler Enter).Function
 		}
+		$this.OtherData.PartsMemoryUsage.EndAdd('BeforeEshLoadRecord')
+
+		$this.OtherData.PartsMemoryUsage.BeginAdd('RegisterEvents')
 		$this.RegisteredEvents=@{
 			SaveVariables = @{
 				ID = 'PowerShell.Exiting'
@@ -176,6 +216,7 @@ $EshellUI = ValueEx @{
 			Register-EngineEvent $_.ID -SupportEvent -Action $_.Action
 			$_.RawData = (Get-EventSubscriber -Force)[-1]
 		}
+		$this.OtherData.PartsMemoryUsage.EndAdd('RegisterEvents')
 
 		. $PSScriptRoot/system/base.ps1
 
@@ -185,35 +226,48 @@ $EshellUI = ValueEx @{
 
 		Set-PSReadLineKeyHandler -Key Tab -Function MenuComplete
 		if($this.Im.WindowsTerminal) {
-			$WindowsTerminalVersion = [regex]::match((Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\wt.exe").Path, "_(.*?)_").Groups[1].Value
+			$WTPathreg = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\wt.exe"
+			$WindowsTerminalVersion = [regex]::match((Get-ItemProperty $WTPathreg).Path, "_(.*?)_").Groups[1].Value
+			$Loginfo = [System.Collections.ArrayList]@(
+				"Since failed to get Windows Terminal version from the registry, use Get-AppXPackage instead, which is extremely slow.",
+				"Please consider repairing the Windows Terminal installation."
+			)
 			if($WindowsTerminalVersion -eq "") {
 				$WindowsTerminalVersion = "$((Get-AppXPackage "Microsoft.WindowsTerminal").Version)" # super slow
-				# auto fix registry
-				$FileName = "Microsoft.WindowsTerminal_${WindowsTerminalVersion}_x64__8wekyb3d8bbwe\wt.exe"
-				if(Test-Path "C:\Program Files\WindowsApps\$FileName") {
+				# auto fix registry, Remove it by `Remove-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\wt.exe" -Force` in root if you want retest
+				$FileName = "C:\Program Files\WindowsApps\Microsoft.WindowsTerminal_${WindowsTerminalVersion}_x64__8wekyb3d8bbwe\wt.exe"
+				if(Test-Path $FileName) {
 					try{
-						New-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\wt.exe" -Force -ErrorAction Stop | Out-Null
-						New-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\wt.exe" -Name 'Path' -Value "C:\Program Files\WindowsApps\$FileName" -PropertyType "String" -Force | Out-Null
-						$this.LoadingLog.AddInfo("Fixed Windows Terminal registry `"HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\wt.exe`"")
+						New-Item -Path $WTPathreg -Force -ErrorAction Stop | Out-Null
+						New-ItemProperty -Path $WTPathreg -Name 'Path' -Value $FileName -PropertyType "String" -Force | Out-Null
+						$this.LoadingLog.AddInfo("Fixed Windows Terminal registry `"$WTPathreg`"")
 					}
 					catch{
-						$this.LoadingLog.AddWarning("Since failed to get Windows Terminal version from the registry, use Get-AppXPackage instead, which is extremely slow.`nEsh tried to fix this but failed.(See ``error`` for more info.)`nPlease consider repairing the Windows Terminal installation or run esh as root.")
+						$Loginfo.Insert(1, "Esh tried to fix this but failed.(See ``error`` for more info.)")
+						$Loginfo[2] = $Loginfo[2].Substring(0, $Loginfo[2].Length - 1) + " or run esh as root."
+						$this.LoadingLog.AddWarning($Loginfo -join "`n")
 					}
 				}
 				else {
-					$this.LoadingLog.AddWarning("Since failed to get Windows Terminal version from the registry, use Get-AppXPackage instead, which is extremely slow.`nPlease consider repairing the Windows Terminal installation.")
+					$this.LoadingLog.AddWarning($Loginfo -join "`n")
 				}
 			}
 			if($WindowsTerminalVersion -eq "") {
 				$WindowsTerminalVersion = "Unknown"
-				$this.LoadingLog.AddError("Failed to get Windows Terminal version from the registry and Get-AppXPackage failed too.`nPlease consider repairing the Windows Terminal installation.")
+				$this.LoadingLog.AddError($Loginfo -join "`n")
 			}
 			$this.OtherData.WindowsTerminalVersion = $WindowsTerminalVersion
 		}
+		
+		$this.OtherData.PartsMemoryUsage.BeginAdd('linux')
 		. $PSScriptRoot/system/linux.ps1
+		$this.OtherData.PartsMemoryUsage.EndAdd('linux')
 
+		$this.OtherData.PartsMemoryUsage.BeginAdd('Prompt')
 		. $PSScriptRoot/system/UI/prompt/main.ps1
+		$this.OtherData.PartsMemoryUsage.EndAdd('Prompt')
 
+		$this.OtherData.PartsMemoryUsage.BeginAdd('BackgroundLoadings')
 		. $PSScriptRoot/system/BackgroundLoading.ps1
 		if (-not $Arguments.NoProfile) {
 			$this.BackgroundJobs.Push({
@@ -228,11 +282,20 @@ $EshellUI = ValueEx @{
 		if ($Arguments.NoBackgroundLoading) {
 			$this.BackgroundJobs.Wait()
 		}
+		$this.OtherData.PartsMemoryUsage.EndAdd('BackgroundLoadings')
 
+		$this.OtherData.PartsMemoryUsage.BeginAdd('Commands')
 		Get-ChildItem "$PSScriptRoot/commands" *.ps1 | ForEach-Object { . $_.FullName }
+		$this.OtherData.PartsMemoryUsage.EndAdd('Commands')
+
+		$this.OtherData.PartsMemoryUsage.BeginAdd('Fixers')
 		Get-ChildItem "$PSScriptRoot/Fixers" *.ps1 | ForEach-Object { . $_.FullName }
+		$this.OtherData.PartsMemoryUsage.EndAdd('Fixers')
+
 		. $PSScriptRoot/system/UI/loaded.ps1 -Arguments $Arguments
 
+		
+		$this.OtherData.PartsMemoryUsage.BeginAdd('AfterEshLoadRecord')
 		$this.State.Started = $true
 		$this.OtherData.AfterEshLoaded = @{
 			FunctionList = Get-ChildItem function:\
@@ -240,6 +303,9 @@ $EshellUI = ValueEx @{
 			AliasesList = Get-ChildItem alias:\
 			Errors = $Error
 		}
+		$this.OtherData.PartsMemoryUsage.EndAdd('AfterEshLoadRecord')
+
+		$this.OtherData.PartsMemoryUsage.EndAdd('EshellBase')
 	}
 	'method:Reload' = {
 		$this.SaveVariables()
