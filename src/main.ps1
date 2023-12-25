@@ -433,7 +433,7 @@ $EshellUI = ValueEx @{
 				return
 			}
 		}
-		. "$($this.Sources.Path)/runner/build.ps1" -OutputFile $OutputFile
+		&"$($this.Sources.Path)/runner/build.ps1" -OutputFile $OutputFile
 		"Compiled to $(AutoShortPath $OutputFile) with size $((Get-Item $OutputFile).Length) bytes"
 	}
 }
