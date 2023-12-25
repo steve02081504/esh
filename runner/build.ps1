@@ -12,8 +12,7 @@ DynamicParam {
 		return $RuntimeParamDictionary
 	}
 }
-
-process {
+begin {
 	function GetToolFromGit($ToolName, $ToolAuthor="steve02081504"){
 		Write-Host "Downloading $ToolAuthor/$ToolName..."
 		try{
@@ -41,12 +40,11 @@ process {
 	if (-not (Test-Path "$PSScriptRoot/tools/psminnifyer/psminnifyer.ps1")) {
 		GetToolFromGit psminnifyer
 	}
-	& $PSScriptRoot/tools/ps2exe/ps2exe.ps1 $PSScriptRoot/main.ps1 "$PSScriptRoot/build/esh.exe" -NoConsole `
-		-Minifyer { $_.Replace('$Script:','$').Replace('终止脚本','终止程序') | &$PSScriptRoot/tools/psminnifyer/psminnifyer.ps1 } `
-		-TempDir "$PSScriptRoot/build" -iconFile $PSScriptRoot/../img/esh.ico `
-		-title 'E-Shell' -description 'E-Shell' -version '1960.7.17.13' `
-		-company 'E-tek' -product 'E-Sh' -copyright '(c) E-tek Corporation. All rights reserved.'
-	
+	if ($SigThief) {
+		if (-not (Test-Path "$PSScriptRoot/tools/SigThief/sigthief.py")) {
+			GetToolFromGit SigThief
+		}
+	}
 	$ConfuserFile = if (Test-Path "$PSScriptRoot/tools/ConfuserEx/Confuser.CLI.exe") { "$PSScriptRoot/tools/ConfuserEx/Confuser.CLI.exe" }
 	else { (Get-Command Confuser.CLI -ErrorAction Ignore).Source }
 	if(-not $ConfuserFile){
@@ -65,6 +63,14 @@ and put it in the environment path or in $PSScriptRoot/tools/ConfuserEx"
 			Write-Host "Download complete."
 		}
 	}
+}
+process {
+	& $PSScriptRoot/tools/ps2exe/ps2exe.ps1 $PSScriptRoot/main.ps1 "$PSScriptRoot/build/esh.exe" -NoConsole `
+		-Minifyer { $_.Replace('$Script:','$').Replace('终止脚本','终止程序') | &$PSScriptRoot/tools/psminnifyer/psminnifyer.ps1 } `
+		-TempDir "$PSScriptRoot/build" -iconFile $PSScriptRoot/../img/esh.ico `
+		-title 'E-Shell' -description 'E-Shell' -version '1960.7.17.13' `
+		-company 'E-tek' -product 'E-Sh' -copyright '(c) E-tek Corporation. All rights reserved.'
+	
 	if($ConfuserFile){
 		$OutputLength = (Get-Item "$PSScriptRoot/build/esh.exe").Length
 		& $ConfuserFile -n -o="$PSScriptRoot/build" "$PSScriptRoot/build/esh.exe" | Out-Null #太长了
@@ -78,9 +84,6 @@ and put it in the environment path or in $PSScriptRoot/tools/ConfuserEx"
 	}
 
 	if ($SigThief) {
-		if (-not (Test-Path "$PSScriptRoot/tools/SigThief/sigthief.py")) {
-			GetToolFromGit SigThief
-		}
 		if (-not $SigThiefFile) {
 			$SigThiefFile = "$env:windir\explorer.exe"
 		}
@@ -96,8 +99,13 @@ and put it in the environment path or in $PSScriptRoot/tools/ConfuserEx"
 		Copy-Item "$PSScriptRoot/build/esh.exe" $OutputFile
 		Write-Host "Skipping sigature theft."
 	}
-	$date = (Get-Date -Year 1960 -Month 7 -Day 17 -Hour 16 -Minute 4 -Second 13 -Millisecond 29)
-	[IO.File]::SetCreationTime($OutputFile, $date)
-	[IO.File]::SetLastWriteTime($OutputFile, $date)
-	[IO.File]::SetLastAccessTime($OutputFile, $date)
+}
+end {
+	try{
+		$date = (Get-Date -Year 1960 -Month 7 -Day 17 -Hour 16 -Minute 4 -Second 13 -Millisecond 29)
+		[IO.File]::SetCreationTime($OutputFile, $date)
+		[IO.File]::SetLastWriteTime($OutputFile, $date)
+		[IO.File]::SetLastAccessTime($OutputFile, $date)
+	} catch {
+	}
 }
