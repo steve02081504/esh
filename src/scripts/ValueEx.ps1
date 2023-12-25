@@ -19,7 +19,7 @@ function global:ValueEx ($ValueAndMethods) {
 		if ($_.Key.StartsWith('method:') -and ($_.Value -is [scriptblock])) {
 			Add-Member -InputObject $ValueExed -MemberType ScriptMethod -Name $_.Key.Substring(7) -Value $_.Value -Force
 		}
-		elseif ($ValueExed -is [HashTable] -or $ValueExed -is [ordered]) {
+		elseif ($ValueExed -is [System.Collections.IDictionary]) {
 			$ValueExed[$_.Key] = $_.Value
 		}
 		else {
