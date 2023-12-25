@@ -31,11 +31,8 @@ begin {
 		}
 		Write-Host "Download complete."
 	}
-	if (-not (Test-Path "$PSScriptRoot/tools/ps2exe/ps2exe.ps1")) {
-		if(Get-Command ps2exe -ErrorAction Ignore){
-			Write-Host "Existing ps2exe doesn't meet the functionality requirements needed for a build, downloading target fork..."
-		}
-		GetToolFromGit ps2exe
+	if (-not (Get-Module -ListAvailable ps12exe)) {
+		Install-Module ps12exe -Force
 	}
 	if (-not (Test-Path "$PSScriptRoot/tools/psminnifyer/psminnifyer.ps1")) {
 		GetToolFromGit psminnifyer
@@ -65,7 +62,7 @@ and put it in the environment path or in $PSScriptRoot/tools/ConfuserEx"
 	}
 }
 process {
-	& $PSScriptRoot/tools/ps2exe/ps2exe.ps1 $PSScriptRoot/main.ps1 "$PSScriptRoot/build/esh.exe" -NoConsole `
+	ps12exe $PSScriptRoot/main.ps1 "$PSScriptRoot/build/esh.exe" -NoConsole `
 		-Minifyer { $_.Replace('$Script:','$').Replace('终止脚本','终止程序') | &$PSScriptRoot/tools/psminnifyer/psminnifyer.ps1 } `
 		-TempDir "$PSScriptRoot/build" -iconFile $PSScriptRoot/../img/esh.ico `
 		-title 'E-Shell' -description 'E-Shell' -version '1960.7.17.13' `
