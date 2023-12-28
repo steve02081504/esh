@@ -193,6 +193,8 @@ $EshellUI = ValueEx @{
 		}
 		$this.OtherData.PartsMemoryUsage.EndAdd('BeforeEshLoadRecord')
 
+		$this.OtherData.HistoryErrorCount = $Error.Count
+
 		$this.OtherData.PartsMemoryUsage.BeginAdd('RegisterEvents')
 		$this.RegisteredEvents=@{
 			SaveVariables = @{
@@ -225,6 +227,7 @@ $EshellUI = ValueEx @{
 		. $PSScriptRoot/system/UI/icon.ps1
 
 		Set-PSReadLineKeyHandler -Key Tab -Function MenuComplete
+		$PSDefaultParameterValues['Out-Default:OutVariable'] = 'ans_array'
 		if($this.Im.WindowsTerminal) {
 			$WTPathreg = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\wt.exe"
 			$WindowsTerminalVersion = [regex]::match((Get-ItemProperty $WTPathreg).Path, "_(.*?)_").Groups[1].Value

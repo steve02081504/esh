@@ -76,8 +76,4 @@ if($IsWindows -and -not(Test-Command sudo)){
 	}
 }
 
-function global:exit($exitCode = 0) {
-	[System.Environment]::Exit($exitCode)
-}
-
 function global:reload { $EshellUI.Reload() }

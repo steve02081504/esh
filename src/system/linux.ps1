@@ -129,8 +129,20 @@ if (Test-Command rm.exe) {
 
 
 $global:ans ??= 72
-function global:ans { $global:ans }
-function global:err { $global:err }
+function global:ans {
+	param(
+		[Parameter(ValueFromRemainingArguments = $true)]
+		$ExprAddition
+	)
+	Invoke-Expression "`$global:ans $ExprAddition"
+}
+function global:err {
+	param(
+		[Parameter(ValueFromRemainingArguments = $true)]
+		$ExprAddition
+	)
+	Invoke-Expression "`$global:err $ExprAddition"
+}
 
 if (Test-Path $EshellUI.MSYS.RootPath) {
 	New-PSDrive -PSProvider FileSystem -Root $EshellUI.MSYS.RootPath -Name 'root' -Scope Global | Out-Null
@@ -183,6 +195,42 @@ if (Test-Path $EshellUI.MSYS.RootPath) {
 	#设置一个函数用于在powershell执行以/开头的命令时，自动转换为windows路径
 	#设置触发器
 	Set-PSReadLineKeyHandler -Key Enter -ScriptBlock {
+		function PseudoRun($Expr) {
+			#求值并输出
+			[Microsoft.PowerShell.PSConsoleReadLine]::CancelLine()
+			Write-Host "`b`b  "
+			do{
+				try {
+					$StartExecutionTime = Get-Date
+					$(if($Expr){
+						Invoke-Expression $Expr -OutVariable global:ans
+					} else { $global:ans }) | Out-Host
+					$EndExecutionTime = Get-Date
+				}
+				catch {
+					if($_.Exception -is [System.Management.Automation.ParseException]) {
+						Write-Host '?>' -NoNewline
+						$Apply = Read-Host
+						if($Apply -ne ''){
+							$Expr = $OriLine += "`n" + $Apply
+						}
+						else{ $EndExecutionTime = Get-Date }
+					}
+					else { $EndExecutionTime = Get-Date }
+					if ($EndExecutionTime) {
+						$global:ans=$null
+						Out-Error ($global:err=$_)
+					}
+				}
+			} until ($EndExecutionTime -ne $null)
+			[Microsoft.PowerShell.PSConsoleReadLine]::AddToHistory($OriLine)
+			[PSCustomObject](@{
+				CommandLine = $Expr
+				ExecutionStatus = "Completed"
+				StartExecutionTime = $StartExecutionTime
+				EndExecutionTime = $EndExecutionTime
+			}) | Add-History
+		}
 		#获取当前行
 		$OriLine = $null
 		$Cursor = $null
@@ -203,56 +251,16 @@ if (Test-Path $EshellUI.MSYS.RootPath) {
 			$Executable = LinuxPathToWindowsPath $Executable
 			$Expr = "$Executable $Rest"
 		}
-		if ($NestedPromptLevel -eq 0) {
-			if ($Line.StartsWith("exit")) {
-				#若当前行以exit开头，则退出vscode
-				Invoke-Expression "global:$Line"
-				return
-			}
-		}
 		if(Test-Command $Executable) {
-			if ($Executable.StartsWith($EshellUI.MSYS.RootPath)) {
-				$Expr = "($Expr) *>&1"
-			}
-			else{
-				[Microsoft.PowerShell.PSConsoleReadLine]::AcceptLine()
+			if ($Executable.StartsWith('root:')) {
+				PseudoRun "($Expr) *>&1"
 				return
 			}
 		}
-		#求值并输出
-		[Microsoft.PowerShell.PSConsoleReadLine]::CancelLine()
-		Write-Host "`b`b  "
-		do{
-			try {
-				$StartExecutionTime = Get-Date
-				$(if($Expr){
-					Invoke-Expression $Expr -OutVariable global:ans
-				} else { $global:ans }) | Out-Host
-				$EndExecutionTime = Get-Date
-			}
-			catch {
-				if($_.Exception -is [System.Management.Automation.ParseException]) {
-					Write-Host '?>' -NoNewline
-					$Apply = Read-Host
-					if($Apply -ne ''){
-						$Expr = $OriLine += "`n" + $Apply
-					}
-					else{ $EndExecutionTime = Get-Date }
-				}
-				else { $EndExecutionTime = Get-Date }
-				if ($EndExecutionTime) {
-					$global:ans=$null
-					Out-Error ($global:err=$_)
-				}
-			}
-		} until ($EndExecutionTime -ne $null)
-		[Microsoft.PowerShell.PSConsoleReadLine]::AddToHistory($OriLine)
-		[PSCustomObject](@{
-			CommandLine = $Expr
-			ExecutionStatus = "Completed"
-			StartExecutionTime = $StartExecutionTime
-			EndExecutionTime = $EndExecutionTime
-		}) | Add-History
+		$global:ans = $($global:ans_array)
+		$global:err = $Error | Select-Object -SkipLast $EshellUI.OtherData.HistoryErrorCount
+		$EshellUI.OtherData.HistoryErrorCount = $Error.Count
+		[Microsoft.PowerShell.PSConsoleReadLine]::AcceptLine()
 	}
 	Set-PSReadLineKeyHandler -Key Tab -ScriptBlock {
 		#获取当前行
@@ -304,55 +312,9 @@ if (Test-Path $EshellUI.MSYS.RootPath) {
 }
 else{
 	Set-PSReadLineKeyHandler -Key Enter -ScriptBlock {
-		#获取当前行
-		$OriLine = $null
-		$Cursor = $null
-		[Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$OriLine, [ref]$Cursor)
-		$Expr = $Line = $OriLine.Trim()
-		if ($NestedPromptLevel -eq 0) {
-			if ($Line.StartsWith("exit")) {
-				#若当前行以exit开头，则退出vscode
-				Invoke-Expression "global:$Line"
-				return
-			}
-		}
-		if(Test-Command $Executable) {
-			[Microsoft.PowerShell.PSConsoleReadLine]::AcceptLine()
-			return
-		}
-		#求值并输出
-		[Microsoft.PowerShell.PSConsoleReadLine]::CancelLine()
-		Write-Host "`b`b  "
-		do{
-			try {
-				$StartExecutionTime = Get-Date
-				$(if($Expr){
-					Invoke-Expression $Expr -OutVariable global:ans
-				} else { $global:ans }) | Out-Host
-				$EndExecutionTime = Get-Date
-			}
-			catch {
-				if($_.Exception -is [System.Management.Automation.ParseException]) {
-					Write-Host '?>' -NoNewline
-					$Apply = Read-Host
-					if($Apply -ne ''){
-						$Expr = $OriLine += "`n" + $Apply
-					}
-					else{ $EndExecutionTime = Get-Date }
-				}
-				else { $EndExecutionTime = Get-Date }
-				if ($EndExecutionTime) {
-					$global:ans=$null
-					Out-Error ($global:err=$_)
-				}
-			}
-		} until ($EndExecutionTime -ne $null)
-		[Microsoft.PowerShell.PSConsoleReadLine]::AddToHistory($OriLine)
-		[PSCustomObject](@{
-			CommandLine = $Expr
-			ExecutionStatus = "Completed"
-			StartExecutionTime = $StartExecutionTime
-			EndExecutionTime = $EndExecutionTime
-		}) | Add-History
+		$global:ans = $($global:ans_array)
+		$global:err = $Error | Select-Object -SkipLast $EshellUI.OtherData.HistoryErrorCount
+		$EshellUI.OtherData.ErrorCount = $Error.HistoryErrorCount
+		[Microsoft.PowerShell.PSConsoleReadLine]::AcceptLine()
 	}
 }
