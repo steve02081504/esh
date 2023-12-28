@@ -34,7 +34,6 @@ begin {
 	if (-not (Get-Module -ListAvailable ps12exe)) {
 		Install-Module ps12exe -Force
 	}
-	Import-Module ps12exe
 	if (-not (Test-Path "$PSScriptRoot/tools/psminnifyer/psminnifyer.ps1")) {
 		GetToolFromGit psminnifyer
 	}
@@ -43,21 +42,21 @@ begin {
 			GetToolFromGit SigThief
 		}
 	}
-	$ConfuserFile = if (Test-Path "$PSScriptRoot/tools/ConfuserEx/Confuser.CLI.exe") { "$PSScriptRoot/tools/ConfuserEx/Confuser.CLI.exe" }
-	else { (Get-Command Confuser.CLI -ErrorAction Ignore).Source }
-	if(-not $ConfuserFile){
-		Write-Host "Confuser.CLI not found. Downloading..."
-		try{
-			Invoke-WebRequest https://github.com/mkaring/ConfuserEx/releases/latest/download/ConfuserEx-CLI.zip -OutFile $PSScriptRoot/tools/ConfuserEx.zip
-			New-Item -ItemType Directory -Force -Path $PSScriptRoot/tools/ConfuserEx | Out-Null
-			Expand-Archive -Path $PSScriptRoot/tools/ConfuserEx.zip -DestinationPath $PSScriptRoot/tools/ConfuserEx
+	$MpressFile = if (Test-Path "$PSScriptRoot/tools/mpress/mpress.exe") { "$PSScriptRoot/tools/mpress/mpress.exe" }
+	else { (Get-Command mpress -ErrorAction Ignore).Source }
+	if (-not $MpressFile) {
+		Write-Host "Mpress not found. Downloading..."
+		try {
+			Invoke-WebRequest https://web.archive.org/web/20150506065200/http://www.matcode.com/mpress.219.zip -OutFile $PSScriptRoot/tools/mpress.zip
+			New-Item -ItemType Directory -Force -Path $PSScriptRoot/tools/mpress | Out-Null
+			Expand-Archive -Path $PSScriptRoot/tools/mpress.zip -DestinationPath $PSScriptRoot/tools/mpress
 		} catch {
-			Write-Warning "Download failed.. Skipping obfuscation.
-Download it from https://github.com/mkaring/ConfuserEx
-and put it in the environment path or in $PSScriptRoot/tools/ConfuserEx"
+			Write-Warning "Download failed. Skipping compression.
+	Download it from https://web.archive.org/web/20150506065200/http://www.matcode.com/mpress.219.zip
+	and put it in the environment path or in $PSScriptRoot/tools/mpress"
 		}
-		if (Test-Path "$PSScriptRoot/tools/ConfuserEx/Confuser.CLI.exe") {
-			$ConfuserFile = "$PSScriptRoot/tools/ConfuserEx/Confuser.CLI.exe"
+		if (Test-Path "$PSScriptRoot/tools/mpress/mpress.exe") {
+			$MpressFile = "$PSScriptRoot/tools/mpress/mpress.exe"
 			Write-Host "Download complete."
 		}
 	}
@@ -69,15 +68,15 @@ process {
 		-title 'E-Shell' -description 'E-Shell' -version '1960.7.17.13' `
 		-company 'E-tek' -product 'E-Sh' -copyright '(c) E-tek Corporation. All rights reserved.'
 	
-	if($ConfuserFile){
+	if($MpressFile){
 		$OutputLength = (Get-Item "$PSScriptRoot/build/esh.exe").Length
-		& $ConfuserFile -n -o="$PSScriptRoot/build" "$PSScriptRoot/build/esh.exe" | Out-Null #太长了
+		& $MpressFile "$PSScriptRoot/build/esh.exe" -s | Out-Null
 		$ObfusLength = (Get-Item "$PSScriptRoot/build/esh.exe").Length
 		if($ObfusLength -ne $OutputLength){
-			Write-Host "Obfuscation complete -> $ObfusLength bytes"
+			Write-Host "Compression complete -> $ObfusLength bytes"
 		}
 		elseif($LASTEXITCODE -eq 1){
-			Write-Warning "Obfuscation failed."
+			Write-Warning "Compression failed."
 		}
 	}
 
