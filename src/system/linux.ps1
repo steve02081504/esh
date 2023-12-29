@@ -199,6 +199,9 @@ if (Test-Path $EshellUI.MSYS.RootPath) {
 	#设置一个函数用于在powershell执行以/开头的命令时，自动转换为windows路径
 	#设置触发器
 	$EshellUI.ExecutionHandlers.Add({
+		param (
+			[string]$OriLine
+		)
 		function PseudoRun($Expr) {
 			#求值并输出
 			[Microsoft.PowerShell.PSConsoleReadLine]::CancelLine()
@@ -235,10 +238,6 @@ if (Test-Path $EshellUI.MSYS.RootPath) {
 				EndExecutionTime = $EndExecutionTime
 			}) | Add-History
 		}
-		#获取当前行
-		$OriLine = $null
-		$Cursor = $null
-		[Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$OriLine, [ref]$Cursor)
 		$Expr = $Line = $OriLine.Trim()
 		#自行首获取可执行文件路径
 		$Executable = $Line.Split(" ")[0]

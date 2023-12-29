@@ -1,20 +1,26 @@
-$global:ans ??= 72
-function global:ans([Parameter(ValueFromRemainingArguments = $true)]$ExprAddition) {
-	Invoke-Expression "`$global:ans $ExprAddition"
-}
-function global:err([Parameter(ValueFromRemainingArguments = $true)]$ExprAddition) {
-	Invoke-Expression "`$global:err $ExprAddition"
+$global:ans_array ??= [System.Collections.ArrayList]@(72)
+
+@('ans', 'err', 'expr') | ForEach-Object {
+	Invoke-Expression "
+	function global:$_([Parameter(ValueFromRemainingArguments = `$true)]`$ExprAddition) {
+		Invoke-Expression ""```$global:$_ `$ExprAddition""
+	}
+	"
 }
 $EshellUI.OtherData.HistoryErrorCount = $Error.Count
 
 $PSDefaultParameterValues['Out-Default:OutVariable'] = 'ans_array'
 $EshellUI.ExecutionHandlers = [System.Collections.ArrayList]@()
 Set-PSReadLineKeyHandler -Key Enter -ScriptBlock {
-	foreach($Handler in $EshellUI.ExecutionHandlers) {
-		if(. $Handler) { return }
-	}
-	if($ans_array -ne $null) { $global:ans = $($global:ans_array) }
+	#获取当前行
+	$global:expr = $global:expr_now
+	$global:expr_now = $Cursor = $null
+	[Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$global:expr_now, [ref]$Cursor)
+	$global:ans = $($global:ans_array)
 	$global:err = $Error | Select-Object -SkipLast $EshellUI.OtherData.HistoryErrorCount
-	$EshellUI.OtherData.ErrorCount = $Error.HistoryErrorCount
+	$EshellUI.OtherData.HistoryErrorCount = $Error.Count
+	foreach($Handler in $EshellUI.ExecutionHandlers) {
+		if($Handler.Invoke($global:expr_now)) { return }
+	}
 	[Microsoft.PowerShell.PSConsoleReadLine]::AcceptLine()
 }
