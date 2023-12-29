@@ -190,10 +190,9 @@ $EshellUI = ValueEx @{
 			Errors = $Error
 			TabHandler = (Get-PSReadLineKeyHandler Tab).Function
 			EnterHandler = (Get-PSReadLineKeyHandler Enter).Function
+			DefaultParameterValues = $PSDefaultParameterValues
 		}
 		$this.OtherData.PartsMemoryUsage.EndAdd('BeforeEshLoadRecord')
-
-		$this.OtherData.HistoryErrorCount = $Error.Count
 
 		$this.OtherData.PartsMemoryUsage.BeginAdd('RegisterEvents')
 		$this.RegisteredEvents=@{
@@ -227,7 +226,6 @@ $EshellUI = ValueEx @{
 		. $PSScriptRoot/system/UI/icon.ps1
 
 		Set-PSReadLineKeyHandler -Key Tab -Function MenuComplete
-		$PSDefaultParameterValues['Out-Default:OutVariable'] = 'ans_array'
 		if($this.Im.WindowsTerminal) {
 			$WTPathreg = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\wt.exe"
 			$WindowsTerminalVersion = [regex]::match((Get-ItemProperty $WTPathreg).Path, "_(.*?)_").Groups[1].Value
@@ -262,6 +260,10 @@ $EshellUI = ValueEx @{
 			$this.OtherData.WindowsTerminalVersion = $WindowsTerminalVersion
 		}
 		
+		$this.OtherData.PartsMemoryUsage.BeginAdd('autovars')
+		. $PSScriptRoot/system/autovars.ps1
+		$this.OtherData.PartsMemoryUsage.EndAdd('autovars')
+
 		$this.OtherData.PartsMemoryUsage.BeginAdd('linux')
 		. $PSScriptRoot/system/linux.ps1
 		$this.OtherData.PartsMemoryUsage.EndAdd('linux')
@@ -360,6 +362,7 @@ $EshellUI = ValueEx @{
 		Set-PSReadLineKeyHandler Tab $this.OtherData.BeforeEshLoaded.TabHandler
 		Remove-PSReadLineKeyHandler Enter
 		Set-PSReadLineKeyHandler Enter $this.OtherData.BeforeEshLoaded.EnterHandler
+		$PSDefaultParameterValues = $this.OtherData.BeforeEshLoaded.DefaultParameterValues
 		$this.State.Started = $false
 	}
 	'method:Repl' = {

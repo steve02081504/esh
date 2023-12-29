@@ -88,6 +88,10 @@ function global:LinuxPathToWindowsPath($Path) {
 		return Join-Path "root:\" $Path
 	}
 }
+function global:LinuxPathToFullWindowsPath($Path) {
+	# "root:\" -> $EshellUI.MSYS.RootPath
+	(LinuxPathToWindowsPath $Path).Replace("root:\", $EshellUI.MSYS.RootPath)
+}
 function global:WindowsPathToLinuxPath($Path) {
 	#若path是rootpath的子目录
 	if ($Path.StartsWith($EshellUI.MSYS.RootPath)) {
@@ -194,7 +198,7 @@ if (Test-Path $EshellUI.MSYS.RootPath) {
 
 	#设置一个函数用于在powershell执行以/开头的命令时，自动转换为windows路径
 	#设置触发器
-	Set-PSReadLineKeyHandler -Key Enter -ScriptBlock {
+	$EshellUI.ExecutionHandlers.Add({
 		function PseudoRun($Expr) {
 			#求值并输出
 			[Microsoft.PowerShell.PSConsoleReadLine]::CancelLine()
@@ -253,15 +257,11 @@ if (Test-Path $EshellUI.MSYS.RootPath) {
 		}
 		if(Test-Command $Executable) {
 			if ($Executable.StartsWith('root:')) {
-				PseudoRun "($Expr) *>&1"
-				return
+				PseudoRun "($Expr) *>&1" | Out-Host
+				return 1
 			}
 		}
-		$global:ans = $($global:ans_array)
-		$global:err = $Error | Select-Object -SkipLast $EshellUI.OtherData.HistoryErrorCount
-		$EshellUI.OtherData.HistoryErrorCount = $Error.Count
-		[Microsoft.PowerShell.PSConsoleReadLine]::AcceptLine()
-	}
+	}) | Out-Null
 	Set-PSReadLineKeyHandler -Key Tab -ScriptBlock {
 		#获取当前行
 		$OriLine = $null
@@ -308,13 +308,5 @@ if (Test-Path $EshellUI.MSYS.RootPath) {
 			#否则调用默认的补全
 			[Microsoft.PowerShell.PSConsoleReadLine]::MenuComplete()
 		}
-	}
-}
-else{
-	Set-PSReadLineKeyHandler -Key Enter -ScriptBlock {
-		$global:ans = $($global:ans_array)
-		$global:err = $Error | Select-Object -SkipLast $EshellUI.OtherData.HistoryErrorCount
-		$EshellUI.OtherData.ErrorCount = $Error.HistoryErrorCount
-		[Microsoft.PowerShell.PSConsoleReadLine]::AcceptLine()
 	}
 }

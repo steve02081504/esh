@@ -3,19 +3,25 @@ function global:mklink {
 		[Parameter(ValueFromRemainingArguments = $true)]
 		[string[]]$RemainingArguments
 	)
+	$replaceList = @{}
 	#对于每个参数
 	$RemainingArguments = $RemainingArguments | ForEach-Object {
 		#若参数长度不是2且是linux路径
 		if (($_.Length -ne 2) -and (IsLinuxPath $_)) {
 			#转换为windows路径
-			LinuxPathToWindowsPath $_
+			$replaceList[$_] = LinuxPathToFullWindowsPath $_
+			$replaceList[$_]
 		}
 		else {
 			$_
 		}
 	}
 	#调用cmd的mklink
-	. cmd /c mklink $RemainingArguments
+	$result = . cmd /c mklink $RemainingArguments
+	$replaceList.GetEnumerator() | ForEach-Object {
+		$result = $result.Replace($_.Value, $_.Key)
+	}
+	$result
 }
 function global:reboot {
 	#重启
