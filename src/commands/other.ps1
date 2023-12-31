@@ -18,8 +18,10 @@ function global:mklink {
 	}
 	#调用cmd的mklink
 	$result = . cmd /c mklink $RemainingArguments
-	$replaceList.GetEnumerator() | ForEach-Object {
-		$result = $result.Replace($_.Value, $_.Key)
+	if($result) {
+		$replaceList.GetEnumerator() | ForEach-Object {
+			$result = $result.Replace($_.Value, $_.Key)
+		}
 	}
 	$result
 }
