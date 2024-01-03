@@ -4,18 +4,10 @@ param(
 	$RemainingArguments
 )
 
-#_if PSEXE
-	#_include ../src/opt/opt_init.ps1
-#_else
-	. $PSScriptRoot/../src/opt/opt_init.ps1
-#_endif
+. $PSScriptRoot/../src/opt/opt_init.ps1
 
 if (-not $eshDir) {
-	#_if PSEXE
-		#_include ../src/opt/download.ps1
-	#_else
-		. $PSScriptRoot/../src/opt/download.ps1
-	#_endif
+	. $PSScriptRoot/../src/opt/download.ps1
 }
 
 if ($RunInstall){
