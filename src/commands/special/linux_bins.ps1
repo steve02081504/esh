@@ -80,6 +80,11 @@ function global:cd {
 				if ($_.Length -eq 2) {
 					if ($arg.StartsWith($_)) {
 						$IsLinuxBin = $true
+						$arg.Substring(2).ToCharArray() | ForEach-Object {
+							if ($LinuxBinArguments -notcontains "-$_") {
+								$IsLinuxBin = $false
+							}
+						}
 					}
 				}
 				else {
@@ -175,6 +180,11 @@ function global:ls {
 			if ($_.Length -eq 2) {
 				if ($arg.StartsWith($_)) {
 					$IsLinuxBin = $true
+					$arg.Substring(2).ToCharArray() | ForEach-Object {
+						if ($LinuxBinArguments -notcontains "-$_") {
+							$IsLinuxBin = $false
+						}
+					}
 				}
 			}
 			else {
@@ -261,6 +271,11 @@ function global:rm {
 			if ($_.Length -eq 2) {
 				if ($arg.StartsWith($_)) {
 					$IsLinuxBin = $true
+					$arg.Substring(2).ToCharArray() | ForEach-Object {
+						if ($LinuxBinArguments -notcontains "-$_") {
+							$IsLinuxBin = $false
+						}
+					}
 				}
 			}
 			else {
@@ -357,6 +372,11 @@ function global:mv {
 			if ($_.Length -eq 2) {
 				if ($arg.StartsWith($_)) {
 					$IsLinuxBin = $true
+					$arg.Substring(2).ToCharArray() | ForEach-Object {
+						if ($LinuxBinArguments -notcontains "-$_") {
+							$IsLinuxBin = $false
+						}
+					}
 				}
 			}
 			else {
@@ -453,6 +473,11 @@ function global:cp {
 			if ($_.Length -eq 2) {
 				if ($arg.StartsWith($_)) {
 					$IsLinuxBin = $true
+					$arg.Substring(2).ToCharArray() | ForEach-Object {
+						if ($LinuxBinArguments -notcontains "-$_") {
+							$IsLinuxBin = $false
+						}
+					}
 				}
 			}
 			else {
@@ -530,6 +555,11 @@ function global:mkdir {
 			if ($_.Length -eq 2) {
 				if ($arg.StartsWith($_)) {
 					$IsLinuxBin = $true
+					$arg.Substring(2).ToCharArray() | ForEach-Object {
+						if ($LinuxBinArguments -notcontains "-$_") {
+							$IsLinuxBin = $false
+						}
+					}
 				}
 			}
 			else {
@@ -607,6 +637,11 @@ function global:touch {
 			if ($_.Length -eq 2) {
 				if ($arg.StartsWith($_)) {
 					$IsLinuxBin = $true
+					$arg.Substring(2).ToCharArray() | ForEach-Object {
+						if ($LinuxBinArguments -notcontains "-$_") {
+							$IsLinuxBin = $false
+						}
+					}
 				}
 			}
 			else {
@@ -688,6 +723,11 @@ function global:cat {
 			if ($_.Length -eq 2) {
 				if ($arg.StartsWith($_)) {
 					$IsLinuxBin = $true
+					$arg.Substring(2).ToCharArray() | ForEach-Object {
+						if ($LinuxBinArguments -notcontains "-$_") {
+							$IsLinuxBin = $false
+						}
+					}
 				}
 			}
 			else {

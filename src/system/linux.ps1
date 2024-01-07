@@ -52,7 +52,7 @@ function global:IsLinuxPath([string]$Path) {
 }
 
 #一个函数以处理linux路径到windows路径的转换
-function global:LinuxPathToWindowsPath($Path) {
+function global:LinuxPathToWindowsPath([string]$Path) {
 	if ($PWD.Path -eq $env:USERPROFILE){
 		if($Path.StartsWith("./")) {
 			$Path = "~" + $Path.Substring(1)
@@ -92,7 +92,7 @@ function global:LinuxPathToFullWindowsPath($Path) {
 	# "root:\" -> $EshellUI.MSYS.RootPath
 	(LinuxPathToWindowsPath $Path).Replace("root:\", $EshellUI.MSYS.RootPath)
 }
-function global:WindowsPathToLinuxPath($Path) {
+function global:WindowsPathToLinuxPath([string]$Path) {
 	#若path是rootpath的子目录
 	if ($Path.StartsWith($EshellUI.MSYS.RootPath)) {
 		#则转换为linux路径
@@ -124,6 +124,9 @@ function global:AutoShortPath($Path) {
 	[regex]$matcher = "^($([regex]::Escape($HOME))|root:|$([regex]::Escape($EshellUI.MSYS.RootPath)))"
 	if ($matcher.IsMatch($Path)) {
 		WindowsPathToLinuxPath $Path
+	}
+	else {
+		$Path
 	}
 }
 

@@ -128,18 +128,6 @@ if ($IsWindows) {
 		New-Item -ItemType Directory -Force -Path $wtFragmentDir | Out-Null
 		Set-Content $wtFragmentDir/esh.json $wtFragmentJson -NoNewline
 	}
-	$startScript = "@$eshDir/opt/run -Command 1000-7"
-	$LoaderPath = "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Startup\Esh_loader.cmd"
-	if (Test-Path $LoaderPath) {
-		if ((Get-Content $LoaderPath -Raw) -ne $startScript) {
-			Set-Content $LoaderPath $startScript -NoNewline
-			Write-Warning "检测到旧的 Eshell 预启动器，其已被更新。"
-		}
-	}
-	else {
-		New-Item -ItemType Directory -Force -Path (Split-Path $LoaderPath) | Out-Null
-		Set-Content $LoaderPath $startScript -NoNewline
-	}
 }
 
 if (-not (Get-Command pwsh -ErrorAction Ignore)) {

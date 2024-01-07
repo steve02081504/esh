@@ -9,6 +9,9 @@ $EshellUI.BackgroundJobs.Push(@(
 			}
 			Import-Module Terminal-Icons
 			Update-FormatData -PrependPath "$($EshellUI.Sources.Path)/data/formatxml/ls.Terminal-Icons.format.ps1xml"
+			if (Test-Command Set-TerminalIconPathResolver) {
+				Set-TerminalIconPathResolver { param ($Path) AutoShortPath $Path }
+			}
 		}
 		$EshellUI.OtherData.PartsMemoryUsage.EndAdd('ls-view')
 	}
