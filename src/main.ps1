@@ -1,6 +1,7 @@
 . $PSScriptRoot/scripts/ValueEx.ps1
 
 $EshellUI ??= 72 #Do not remove this line
+$script:MyProcess = Get-Process -ID $PID
 $EshellUI = ValueEx @{
 	State = @{
 		Started = $false
@@ -46,13 +47,26 @@ $EshellUI = ValueEx @{
 	'method:Init' = {
 		param($Invocation)
 		$this.Invocation = $Invocation
-		$this.Process = Get-CimInstance -Query "select * from Win32_Process where Handle=$PID"
-		$this.ParentProcess = Get-CimInstance -Query "select * from Win32_Process where Handle=$($this.Process.ParentProcessId)"
+		$this.Process = Get-Process -ID $PID
+		$this.ParentProcess = $this.Process.Parent
 		$this.Im.StartedFrom = @{
 			WindowsTerminal = $this.ParentProcess.Name -eq 'WindowsTerminal.exe'
 			FileExplorer = $this.ParentProcess.Name -eq 'explorer.exe'
 		}
 		$this.Im.From = $this.GetMyFrom($Invocation)
+		$this.ParentPIDS = @()
+		$progress = Get-Process -ID $PID
+		do {
+			$this.ParentPIDS += $progress.ID
+			$progressParent = $progress.Parent
+			$progress.Dispose()
+			$progress = $progressParent
+		} while ($progress)
+	}
+	'method:UpdateProcess' = {
+		$EshellUI.Process.Dispose()
+		$EshellUI.Process = Get-Process -ID $PID
+		$EshellUI.Process
 	}
 
 	LoadingLog = ValueEx @{
@@ -118,15 +132,15 @@ $EshellUI = ValueEx @{
 		PartsMemoryUsage = ValueEx @{
 			__type__ = [System.Collections.Specialized.OrderedDictionary]
 			'#pushing_array' = [System.Collections.ArrayList]@()
-			PwshBase = (Get-Process -ID $PID).WorkingSet64
+			PwshBase = $script:MyProcess.WorkingSet64
 			'method:BeginAdd' = {
 				param ($Name)
-				$this['#pushing_array'].Add((Get-Process -ID $PID).WorkingSet64) | Out-Null
+				$this['#pushing_array'].Add($EshellUI.UpdateProcess().WorkingSet64) | Out-Null
 				$this[$Name] = -1
 			}
 			'method:EndAdd' = {
 				param ($Name)
-				$this[$Name] = ((Get-Process -ID $PID).WorkingSet64 - $this['#pushing_array'][-1])
+				$this[$Name] = ($EshellUI.UpdateProcess().WorkingSet64 - $this['#pushing_array'][-1])
 				$this['#pushing_array'].RemoveAt($this['#pushing_array'].Count - 1)
 				for ($i = 0; $i -lt $this['#pushing_array'].Count; $i++) {
 					$this['#pushing_array'][$i] += $this[$Name]
@@ -135,16 +149,12 @@ $EshellUI = ValueEx @{
 			'method:View' = {
 				$Total = 0
 				$this.GetEnumerator() | ForEach-Object {
-					$Name = $_.Key
 					if($_.Value){
 						$Total += $_.Value
-						$Value = if($_.Value/1024 -gt 1024){
-							"$($_.Value/1024/1024) MB"
-						}else{"$($_.Value/1024) KB"}
-						@{ $Name = $Value }
+						@{ $_.Key = size_format $_.Value }
 					}
 				}
-				@{ Total = "$($Total/1024/1024) MB" }
+				@{ Total = size_format $Total }
 			}
 		}
 	}
@@ -205,6 +215,16 @@ $EshellUI = ValueEx @{
 				Action = {
 					if ($EshellUI.BackgroundJobs.Count) {
 						$EshellUI.BackgroundJobs.PopAndRun()
+					}
+				}
+			}
+			FocusRecordUpdate = @{
+				ID = 'PowerShell.OnIdle'
+				Action = {
+					$LastFocus = $EshellUI.OtherData.GettingFocus
+					$EshellUI.OtherData.GettingFocus = $EshellUI.ParentPIDS -contains [Win32]::GetForegroundProcessId()
+					if ($LastFocus -ne $EshellUI.OtherData.GettingFocus) {
+						Write-Host $($VirtualTerminal.RestoreCursor + $EshellUI.Prompt.Get()) -NoNewline
 					}
 				}
 			}
@@ -309,6 +329,10 @@ $EshellUI = ValueEx @{
 			Errors = $Error
 		}
 		$this.OtherData.PartsMemoryUsage.EndAdd('AfterEshLoadRecord')
+
+		$this.OtherData.PartsMemoryUsage.BeginAdd('FocusRecord')
+		$this.OtherData.GettingFocus = $EshellUI.ParentPIDS -contains [Win32]::GetForegroundProcessId()
+		$this.OtherData.PartsMemoryUsage.EndAdd('FocusRecord')
 
 		$this.OtherData.PartsMemoryUsage.EndAdd('EshellBase')
 	}
@@ -443,3 +467,5 @@ $EshellUI = ValueEx @{
 		"Compiled to $(AutoShortPath $OutputFile) with size $((Get-Item $OutputFile).Length) bytes"
 	}
 }
+$script:MyProcess.Dispose()
+Remove-Variable MyProcess -Scope Script

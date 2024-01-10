@@ -40,7 +40,7 @@ Get-ChildItem $PSScriptRoot/builders *.ps1 | Sort-Object -Property Name | ForEac
 function global:prompt {
 	$LastExitCodeBackup = $global:LastExitCode
 	try{
-		$EshellUI.Prompt.Get()
+		$VirtualTerminal.SaveCursor + $EshellUI.Prompt.Get()
 	}
 	catch {
 		$_ | Out-Error

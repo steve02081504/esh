@@ -119,6 +119,9 @@ function global:size_format {
 		[Parameter(Mandatory = $true)]
 		[double]$size
 	)
+	if($size -lt 0) {
+		return '-' + (size_format (-$size))
+	}
 	#若文件大小大于1GB
 	if ($size -gt 1GB) {
 		#输出文件大小
