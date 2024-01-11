@@ -1,6 +1,6 @@
 if ($Host.UI.SupportsVirtualTerminal) {
 	function Escape { [char]27 + '[' + $args }
-	$global:VirtualTerminal = @{
+	$global:VirtualTerminal = ValueEx @{
 		Escape          = Escape
 		Colors          = @{
 			Black         = Escape '30m'
@@ -55,6 +55,42 @@ if ($Host.UI.SupportsVirtualTerminal) {
 		ClearScreenUp   = Escape '1J'
 		#清除整屏
 		ClearScreenAll  = Escape '2J'
+		#向上滚动
+		'method:RollUp' = {
+			param($num)
+			$CousorPos = $Host.UI.RawUI.CursorPosition
+			try {
+				$CousorPos.Y = $CousorPos.Y - $num
+				$Host.UI.RawUI.CursorPosition = $CousorPos
+			}
+			catch {
+				Write-Host "`e${num}A" -NoNewline
+			}
+		}
+		#向下滚动
+		'method:RollDown' = {
+			param($num)
+			$CousorPos = $Host.UI.RawUI.CursorPosition
+			try {
+				$CousorPos.Y = $CousorPos.Y + $num
+				$Host.UI.RawUI.CursorPosition = $CousorPos
+			}
+			catch {
+				Write-Host "`e${num}B" -NoNewline
+			}
+		}
+		#设置绝对水平
+		'method:SetAbsoluteHorizontal' = {
+			param($num)
+			$CousorPos = $Host.UI.RawUI.CursorPosition
+			try {
+				$CousorPos.X = $num
+				$Host.UI.RawUI.CursorPosition = $CousorPos
+			}
+			catch {
+				Write-Host "`e${num}G" -NoNewline
+			}
+		}
 	}
 	Remove-Item function:Escape
 }

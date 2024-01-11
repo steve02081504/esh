@@ -29,9 +29,11 @@ $EshellUI.Prompt = ValueEx @{
 		$this.Builders.GetEnumerator() | ForEach-Object {
 			$this.LastBuild.Tokens += $this.LastBuild.BuilderOutput[$_.Key] = & $_.Value
 		}
-		return $this.BuildMethods.NewlineCheck(
+		$this.LastBuild.Value = $this.BuildMethods.NewlineCheck(
 			$this.BuildMethods.MargeBlock($this.LastBuild.Tokens)
 		) + ' ' + $VirtualTerminal.Colors.Reset + '>' * ($NestedPromptLevel+1)
+		$this.LastBuild.LineNum = ($this.LastBuild.Value -split "`n").Length
+		$this.LastBuild.Value
 	}
 }
 #遍历脚本所在文件夹
