@@ -224,16 +224,19 @@ $EshellUI = ValueEx @{
 					$LastFocus = $EshellUI.OtherData.GettingFocus
 					$EshellUI.OtherData.GettingFocus = $EshellUI.ParentPIDS -contains [Win32]::GetForegroundProcessId()
 					if ($LastFocus -ne $EshellUI.OtherData.GettingFocus) {
+						$LastBuild = $EshellUI.Prompt.LastBuild
+						$NewPrompt = $EshellUI.Prompt.Get()
+						if ($LastBuild.Value -eq $NewPrompt) { return }
 						$PosNow = $Host.UI.RawUI.CursorPosition
-						if($EshellUI.Prompt.LastBuild.LineNum -gt 0){
-							$VirtualTerminal.RollUp($EshellUI.Prompt.LastBuild.LineNum - 1)
+						if($LastBuild.LineNum -gt 0){
+							$VirtualTerminal.RollUp($LastBuild.LineNum - 1)
 							$VirtualTerminal.SetAbsoluteHorizontal(0)
 						}
 						else{
 							$VirtualTerminal.RestoreCursor | Out-Host
 						}
 						$VirtualTerminal.RestoreCursor
-						Write-Host $EshellUI.Prompt.Get() -NoNewline
+						Write-Host $NewPrompt -NoNewline
 						$VirtualTerminal.SetAbsoluteHorizontal($PosNow.X)
 					}
 				}
