@@ -8,20 +8,17 @@ $EshellUI.DirProfile = @{
 }
 $EshellUI.Prompt.Builders['_dirProfileLoader'] = {
 	$profileDir = DiggingPath { $_ } $PWD.Path '.esh'
-	if($profileDir -eq $EshellUI.DirProfile.path) {
-		return
-	}
+	if($profileDir -eq $EshellUI.DirProfile.path) { return }
+	$PathArray = $env:Path -split ';'
 	$EshellUI.DirProfile.commands -ne $null | ForEach-Object {
 		Remove-Alias -Name $_ -Scope global -Force -ErrorAction Ignore
 	}
 	$EshellUI.DirProfile.backupcommands.GetEnumerator() | ForEach-Object {
 		Set-Alias @_ -Scope global -Force -ErrorAction Ignore
 	}
-	$PathArray = $env:Path -split ';'
 	$EshellUI.DirProfile.envpaths | ForEach-Object {
 		$PathArray = $PathArray -ne $_
 	}
-	$env:Path = $PathArray -ne '' -join ';'
 	$EshellUI.DirProfile = @{
 		path = $profileDir
 		commands = @()
@@ -41,10 +38,10 @@ $EshellUI.Prompt.Builders['_dirProfileLoader'] = {
 	}
 	Get-Content "$profileDir/paths.txt" -ErrorAction Ignore | ForEach-Object {
 		$fullpath = [System.IO.Path]::GetFullPath($_, $PWD.Path)
-		if($env:Path -split ';' -notcontains $fullpath) {
+		if($PathArray -notcontains $fullpath) {
 			$EshellUI.DirProfile.envpaths+=$fullpath
+			$PathArray+=$fullpath
 		}
-		$env:Path += (,$fullpath) -join ';'
 	}
 	$newlogo = Import-PowerShellDataFile "$profileDir/logo.psd1" -ErrorAction Ignore
 	$newlogo ??= Get-Content "$profileDir/logo.txt" -ErrorAction Ignore
@@ -56,11 +53,12 @@ $EshellUI.Prompt.Builders['_dirProfileLoader'] = {
 		$VirtualTerminal.Colors.Magenta+'Path provided env:'
 		if($EshellUI.DirProfile.commands.Count -gt 0){
 			"$($EshellUI.DirProfile.commands.Count) commands:"+$VirtualTerminal.Colors.Green
-			$EshellUI.DirProfile.commands -join "  "
+			$EshellUI.DirProfile.commands -join " "
 			$VirtualTerminal.Colors.Magenta
 		}
 		if($EshellUI.DirProfile.envpaths.Count -gt 0){
 			"$($EshellUI.DirProfile.envpaths.Count) enveronment paths"
 		}
 	}) | Out-Host
+	$env:Path = $PathArray -ne '' -join ';'
 }
