@@ -303,6 +303,7 @@ $EshellUI = ValueEx @{
 
 		$this.OtherData.PartsMemoryUsage.BeginAdd('Prompt')
 		. $PSScriptRoot/system/UI/prompt/main.ps1
+		. $PSScriptRoot/system/steam.ps1
 		$this.OtherData.PartsMemoryUsage.EndAdd('Prompt')
 
 		$this.OtherData.PartsMemoryUsage.BeginAdd('BackgroundLoadings')
