@@ -41,12 +41,19 @@ Get-ChildItem $PSScriptRoot/builders *.ps1 | Sort-Object -Property Name | ForEac
 
 function global:prompt {
 	$LastExitCodeBackup = $global:LastExitCode
-	try{
+	$RawUIColorsBackup = @{
+		Foreground = $Host.UI.RawUI.ForegroundColor
+		Background = $Host.UI.RawUI.BackgroundColor
+	}
+	$(try{
 		$VirtualTerminal.SaveCursor + $EshellUI.Prompt.Get()
 	}
 	catch {
 		$_ | Out-Error
 		"err >"
-	}
+	}) | Write-Host -NoNewline
+	[char]0
 	$global:LastExitCode = $LastExitCodeBackup
+	$Host.UI.RawUI.ForegroundColor = $RawUIColorsBackup.Foreground
+	$Host.UI.RawUI.BackgroundColor = $RawUIColorsBackup.Background
 }
