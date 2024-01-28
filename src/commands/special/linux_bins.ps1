@@ -154,6 +154,15 @@ function global:ls {
 		return
 	}
 	$IsLinuxBin = !(Test-Call Get-ChildItem $RemainingArguments)
+	# 特殊照顾下参数有-f的情况 因为太常用了
+	if ($RemainingArguments -ccontains "-f") {
+		$TestRemainingArguments = $RemainingArguments -ne "-f"
+		$TestRemainingArguments += "-Force"
+		$IsLinuxBin = !(Test-Call Get-ChildItem $TestRemainingArguments)
+		if (-not $IsLinuxBin) {
+			$RemainingArguments = $TestRemainingArguments
+		}
+	}
 	if ($IsLinuxBin) {
 		#若是linux的ls.exe
 		#则调用ls.exe
