@@ -222,7 +222,7 @@ $EshellUI = ValueEx @{
 				ID = 'PowerShell.OnIdle'
 				Action = {
 					$LastFocus = $EshellUI.OtherData.GettingFocus
-					$EshellUI.OtherData.GettingFocus = $EshellUI.ParentPIDS -contains [Win32]::GetForegroundProcessId()
+					$EshellUI.OtherData.GettingFocus = $EshellUI.ParentPIDS -contains [esh.Win32]::GetForegroundProcessId()
 					if ($LastFocus -ne $EshellUI.OtherData.GettingFocus) {
 						$LastBuild = $EshellUI.Prompt.LastBuild
 						$NewPrompt = $EshellUI.Prompt.Get()
@@ -345,7 +345,7 @@ $EshellUI = ValueEx @{
 		$this.OtherData.PartsMemoryUsage.EndAdd('AfterEshLoadRecord')
 
 		$this.OtherData.PartsMemoryUsage.BeginAdd('FocusRecord')
-		$this.OtherData.GettingFocus = $EshellUI.ParentPIDS -contains [Win32]::GetForegroundProcessId()
+		$this.OtherData.GettingFocus = $EshellUI.ParentPIDS -contains [esh.Win32]::GetForegroundProcessId()
 		$this.OtherData.PartsMemoryUsage.EndAdd('FocusRecord')
 
 		$this.OtherData.PartsMemoryUsage.EndAdd('EshellBase')

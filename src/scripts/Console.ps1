@@ -1,6 +1,7 @@
 Add-Type @"
-	using System;
-	using System.Runtime.InteropServices;
+using System;
+using System.Runtime.InteropServices;
+namespace esh {
 	public class Win32 {
 		[DllImport("user32.dll", CharSet = CharSet.Auto)]
 		public static extern IntPtr SendMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
@@ -19,6 +20,7 @@ Add-Type @"
 		[DllImport("kernel32.dll", ExactSpelling = true)]
 		public static extern IntPtr GetConsoleWindow();
 	}
+}
 "@
 
 # 设置窗口icon
@@ -28,13 +30,13 @@ function Set-WindowIcon ($hWnd, $iconPath) {
 	$WM_SETICON = 0x0080
 	$ICON_SMALL = 0
 	$ICON_BIG = 1
-	[Win32]::SendMessage($hWnd, $WM_SETICON, $ICON_SMALL, $hIcon) | Out-Null
-	[Win32]::SendMessage($hWnd, $WM_SETICON, $ICON_BIG, $hIcon) | Out-Null
+	[esh.Win32]::SendMessage($hWnd, $WM_SETICON, $ICON_SMALL, $hIcon) | Out-Null
+	[esh.Win32]::SendMessage($hWnd, $WM_SETICON, $ICON_BIG, $hIcon) | Out-Null
 	$icon.Dispose()
 }
 
 # 封装函数
 function Set-ConsoleIcon ($iconPath) {
-	$hWnd = [Win32]::GetConsoleWindow()
+	$hWnd = [esh.Win32]::GetConsoleWindow()
 	Set-WindowIcon $hWnd $iconPath
 }
