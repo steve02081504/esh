@@ -1,14 +1,22 @@
+$Script:BlueStackInstance = ''
+Get-ChildItem -Path C:\ProgramData\BlueStacks_nxt\Engine -Directory | Where-Object {
+	# 文件夹下有名为Root.vhd的文件
+	Test-Path -Path "$($_.FullName)\Root.vhd"
+} | ForEach-Object {
+	$Script:BlueStackInstance = $_.Name
+}
+
 function global:Install-apk {
 	param(
 		[Parameter(Mandatory = $true)]
 		[string]$apkPath
 	)
-	. 'C:\Program Files\BlueStacks_nxt\HD-Player.exe' --instance Pie64 --cmd installApk --filepath "$apkPath"
+	. 'C:\Program Files\BlueStacks_nxt\HD-Player.exe' --instance $Script:BlueStackInstance --cmd installApk --filepath "$apkPath"
 }
 
 function global:Show-apks {
-	#读取C:\ProgramData\BlueStacks_nxt\Engine\Pie64\AppCache\AppCache.json
-	$AppCache = Get-Content 'C:\ProgramData\BlueStacks_nxt\Engine\Pie64\AppCache\AppCache.json' -Raw | ConvertFrom-Json
+	#读取C:\ProgramData\BlueStacks_nxt\Engine\$Script:BlueStackInstance\AppCache\AppCache.json
+	$AppCache = Get-Content "C:\ProgramData\BlueStacks_nxt\Engine\$Script:BlueStackInstance\AppCache\AppCache.json" -Raw -ErrorAction Ignore | ConvertFrom-Json
 	<#
 	{
 		"activity": "jp.co.cygames.activity.OverrideUnityActivity",
@@ -35,7 +43,7 @@ function global:Show-apks {
 		$IsFullScreen = $_.isFullScreen
 		$IsHomeApp = $_.isHomeApp
 		$Orientation = $_.orientation
-		$IconPath = "C:\Program Files\BlueStacks_nxt\Engine\Pie64\AppCache\$IconFileName"
+		$IconPath = "C:\ProgramData\BlueStacks_nxt\Engine\$Script:BlueStackInstance\AppCache\$IconFileName"
 		$apk = @{
 			appLabel     = $AppLabel
 			package      = $Package
@@ -71,7 +79,7 @@ function global:Start-apk {
 		return
 	}
 	else {
-		. 'C:\Program Files\BlueStacks_nxt\HD-Player.exe' --instance Pie64 --cmd launchApp --package "$apkSign"
+		. 'C:\Program Files\BlueStacks_nxt\HD-Player.exe' --instance $Script:BlueStackInstance --cmd launchApp --package "$apkSign"
 	}
 }
 
