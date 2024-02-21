@@ -214,3 +214,12 @@ function global:Clear-UserPath {
 	$UserPath = $UserPath -join ';'
 	[Environment]::SetEnvironmentVariable("Path", $UserPath, "User")
 }
+
+function global:regedit {
+	if (Test-Command registryFinder) {
+		registryFinder $args
+	}
+	else {
+		regedit $args
+	}
+}
