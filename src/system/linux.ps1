@@ -45,7 +45,7 @@ function global:IsLinuxPath([string]$Path) {
 	if ($Path.StartsWith("/") -or $Path.StartsWith("~")) {
 		return $true
 	}
-	if (($PWD.Path -eq $env:USERPROFILE) -and $Path.StartsWith("./")) {
+	if (($PWD.Path -eq $env:USERPROFILE) -and $Path.StartsWith(".") -and -not (Test-Path $Path)) {
 		return $true
 	}
 	return $false
@@ -118,6 +118,13 @@ function global:WindowsPathToLinuxPath([string]$Path) {
 		$Path = "/${DriveLetter}/${Path}"
 	}
 	$Path = $Path.Replace("\", "/")
+	# '~/AppData/\w+/X -> ~/.X
+	if ($Path.StartsWith("~/AppData/")) {
+		$TestPath = $Path -replace ('\~/AppData/\w+/', "~/.")
+		if (Test-Path $(LinuxPathToWindowsPath $TestPath)) {
+			$Path = $TestPath
+		}
+	}
 	return $Path
 }
 function global:AutoShortPath($Path) {
@@ -132,23 +139,6 @@ function global:AutoShortPath($Path) {
 
 if (Test-Command rm.exe) {
 	. "$($EshellUI.Sources.Path)/src/commands/special/linux_bins.ps1"
-}
-
-
-$global:ans ??= 72
-function global:ans {
-	param(
-		[Parameter(ValueFromRemainingArguments = $true)]
-		$ExprAddition
-	)
-	Invoke-Expression "`$global:ans $ExprAddition"
-}
-function global:err {
-	param(
-		[Parameter(ValueFromRemainingArguments = $true)]
-		$ExprAddition
-	)
-	Invoke-Expression "`$global:err $ExprAddition"
 }
 
 if (Test-Path $EshellUI.MSYS.RootPath) {
@@ -283,8 +273,7 @@ if (Test-Path $EshellUI.MSYS.RootPath) {
 			}
 			$WordToComplete = $WordToComplete.Substring(1, $WordToComplete.Length - 2)
 		}
-		#若当前单词以/开头
-		if ($WordToComplete.StartsWith("/") -or $WordToComplete.StartsWith("~")) {
+		if (IsLinuxPath $WordToComplete) {
 			#则转换为windows路径
 			$WordAfterComplete = LinuxPathToWindowsPath $WordToComplete + '/'
 			if ($HasQuote) {

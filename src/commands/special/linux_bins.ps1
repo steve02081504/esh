@@ -62,7 +62,13 @@ function global:cd {
 			Set-Location $Path
 		}
 		else {
-			Out-Error "bash: cd: ${Path}: No such file or directory"
+			$linuxPath = LinuxPathToWindowsPath $Path
+			if (Test-Path $linuxPath) {
+				Set-Location $linuxPath
+			}
+			else {
+				Out-Error "bash: cd: ${Path}: No such file or directory"
+			}
 		}
 		return
 	}
@@ -118,7 +124,7 @@ function global:ls {
 		[Parameter(ValueFromRemainingArguments = $true)]
 		[System.Collections.ArrayList]$RemainingArguments
 	)
-	
+	$RemainingArguments ??= @()
 	$IsLinuxBin = $false
 	$WinArgs = $RemainingArguments | ForEach-Object {
 		# 跳过参数部分
@@ -129,13 +135,13 @@ function global:ls {
 		if (Test-Path $_) {
 			return $_
 		}
-		$linuxPath = WindowsPathToLinuxPath $_
-		if (Test-Path $linuxPath) {
-			return $linuxPath
+		$winPath = LinuxPathToWindowsPath $_
+		if (Test-Path $winPath) {
+			return $winPath
 		}
 		return $_
 	}
-	$linuxArgs = $WinArgs | ForEach-Object {
+	$linuxArgs = $RemainingArguments | ForEach-Object {
 		if ($_.StartsWith("-")) {
 			return $_
 		}
@@ -149,7 +155,7 @@ function global:ls {
 	$IsLinuxBin = !(Test-Call Get-ChildItem $WinArgs)
 	# 特殊照顾下参数有-f的情况 因为太常用了
 	if ($RemainingArguments -ccontains "-f") {
-		$TestRemainingArguments = $WinArgs -ne "-f"
+		$TestRemainingArguments = @($WinArgs) -ne "-f"
 		$TestRemainingArguments += "-Force"
 		$IsLinuxBin = !(Test-Call Get-ChildItem $TestRemainingArguments)
 		if (-not $IsLinuxBin) {

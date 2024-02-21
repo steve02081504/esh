@@ -9,8 +9,6 @@ function global:Test-Call {
 		[ValidatePattern('^[\w-]+$')]
 		[string]
 		$CommandName,
-
-		[Parameter(Mandatory = $true)]
 		[string[]]
 		$TestArgs
 	)
