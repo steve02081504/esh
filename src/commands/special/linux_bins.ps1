@@ -118,77 +118,54 @@ function global:ls {
 		[Parameter(ValueFromRemainingArguments = $true)]
 		[System.Collections.ArrayList]$RemainingArguments
 	)
-	#从RemainingArguments中提取Path
-	$Path = $null
-	for ($i = 0; $i -lt $RemainingArguments.Count; $i++) {
-		$arg = $RemainingArguments[$i]
-		if ($arg.StartsWith("-")) {
-			continue
-		}
-		$Path = $arg
-		$RemainingArguments.RemoveAt($i)
-		break
-	}
-	[string[]]$RemainingArguments = @($RemainingArguments)
-	if (-not "$RemainingArguments") {
-		$RemainingArguments = @()
-	}
-	#若path是linux路径
-	if (IsLinuxPath $Path) {
-		#则转换为windows路径
-		$Path = LinuxPathToWindowsPath $Path
-	}
+	
 	$IsLinuxBin = $false
-	if ($RemainingArguments.Length -eq 0) {
-		#若RemainingArguments是空的
-		#则调用Get-ChildItem
-		if ($Path.Length -eq 0) {
-			Get-ChildItem
+	$WinArgs = $RemainingArguments | ForEach-Object {
+		# 跳过参数部分
+		if ($_.StartsWith("-")) {
+			return $_
 		}
-		elseif (Test-Path $Path) {
-			Get-ChildItem $Path
+		#若是有效的文件路径，保持原样
+		if (Test-Path $_) {
+			return $_
+		}
+		$linuxPath = WindowsPathToLinuxPath $_
+		if (Test-Path $linuxPath) {
+			return $linuxPath
+		}
+		return $_
+	}
+	$linuxArgs = $WinArgs | ForEach-Object {
+		if ($_.StartsWith("-")) {
+			return $_
+		}
+		if (Test-Path $_) {
+			WindowsPathToLinuxPath $_
 		}
 		else {
-			ls.exe $(WindowsPathToLinuxPath $Path)
+			$_
 		}
-		return
 	}
-	$IsLinuxBin = !(Test-Call Get-ChildItem $RemainingArguments)
+	$IsLinuxBin = !(Test-Call Get-ChildItem $WinArgs)
 	# 特殊照顾下参数有-f的情况 因为太常用了
 	if ($RemainingArguments -ccontains "-f") {
-		$TestRemainingArguments = $RemainingArguments -ne "-f"
+		$TestRemainingArguments = $WinArgs -ne "-f"
 		$TestRemainingArguments += "-Force"
 		$IsLinuxBin = !(Test-Call Get-ChildItem $TestRemainingArguments)
 		if (-not $IsLinuxBin) {
-			$RemainingArguments = $TestRemainingArguments
+			$WinArgs = $TestRemainingArguments
 		}
 	}
 	if ($IsLinuxBin) {
 		#若是linux的ls.exe
 		#则调用ls.exe
-		$Path = WindowsPathToLinuxPath $Path
-		$RemainingArguments = $RemainingArguments | ForEach-Object {
-			#若是有效的文件路径
-			if (Test-Path $_) {
-				#则转换为linux路径
-				WindowsPathToLinuxPath $_
-			}
-			else {
-				$_
-			}
-		}
-		$RemainingArguments = $RemainingArguments -join " "
-		$RemainingArguments = $RemainingArguments.Trim()
-		if ($Path.Length -eq 0) {
-			ls.exe $RemainingArguments
-		}
-		else {
-			ls.exe $Path $RemainingArguments
-		}
+		$linuxArgs = '"' + $linuxArgs -join '" "' + '"'
+		$linuxArgs = $linuxArgs.Trim()
+		ls.exe $linuxArgs
 	}
 	else {
 		#否则调用Get-ChildItem
-		Invoke-Expression "Get-ChildItem $Path $RemainingArguments"
+		Invoke-Expression "Get-ChildItem $WinArgs"
 	}
 }
 
