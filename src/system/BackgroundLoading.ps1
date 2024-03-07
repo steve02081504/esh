@@ -21,7 +21,7 @@ $EshellUI.BackgroundJobs.Push(@(
 		$GitHubDesktopsGitPath = $env:Path -split ';' | Where-Object { $_.EndsWith('\resources\app\git\mingw64\bin') }
 		if ($GitHubDesktopsGitPath -and -not (Test-Path $GitHubDesktopsGitPath)) {
 			$GitHubDesktopPath = Split-Path $GitHubDesktopsGitPath.TrimEnd('\resources\app\git\mingw64\bin')
-			$newVersion = Get-ChildItem $GitHubDesktopPath -Directory -Filter 'app-*' | Sort-Object -Property Name -Descending | Select-Object -First 1
+			$newVersion = Get-ChildItem $GitHubDesktopPath -Directory -Filter 'app-*' | Where-Object { Test-Path $_\resources } | Select-Object -First 1
 			$newPath = Join-Path $newVersion.FullName 'resources\app\git\mingw64\bin'
 			$env:Path = $env:Path -replace [regex]::Escape($GitHubDesktopsGitPath), $newPath
 			# 将更新后的$env:Path写入系统
