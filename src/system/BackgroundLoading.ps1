@@ -16,6 +16,29 @@ $EshellUI.BackgroundJobs.Push(@(
 		$EshellUI.OtherData.PartsMemoryUsage.EndAdd('ls-view')
 	}
 	{
+		# 若$env:Path中存在XXXX/app-XXX\resources\app\git\mingw64\bin
+		# 则试图更新版本号
+		$GitHubDesktopsGitPath = $env:Path -split ';' | Where-Object { $_.EndsWith('\resources\app\git\mingw64\bin') }
+		if ($GitHubDesktopsGitPath -and -not (Test-Path $GitHubDesktopsGitPath)) {
+			$GitHubDesktopPath = Split-Path $GitHubDesktopsGitPath.TrimEnd('\resources\app\git\mingw64\bin')
+			$newVersion = Get-ChildItem $GitHubDesktopPath -Directory -Filter 'app-*' | Sort-Object -Property Name -Descending | Select-Object -First 1
+			$newPath = Join-Path $newVersion.FullName 'resources\app\git\mingw64\bin'
+			$env:Path = $env:Path -replace [regex]::Escape($GitHubDesktopsGitPath), $newPath
+			# 将更新后的$env:Path写入系统
+			# 首先确定原path是由user还是machine提供的，更新回对应的user或machine环境变量
+			$UserPath = [Environment]::GetEnvironmentVariable("Path", "User")
+			$SystemPath = [Environment]::GetEnvironmentVariable("Path", "Machine")
+			if ($UserPath -match [regex]::Escape($GitHubDesktopsGitPath)) {
+				$UserPath = $UserPath -replace [regex]::Escape($GitHubDesktopsGitPath), $newPath
+				[Environment]::SetEnvironmentVariable("Path", $UserPath, "User")
+			}
+			elseif ($SystemPath -match [regex]::Escape($GitHubDesktopsGitPath)) {
+				$SystemPath = $SystemPath -replace [regex]::Escape($GitHubDesktopsGitPath), $newPath
+				try {
+					[Environment]::SetEnvironmentVariable("Path", $SystemPath, "Machine")
+				}catch {}
+			}
+		}
 		if (Test-Command git) {
 			$EshellUI.OtherData.PartsMemoryUsage.BeginAdd('tab-git')
 			if (-not (Get-Module -ListAvailable posh-git)) {
