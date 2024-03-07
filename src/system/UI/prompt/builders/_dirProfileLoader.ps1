@@ -14,7 +14,7 @@ $EshellUI.Prompt.Builders['_dirProfileLoader'] = {
 		Remove-Alias -Name $_ -Scope global -Force -ErrorAction Ignore
 	}
 	$EshellUI.DirProfile.backupcommands.GetEnumerator() | ForEach-Object {
-		Set-Alias @_ -Scope global -Force -ErrorAction Ignore
+		Set-Alias -Name $_.Key -Value $_.Value -Scope global -Force -ErrorAction Ignore
 	}
 	$EshellUI.DirProfile.envpaths | ForEach-Object {
 		$PathArray = $PathArray -ne $_
