@@ -190,7 +190,7 @@ $EshellUI = ValueEx @{
 		$this.OtherData.PartsMemoryUsage.BeginAdd('EshellBase')
 
 		$LastExitCode = 72 #Do not remove this line
-		
+
 		$this.OtherData.PartsMemoryUsage.BeginAdd('BeforeEshLoadRecord')
 		$this.OtherData.BeforeEshLoaded = @{
 			FunctionList = Get-ChildItem function:\
@@ -292,7 +292,7 @@ $EshellUI = ValueEx @{
 			}
 			$this.OtherData.WindowsTerminalVersion = $WindowsTerminalVersion
 		}
-		
+
 		$this.OtherData.PartsMemoryUsage.BeginAdd('autovars')
 		. $PSScriptRoot/system/autovars.ps1
 		$this.OtherData.PartsMemoryUsage.EndAdd('autovars')
@@ -333,7 +333,7 @@ $EshellUI = ValueEx @{
 
 		. $PSScriptRoot/system/UI/loaded.ps1 -Arguments $Arguments
 
-		
+
 		$this.OtherData.PartsMemoryUsage.BeginAdd('AfterEshLoadRecord')
 		$this.State.Started = $true
 		$this.OtherData.AfterEshLoaded = @{
@@ -402,6 +402,43 @@ $EshellUI = ValueEx @{
 		Set-PSReadLineKeyHandler Enter $this.OtherData.BeforeEshLoaded.EnterHandler
 		$PSDefaultParameterValues = $this.OtherData.BeforeEshLoaded.DefaultParameterValues
 		$this.State.Started = $false
+	}
+	'method:AcceptLine' = {
+		param($Expr)
+		$OriLine = $global:expr_now
+		[Microsoft.PowerShell.PSConsoleReadLine]::CancelLine()
+		Write-Host "`b`b  "
+		do {
+			try {
+				$StartExecutionTime = Get-Date
+				$(if($Expr){
+					Invoke-Expression $Expr | Out-Default
+				} else { $global:ans }) *>&1 | Out-Host
+				$EndExecutionTime = Get-Date
+			}
+			catch {
+				if($_.Exception -is [System.Management.Automation.ParseException]) {
+					Write-Host '?>' -NoNewline
+					$Apply = Read-Host
+					if($Apply -ne ''){
+						$Expr = $OriLine += "`n" + $Apply
+					}
+					else{ $EndExecutionTime = Get-Date }
+				}
+				else { $EndExecutionTime = Get-Date }
+				if ($EndExecutionTime) {
+					$global:ans=$null
+					Out-Error ($global:err=$_)
+				}
+			}
+		} until ($EndExecutionTime -ne $null)
+		[Microsoft.PowerShell.PSConsoleReadLine]::AddToHistory($OriLine)
+		[PSCustomObject](@{
+			CommandLine = $Expr
+			ExecutionStatus = "Completed"
+			StartExecutionTime = $StartExecutionTime
+			EndExecutionTime = $EndExecutionTime
+		}) | Add-History
 	}
 	'method:Repl' = {
 		param([switch]$NotEnterNestedPrompt = $false)

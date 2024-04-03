@@ -195,42 +195,6 @@ if (Test-Path $EshellUI.MSYS.RootPath) {
 		param (
 			[string]$OriLine
 		)
-		function PseudoRun($Expr) {
-			#求值并输出
-			[Microsoft.PowerShell.PSConsoleReadLine]::CancelLine()
-			Write-Host "`b`b  "
-			do{
-				try {
-					$StartExecutionTime = Get-Date
-					$(if($Expr){
-						Invoke-Expression $Expr -OutVariable global:ans
-					} else { $global:ans }) | Out-Host
-					$EndExecutionTime = Get-Date
-				}
-				catch {
-					if($_.Exception -is [System.Management.Automation.ParseException]) {
-						Write-Host '?>' -NoNewline
-						$Apply = Read-Host
-						if($Apply -ne ''){
-							$Expr = $OriLine += "`n" + $Apply
-						}
-						else{ $EndExecutionTime = Get-Date }
-					}
-					else { $EndExecutionTime = Get-Date }
-					if ($EndExecutionTime) {
-						$global:ans=$null
-						Out-Error ($global:err=$_)
-					}
-				}
-			} until ($EndExecutionTime -ne $null)
-			[Microsoft.PowerShell.PSConsoleReadLine]::AddToHistory($OriLine)
-			[PSCustomObject](@{
-				CommandLine = $Expr
-				ExecutionStatus = "Completed"
-				StartExecutionTime = $StartExecutionTime
-				EndExecutionTime = $EndExecutionTime
-			}) | Add-History
-		}
 		$Expr = $Line = $OriLine.Trim()
 		#自行首获取可执行文件路径
 		$Executable = $Line.Split(" ")[0]
@@ -246,11 +210,8 @@ if (Test-Path $EshellUI.MSYS.RootPath) {
 			#则转换为windows路径
 			$Executable = LinuxPathToWindowsPath $Executable
 			$Expr = "$Executable $Rest"
-		}
-		if(Test-Command $Executable) {
-			if ($Executable.StartsWith('root:')) {
-				PseudoRun "($Expr) *>&1" | Out-Host
-				return 1
+			if(Test-Command $Executable) {
+				return $Expr
 			}
 		}
 	}) | Out-Null
