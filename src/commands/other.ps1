@@ -18,7 +18,7 @@ function global:mklink {
 	}
 	#调用cmd的mklink
 	$result = . cmd /c mklink $RemainingArguments
-	if($result) {
+	if ($result) {
 		$replaceList.GetEnumerator() | ForEach-Object {
 			$result = $result.Replace($_.Value, $_.Key)
 		}
@@ -73,10 +73,11 @@ function global:clear-emptys {
 	($paths ?? '.') | ForEach-Object {
 		if (IsLinuxPath $_) {
 			LinuxPathToWindowsPath $_
-		} else { $_ }
+		}
+		else { $_ }
 	} | ForEach-Object {
-		if((Get-Item $_).PSIsContainer){
-			$Count = {(Get-ChildItem $_ -Force | Measure-Object).Count}
+		if ((Get-Item $_).PSIsContainer) {
+			$Count = { (Get-ChildItem $_ -Force | Measure-Object).Count }
 			if ((&$Count) -gt 0 -and $recursive -and $depth -ne 0) {
 				clear-emptys -recursive -depth $($depth - 1) -paths $((Get-ChildItem $_ -Force).FullName)
 			}
@@ -119,7 +120,7 @@ function global:size_format {
 		[Parameter(Mandatory = $true)]
 		[double]$size
 	)
-	if($size -lt 0) {
+	if ($size -lt 0) {
 		return '-' + (size_format (-$size))
 	}
 	#若文件大小大于1GB
@@ -223,3 +224,16 @@ function global:regedit {
 		regedit $args
 	}
 }
+
+function global:UntilSuccess {
+	param (
+		[Parameter(ValueFromRemainingArguments = $true)]
+		$args
+	)
+	$sb = [scriptblock]::Create($args)
+	do {
+		& $sb
+	}while ($LASTEXITCODE)
+}
+Set-Alias 'until-success' 'UntilSuccess' -Scope global
+Set-Alias 'us' 'UntilSuccess' -Scope global
