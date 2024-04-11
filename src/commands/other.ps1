@@ -230,6 +230,7 @@ function global:UntilSuccess {
 		[Parameter(ValueFromRemainingArguments = $true)]
 		$args
 	)
+	$LASTEXITCODE = 0
 	$sb = [scriptblock]::Create($args)
 	do {
 		& $sb
