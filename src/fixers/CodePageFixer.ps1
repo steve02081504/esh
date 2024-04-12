@@ -1,4 +1,8 @@
-if ($IsWindows -and ([Console]::OutputEncoding -ne [System.Text.Encoding]::UTF8)) {
+function Get-CharPage {[void]($(chcp) -match '(\d+)$'); $Matches[0]}
+if ($IsWindows -and
+	([Console]::OutputEncoding -ne [System.Text.Encoding]::UTF8) -and
+	([Console]::OutputEncoding.CodePage -ne (Get-CharPage))
+) {
 	$CursorPosBackUp = $host.UI.RawUI.CursorPosition
 	$TestText = '中文测试你好小笼包我是冰激凌'
 	foreach ($Encoding in [System.Text.Encoding]::GetEncodings()) {

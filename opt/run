@@ -39,15 +39,18 @@ fi
 
 pwshCommand=""
 NoExit="-NoExit"
+NoLogo=""
 if [[ -n "$File" ]]; then
 	File=$(echo "$File" | sed -e 's/"/`"/g')
 	pwshCommand="$pwshCommand ; . $File"
 	NoExit=""
+	NoLogo=" -NoLogo"
 fi
 if [[ -n "$command" ]]; then
 	command=$(echo "$command" | sed -e 's/"/`"/g')
 	pwshCommand="$pwshCommand ; Invoke-Expression \"$command\""
 	NoExit=""
+	NoLogo=" -NoLogo"
 fi
-pwsh $parsed_args -nologo $NoExit -command ". $SCRIPT_DIR/run.ps1$pwshCommand"
+pwsh $parsed_args -nologo $NoExit -command ". $SCRIPT_DIR/run.ps1$NoLogo$pwshCommand"
 exit $?
