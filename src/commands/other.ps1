@@ -221,7 +221,7 @@ function global:regedit {
 		registryFinder $args
 	}
 	else {
-		regedit $args
+		regedit.exe $args
 	}
 }
 
