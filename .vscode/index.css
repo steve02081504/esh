@@ -1,0 +1,4 @@
+.editor-group-watermark>.letterpress {
+	background-image: url("https://raw.githubusercontent.com/Aikoyori/ProgrammingVTuberLogos/main/VSCode/VSCode.png") !important;
+	opacity: .75;
+}
