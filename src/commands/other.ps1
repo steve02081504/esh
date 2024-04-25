@@ -238,3 +238,8 @@ function global:UntilSuccess {
 }
 Set-Alias 'until-success' 'UntilSuccess' -Scope global
 Set-Alias 'us' 'UntilSuccess' -Scope global
+
+function global:halt {
+	taskkill /f /im explorer.exe *> $null
+	Start-Process explorer.exe
+}
