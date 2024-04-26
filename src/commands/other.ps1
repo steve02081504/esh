@@ -227,6 +227,7 @@ function global:regedit {
 
 function global:UntilSuccess {
 	param (
+		[int]$WaittingTime = 0,
 		[Parameter(ValueFromRemainingArguments = $true)]
 		$args
 	)
@@ -234,6 +235,9 @@ function global:UntilSuccess {
 	$sb = [scriptblock]::Create($args)
 	do {
 		& $sb
+		if ($LASTEXITCODE -ne 0) {
+			Start-Sleep $WaittingTime
+		}
 	}while ($LASTEXITCODE)
 }
 Set-Alias 'until-success' 'UntilSuccess' -Scope global
