@@ -9,7 +9,7 @@ $EshellUI.Prompt.Builders['ukagaka'] = {
 			}
 		) $x"
 		if ($name=$ukagakaDescription.name ?? $detalname) {
-			"$name$(if ($name -ne $detalname) { "($detalname)" })"
+			"$name$(if ($name -ne $detalname -and $detalname) { "($detalname)" })"
 		}
 		if ($x=$ukagakaDescription.craftman) { "by $x" }
 		if ($x=$ukagakaDescription.githubrepo ?? $ukagakaDescription.craftmanurl){ "@ <$x>" }
