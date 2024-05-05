@@ -44,10 +44,10 @@ $EshellUI.Prompt.Builders['_dirProfileLoader'] = {
 		}
 	}
 	$newlogo = Import-PowerShellDataFile "$profileDir/logo.psd1" -ErrorAction Ignore
-	$newlogo ??= Get-Content "$profileDir/logo.txt" -ErrorAction Ignore
+	$newlogo ??= Get-Content "$profileDir/logo.txt" -Raw -ErrorAction Ignore
 	if($EshellUI.DirProfile.logo -ne $newlogo) {
 		$EshellUI.DirProfile.logo = $newlogo
-		if($newlogo){ $newlogo | Out-Host }
+		if($newlogo){ $VirtualTerminal.Colors[$newlogo.color??'default']+$($newlogo.logo??$newlogo) | Out-Host }
 	}
 	$(if($EshellUI.DirProfile.commands.Count -gt 0 -or $EshellUI.DirProfile.envpaths.Count -gt 0) {
 		$VirtualTerminal.Colors.Magenta+'Path provided env:'
