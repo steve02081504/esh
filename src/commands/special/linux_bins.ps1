@@ -6,26 +6,26 @@ function global:cd {
 	param(
 		#其余的参数
 		[Parameter(ValueFromRemainingArguments = $true)]
-		[System.Collections.ArrayList]$RemainingArguments
+		[System.Collections.ArrayList]$_RemainingArguments
 	)
 	#从RemainingArguments中提取Path
 	$Path = $null
-	for ($i = 0; $i -lt $RemainingArguments.Count; $i++) {
-		$arg = $RemainingArguments[$i]
+	for ($i = 0; $i -lt $_RemainingArguments.Count; $i++) {
+		$arg = $_RemainingArguments[$i]
 		if (-not $arg) {
-			$RemainingArguments.RemoveAt($i)
+			$_RemainingArguments.RemoveAt($i)
 			continue
 		}
 		if ($arg.StartsWith("-")) {
 			continue
 		}
 		$Path = $arg
-		$RemainingArguments.RemoveAt($i)
+		$_RemainingArguments.RemoveAt($i)
 		break
 	}
-	[string[]]$RemainingArguments = @($RemainingArguments)
-	if (-not "$RemainingArguments") {
-		$RemainingArguments = @()
+	[string[]]$_RemainingArguments = @($_RemainingArguments)
+	if (-not "$_RemainingArguments") {
+		$_RemainingArguments = @()
 	}
 	#若path是linux路径
 	if (IsLinuxPath $Path) {
@@ -72,19 +72,19 @@ function global:cd {
 		}
 		return
 	}
-	if ($RemainingArguments.Length -eq 0) {
+	if ($_RemainingArguments.Length -eq 0) {
 		#若RemainingArguments是空的
 		baseCD $Path
 		return
 	}
 	#cd: usage: cd [-L|[-P [-e]] [-@]] [dir]
 	if (-not $IsLinuxBin) {
-		$IsLinuxBin = !(Test-Call Set-Location $RemainingArguments)
+		$IsLinuxBin = !(Test-Call Set-Location $_RemainingArguments)
 	}
 	if ($IsLinuxBin) {
 		#cd是bash提供的内置命令，没有单独的可执行文件
 		#所以我们只能通过Set-Location来模拟cd的行为
-		foreach ($arg in $RemainingArguments) {
+		foreach ($arg in $_RemainingArguments) {
 			if ($arg -eq "-L") {
 				#-L的意思是跟随符号链接
 				#但是powershell的Set-Location默认就是跟随符号链接的
@@ -103,14 +103,14 @@ function global:cd {
 				#-@的意思是显示扩展属性，我们直接不支持这个功能
 			}
 			else {
-				bash -c "cd $Path $RemainingArguments"
+				bash -c "cd $Path $_RemainingArguments"
 				return
 			}
 		}
 	}
 	else {
 		#否则调用Set-Location
-		Invoke-Expression "Set-Location $Path $RemainingArguments"
+		Invoke-Expression "Set-Location $Path $_RemainingArguments"
 	}
 }
 
@@ -122,11 +122,11 @@ function global:ls {
 	param(
 		#其余的参数
 		[Parameter(ValueFromRemainingArguments = $true)]
-		[System.Collections.ArrayList]$RemainingArguments
+		[System.Collections.ArrayList]$_RemainingArguments
 	)
-	$RemainingArguments ??= @()
+	$_RemainingArguments ??= @()
 	$IsLinuxBin = $false
-	$WinArgs = $RemainingArguments | ForEach-Object {
+	$WinArgs = $_RemainingArguments | ForEach-Object {
 		# 跳过参数部分
 		if ($_.StartsWith("-")) {
 			return $_
@@ -141,7 +141,7 @@ function global:ls {
 		}
 		return $_
 	}
-	$linuxArgs = $RemainingArguments | ForEach-Object {
+	$linuxArgs = $_RemainingArguments | ForEach-Object {
 		if ($_.StartsWith("-")) {
 			return $_
 		}
@@ -153,10 +153,16 @@ function global:ls {
 		}
 	}
 	$IsLinuxBin = !(Test-Call Get-ChildItem $WinArgs)
-	# 特殊照顾下参数有-f的情况 因为太常用了
-	if ($RemainingArguments -ccontains "-f") {
-		$TestRemainingArguments = @($WinArgs) -ne "-f"
-		$TestRemainingArguments += "-Force"
+	# 特殊照顾下参数有-f|-R的情况 因为太常用了
+	if ($_RemainingArguments -ccontains "-f" -or $_RemainingArguments -ccontains "-R") {
+		if ($_RemainingArguments -ccontains "-f") {
+			$TestRemainingArguments = @($WinArgs) -ne "-f"
+			$TestRemainingArguments += "-Force"
+		}
+		if ($_RemainingArguments -ccontains "-R") {
+			$TestRemainingArguments = @($WinArgs) -ne "-R"
+			$TestRemainingArguments += "-Recurse"
+		}
 		$IsLinuxBin = !(Test-Call Get-ChildItem $TestRemainingArguments)
 		if (-not $IsLinuxBin) {
 			$WinArgs = $TestRemainingArguments
@@ -183,22 +189,22 @@ function global:rm {
 	param(
 		#其余的参数
 		[Parameter(ValueFromRemainingArguments = $true)]
-		[System.Collections.ArrayList]$RemainingArguments
+		[System.Collections.ArrayList]$_RemainingArguments
 	)
 	#从RemainingArguments中提取Path
 	$Path = $null
-	for ($i = 0; $i -lt $RemainingArguments.Count; $i++) {
-		$arg = $RemainingArguments[$i]
+	for ($i = 0; $i -lt $_RemainingArguments.Count; $i++) {
+		$arg = $_RemainingArguments[$i]
 		if ($arg.StartsWith("-")) {
 			continue
 		}
 		$Path = $arg
-		$RemainingArguments.RemoveAt($i)
+		$_RemainingArguments.RemoveAt($i)
 		break
 	}
-	[string[]]$RemainingArguments = @($RemainingArguments)
-	if (-not "$RemainingArguments") {
-		$RemainingArguments = @()
+	[string[]]$_RemainingArguments = @($_RemainingArguments)
+	if (-not "$_RemainingArguments") {
+		$_RemainingArguments = @()
 	}
 	#若path是linux路径
 	if (IsLinuxPath $Path) {
@@ -207,21 +213,21 @@ function global:rm {
 	}
 	$IsLinuxBin = $Path.Length -eq 0
 	if ($IsLinuxBin) {
-		rm.exe $RemainingArguments
+		rm.exe $_RemainingArguments
 		return
 	}
-	if ($RemainingArguments.Length -eq 0) {
+	if ($_RemainingArguments.Length -eq 0) {
 		#若RemainingArguments是空的
 		#则调用Remove-Item
 		Remove-Item $Path
 		return
 	}
-	$IsLinuxBin = !(Test-Call Remove-Item $RemainingArguments)
+	$IsLinuxBin = !(Test-Call Remove-Item $_RemainingArguments)
 	if ($IsLinuxBin) {
 		#若是linux的rm.exe
 		#则调用rm.exe
 		$Path = WindowsPathToLinuxPath $Path
-		$RemainingArguments = $RemainingArguments | ForEach-Object {
+		$_RemainingArguments = $_RemainingArguments | ForEach-Object {
 			#若是有效的文件路径
 			if (Test-Path $_) {
 				#则转换为linux路径
@@ -231,13 +237,13 @@ function global:rm {
 				$_
 			}
 		}
-		$RemainingArguments = $RemainingArguments -join " "
-		$RemainingArguments = $RemainingArguments.Trim()
-		rm.exe $Path $RemainingArguments
+		$_RemainingArguments = $_RemainingArguments -join " "
+		$_RemainingArguments = $_RemainingArguments.Trim()
+		rm.exe $Path $_RemainingArguments
 	}
 	else {
 		#否则调用Remove-Item
-		Invoke-Expression "Remove-Item $Path $RemainingArguments"
+		Invoke-Expression "Remove-Item $Path $_RemainingArguments"
 	}
 }
 
@@ -249,33 +255,33 @@ function global:mv {
 	param(
 		#其余的参数
 		[Parameter(ValueFromRemainingArguments = $true)]
-		[System.Collections.ArrayList]$RemainingArguments
+		[System.Collections.ArrayList]$_RemainingArguments
 	)
 	#从RemainingArguments中提取Path
 	$Path = $null
-	for ($i = 0; $i -lt $RemainingArguments.Count; $i++) {
-		$arg = $RemainingArguments[$i]
+	for ($i = 0; $i -lt $_RemainingArguments.Count; $i++) {
+		$arg = $_RemainingArguments[$i]
 		if ($arg.StartsWith("-")) {
 			continue
 		}
 		$Path = $arg
-		$RemainingArguments.RemoveAt($i)
+		$_RemainingArguments.RemoveAt($i)
 		break
 	}
 	#从RemainingArguments中提取Destination
 	$Destination = ""
-	for ($i = 0; $i -lt $RemainingArguments.Count; $i++) {
-		$arg = $RemainingArguments[$i]
+	for ($i = 0; $i -lt $_RemainingArguments.Count; $i++) {
+		$arg = $_RemainingArguments[$i]
 		if ($arg.StartsWith("-")) {
 			continue
 		}
 		$Destination = $arg
-		$RemainingArguments.RemoveAt($i)
+		$_RemainingArguments.RemoveAt($i)
 		break
 	}
-	[string[]]$RemainingArguments = @($RemainingArguments)
-	if (-not "$RemainingArguments") {
-		$RemainingArguments = @()
+	[string[]]$_RemainingArguments = @($_RemainingArguments)
+	if (-not "$_RemainingArguments") {
+		$_RemainingArguments = @()
 	}
 	#若path是linux路径
 	if (IsLinuxPath $Path) {
@@ -291,18 +297,18 @@ function global:mv {
 		mv.exe @args
 		return
 	}
-	if ($RemainingArguments.Length -eq 0) {
+	if ($_RemainingArguments.Length -eq 0) {
 		#若RemainingArguments是空的
 		#则调用Move-Item
 		Move-Item $Path -Destination $Destination
 		return
 	}
-	$IsLinuxBin = !(Test-Call Move-Item $RemainingArguments)
+	$IsLinuxBin = !(Test-Call Move-Item $_RemainingArguments)
 	if ($IsLinuxBin) {
 		#若是linux的mv.exe
 		#则调用mv.exe
 		$Path = WindowsPathToLinuxPath $Path
-		$RemainingArguments = $RemainingArguments | ForEach-Object {
+		$_RemainingArguments = $_RemainingArguments | ForEach-Object {
 			#若是有效的文件路径
 			if (Test-Path $_) {
 				#则转换为linux路径
@@ -312,13 +318,13 @@ function global:mv {
 				$_
 			}
 		}
-		$RemainingArguments = $RemainingArguments -join " "
-		$RemainingArguments = $RemainingArguments.Trim()
-		mv.exe $Path $Destination $RemainingArguments
+		$_RemainingArguments = $_RemainingArguments -join " "
+		$_RemainingArguments = $_RemainingArguments.Trim()
+		mv.exe $Path $Destination $_RemainingArguments
 	}
 	else {
 		#否则调用Move-Item
-		Invoke-Expression "Move-Item $Path -Destination $Destination $RemainingArguments"
+		Invoke-Expression "Move-Item $Path -Destination $Destination $_RemainingArguments"
 	}
 }
 
@@ -330,33 +336,33 @@ function global:cp {
 	param(
 		#其余的参数
 		[Parameter(ValueFromRemainingArguments = $true)]
-		[System.Collections.ArrayList]$RemainingArguments
+		[System.Collections.ArrayList]$_RemainingArguments
 	)
 	#从RemainingArguments中提取Path
 	$Path = $null
-	for ($i = 0; $i -lt $RemainingArguments.Count; $i++) {
-		$arg = $RemainingArguments[$i]
+	for ($i = 0; $i -lt $_RemainingArguments.Count; $i++) {
+		$arg = $_RemainingArguments[$i]
 		if ($arg.StartsWith("-")) {
 			continue
 		}
 		$Path = $arg
-		$RemainingArguments.RemoveAt($i)
+		$_RemainingArguments.RemoveAt($i)
 		break
 	}
 	#从RemainingArguments中提取Destination
 	$Destination = ""
-	for ($i = 0; $i -lt $RemainingArguments.Count; $i++) {
-		$arg = $RemainingArguments[$i]
+	for ($i = 0; $i -lt $_RemainingArguments.Count; $i++) {
+		$arg = $_RemainingArguments[$i]
 		if ($arg.StartsWith("-")) {
 			continue
 		}
 		$Destination = $arg
-		$RemainingArguments.RemoveAt($i)
+		$_RemainingArguments.RemoveAt($i)
 		break
 	}
-	[string[]]$RemainingArguments = @($RemainingArguments)
-	if (-not "$RemainingArguments") {
-		$RemainingArguments = @()
+	[string[]]$_RemainingArguments = @($_RemainingArguments)
+	if (-not "$_RemainingArguments") {
+		$_RemainingArguments = @()
 	}
 	#若path是linux路径
 	if (IsLinuxPath $Path) {
@@ -372,18 +378,18 @@ function global:cp {
 		cp.exe @args
 		return
 	}
-	if ($RemainingArguments.Length -eq 0) {
+	if ($_RemainingArguments.Length -eq 0) {
 		#若RemainingArguments是空的
 		#则调用Copy-Item
 		Copy-Item $Path -Destination $Destination
 		return
 	}
-	$IsLinuxBin = !(Test-Call Copy-Item $RemainingArguments)
+	$IsLinuxBin = !(Test-Call Copy-Item $_RemainingArguments)
 	if ($IsLinuxBin) {
 		#若是linux的cp.exe
 		#则调用cp.exe
 		$Path = WindowsPathToLinuxPath $Path
-		$RemainingArguments = $RemainingArguments | ForEach-Object {
+		$_RemainingArguments = $_RemainingArguments | ForEach-Object {
 			#若是有效的文件路径
 			if (Test-Path $_) {
 				#则转换为linux路径
@@ -393,13 +399,13 @@ function global:cp {
 				$_
 			}
 		}
-		$RemainingArguments = $RemainingArguments -join " "
-		$RemainingArguments = $RemainingArguments.Trim()
-		cp.exe $Path $Destination $RemainingArguments
+		$_RemainingArguments = $_RemainingArguments -join " "
+		$_RemainingArguments = $_RemainingArguments.Trim()
+		cp.exe $Path $Destination $_RemainingArguments
 	}
 	else {
 		#否则调用Copy-Item
-		Invoke-Expression "Copy-Item $Path -Destination $Destination $RemainingArguments"
+		Invoke-Expression "Copy-Item $Path -Destination $Destination $_RemainingArguments"
 	}
 }
 
@@ -407,22 +413,22 @@ function global:mkdir {
 	param(
 		#其余的参数
 		[Parameter(ValueFromRemainingArguments = $true)]
-		[System.Collections.ArrayList]$RemainingArguments
+		[System.Collections.ArrayList]$_RemainingArguments
 	)
 	#从RemainingArguments中提取Path
 	$Path = $null
-	for ($i = 0; $i -lt $RemainingArguments.Count; $i++) {
-		$arg = $RemainingArguments[$i]
+	for ($i = 0; $i -lt $_RemainingArguments.Count; $i++) {
+		$arg = $_RemainingArguments[$i]
 		if ($arg.StartsWith("-")) {
 			continue
 		}
 		$Path = $arg
-		$RemainingArguments.RemoveAt($i)
+		$_RemainingArguments.RemoveAt($i)
 		break
 	}
-	[string[]]$RemainingArguments = @($RemainingArguments)
-	if (-not "$RemainingArguments") {
-		$RemainingArguments = @()
+	[string[]]$_RemainingArguments = @($_RemainingArguments)
+	if (-not "$_RemainingArguments") {
+		$_RemainingArguments = @()
 	}
 	#若path是linux路径
 	if (IsLinuxPath $Path) {
@@ -434,18 +440,18 @@ function global:mkdir {
 		mkdir.exe @args
 		return
 	}
-	if ($RemainingArguments.Length -eq 0) {
+	if ($_RemainingArguments.Length -eq 0) {
 		#若RemainingArguments是空的
 		#则调用New-Item
 		New-Item $Path -ItemType Directory
 		return
 	}
-	$IsLinuxBin = !(Test-Call New-Item $RemainingArguments)
+	$IsLinuxBin = !(Test-Call New-Item $_RemainingArguments)
 	if ($IsLinuxBin) {
 		#若是linux的mkdir.exe
 		#则调用mkdir.exe
 		$Path = WindowsPathToLinuxPath $Path
-		$RemainingArguments = $RemainingArguments | ForEach-Object {
+		$_RemainingArguments = $_RemainingArguments | ForEach-Object {
 			#若是有效的文件路径
 			if (Test-Path $_) {
 				#则转换为linux路径
@@ -455,13 +461,13 @@ function global:mkdir {
 				$_
 			}
 		}
-		$RemainingArguments = $RemainingArguments -join " "
-		$RemainingArguments = $RemainingArguments.Trim()
-		mkdir.exe $Path $RemainingArguments
+		$_RemainingArguments = $_RemainingArguments -join " "
+		$_RemainingArguments = $_RemainingArguments.Trim()
+		mkdir.exe $Path $_RemainingArguments
 	}
 	else {
 		#否则调用New-Item
-		Invoke-Expression "New-Item $Path -ItemType Directory $RemainingArguments"
+		Invoke-Expression "New-Item $Path -ItemType Directory $_RemainingArguments"
 	}
 }
 
@@ -469,22 +475,22 @@ function global:touch {
 	param(
 		#其余的参数
 		[Parameter(ValueFromRemainingArguments = $true)]
-		[System.Collections.ArrayList]$RemainingArguments
+		[System.Collections.ArrayList]$_RemainingArguments
 	)
 	#从RemainingArguments中提取Path
 	$Path = $null
-	for ($i = 0; $i -lt $RemainingArguments.Count; $i++) {
-		$arg = $RemainingArguments[$i]
+	for ($i = 0; $i -lt $_RemainingArguments.Count; $i++) {
+		$arg = $_RemainingArguments[$i]
 		if ($arg.StartsWith("-")) {
 			continue
 		}
 		$Path = $arg
-		$RemainingArguments.RemoveAt($i)
+		$_RemainingArguments.RemoveAt($i)
 		break
 	}
-	[string[]]$RemainingArguments = @($RemainingArguments)
-	if (-not "$RemainingArguments") {
-		$RemainingArguments = @()
+	[string[]]$_RemainingArguments = @($_RemainingArguments)
+	if (-not "$_RemainingArguments") {
+		$_RemainingArguments = @()
 	}
 	#若path是linux路径
 	if (IsLinuxPath $Path) {
@@ -496,18 +502,18 @@ function global:touch {
 		touch.exe @args
 		return
 	}
-	if ($RemainingArguments.Length -eq 0) {
+	if ($_RemainingArguments.Length -eq 0) {
 		#若RemainingArguments是空的
 		#则调用New-Item
 		New-Item $Path -ItemType File
 		return
 	}
-	$IsLinuxBin = !(Test-Call New-Item $RemainingArguments)
+	$IsLinuxBin = !(Test-Call New-Item $_RemainingArguments)
 	if ($IsLinuxBin) {
 		#若是linux的touch.exe
 		#则调用touch.exe
 		$Path = WindowsPathToLinuxPath $Path
-		$RemainingArguments = $RemainingArguments | ForEach-Object {
+		$_RemainingArguments = $_RemainingArguments | ForEach-Object {
 			#若是有效的文件路径
 			if (Test-Path $_) {
 				#则转换为linux路径
@@ -517,13 +523,13 @@ function global:touch {
 				$_
 			}
 		}
-		$RemainingArguments = $RemainingArguments -join " "
-		$RemainingArguments = $RemainingArguments.Trim()
-		touch.exe $Path $RemainingArguments
+		$_RemainingArguments = $_RemainingArguments -join " "
+		$_RemainingArguments = $_RemainingArguments.Trim()
+		touch.exe $Path $_RemainingArguments
 	}
 	else {
 		#否则调用New-Item
-		Invoke-Expression "New-Item $Path -ItemType File $RemainingArguments"
+		Invoke-Expression "New-Item $Path -ItemType File $_RemainingArguments"
 	}
 }
 
@@ -535,22 +541,22 @@ function global:cat {
 	param(
 		#其余的参数
 		[Parameter(ValueFromRemainingArguments = $true)]
-		[System.Collections.ArrayList]$RemainingArguments
+		[System.Collections.ArrayList]$_RemainingArguments
 	)
 	#从RemainingArguments中提取Path
 	$Path = $null
-	for ($i = 0; $i -lt $RemainingArguments.Count; $i++) {
-		$arg = $RemainingArguments[$i]
+	for ($i = 0; $i -lt $_RemainingArguments.Count; $i++) {
+		$arg = $_RemainingArguments[$i]
 		if ($arg.StartsWith("-")) {
 			continue
 		}
 		$Path = $arg
-		$RemainingArguments.RemoveAt($i)
+		$_RemainingArguments.RemoveAt($i)
 		break
 	}
-	[string[]]$RemainingArguments = @($RemainingArguments)
-	if (-not "$RemainingArguments") {
-		$RemainingArguments = @()
+	[string[]]$_RemainingArguments = @($_RemainingArguments)
+	if (-not "$_RemainingArguments") {
+		$_RemainingArguments = @()
 	}
 	#若path是linux路径
 	if (IsLinuxPath $Path) {
@@ -562,18 +568,18 @@ function global:cat {
 		cat.exe @args
 		return
 	}
-	if ($RemainingArguments.Length -eq 0) {
+	if ($_RemainingArguments.Length -eq 0) {
 		#若RemainingArguments是空的
 		#则调用Get-Content
 		Get-Content $Path
 		return
 	}
-	$IsLinuxBin = !(Test-Call Get-Content $RemainingArguments)
+	$IsLinuxBin = !(Test-Call Get-Content $_RemainingArguments)
 	if ($IsLinuxBin) {
 		#若是linux的cat.exe
 		#则调用cat.exe
 		$Path = WindowsPathToLinuxPath $Path
-		$RemainingArguments = $RemainingArguments | ForEach-Object {
+		$_RemainingArguments = $_RemainingArguments | ForEach-Object {
 			#若是有效的文件路径
 			if (Test-Path $_) {
 				#则转换为linux路径
@@ -583,12 +589,12 @@ function global:cat {
 				$_
 			}
 		}
-		$RemainingArguments = $RemainingArguments -join " "
-		$RemainingArguments = $RemainingArguments.Trim()
-		cat.exe $Path $RemainingArguments
+		$_RemainingArguments = $_RemainingArguments -join " "
+		$_RemainingArguments = $_RemainingArguments.Trim()
+		cat.exe $Path $_RemainingArguments
 	}
 	else {
 		#否则调用Get-Content
-		Invoke-Expression "Get-Content $Path $RemainingArguments"
+		Invoke-Expression "Get-Content $Path $_RemainingArguments"
 	}
 }
