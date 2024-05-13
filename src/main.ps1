@@ -151,10 +151,10 @@ $EshellUI = ValueEx @{
 				$this.GetEnumerator() | ForEach-Object {
 					if($_.Value){
 						$Total += $_.Value
-						@{ $_.Key = size_format $_.Value }
+						@{ $_.Key = Format-FileSize $_.Value }
 					}
 				}
-				@{ Total = size_format $Total }
+				@{ Total = Format-FileSize $Total }
 			}
 		}
 	}

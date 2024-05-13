@@ -115,13 +115,13 @@ function global:dirsync {
 	}
 }
 
-function global:size_format {
+function global:Format-FileSize {
 	param(
 		[Parameter(Mandatory = $true)]
 		[double]$size
 	)
 	if ($size -lt 0) {
-		return '-' + (size_format (-$size))
+		return '-' + (Format-FileSize (-$size))
 	}
 	#若文件大小大于1GB
 	if ($size -gt 1GB) {
@@ -173,11 +173,11 @@ function global:fsize {
 			Get-ChildItem $_ -Force | ForEach-Object {
 				if ($_.PSIsContainer) {
 					$size = (Get-ChildItem $_ -Recurse -Force | Measure-Object -Property Length -Sum).Sum
-					"{0,10} {1}" -f (size_format $size), $_.Name
+					"{0,10} {1}" -f (Format-FileSize $size), $_.Name
 				}
 				else {
 					$size = $_.Length
-					"{0,10} {1}" -f (size_format $size), $_.Name
+					"{0,10} {1}" -f (Format-FileSize $size), $_.Name
 				}
 			}
 		}
@@ -185,7 +185,7 @@ function global:fsize {
 		elseif (Test-Path $_) {
 			#输出文件大小
 			$size = (Get-Item $_).Length
-			"{0,10} {1}" -f (size_format $size), $_
+			"{0,10} {1}" -f (Format-FileSize $size), $_
 		}
 	}
 }
