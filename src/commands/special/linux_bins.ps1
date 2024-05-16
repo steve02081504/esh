@@ -571,7 +571,12 @@ function global:cat {
 	if ($_RemainingArguments.Length -eq 0) {
 		#若RemainingArguments是空的
 		#则调用Get-Content
-		Get-Content $Path
+		if (Test-Path $Path) {
+			Get-Content $Path
+		}
+		else {
+			"cat: $(AutoShortPath $Path): No such file or directory"
+		}
 		return
 	}
 	$IsLinuxBin = !(Test-Call Get-Content $_RemainingArguments)
