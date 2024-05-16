@@ -190,16 +190,11 @@ function global:fsize {
 	}
 }
 
-function global:code {
-	if (Test-Command code.cmd) {
-		code.cmd $args
-	}
-	elseif (Test-Command code-insiders.cmd) {
-		code-insiders.cmd $args
-	}
-	else {
-		Write-Host "VS Code not found."
-	}
+if (Test-Command code.cmd) {
+	function global:code { code.cmd $args }
+}
+elseif (Test-Command code-insiders.cmd) {
+	function global:code { code-insiders.cmd $args }
 }
 
 function global:Clear-UserPath {
