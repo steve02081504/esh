@@ -323,6 +323,36 @@ $EshellUI = ValueEx @{
 		}
 		$this.OtherData.PartsMemoryUsage.EndAdd('BackgroundLoadings')
 
+		$this.OtherData.PartsMemoryUsage.BeginAdd('CommandNotFoundHandler')
+		$this.OtherData.BeforeEshLoaded.CommandNotFoundHandler = $ExecutionContext.InvokeCommand.CommandNotFoundAction
+		$ExecutionContext.InvokeCommand.CommandNotFoundAction = {
+			param($Name, $EventArgs)
+			$EventArgs.Command = Get-Command null -ErrorAction Ignore
+			if (Test-Command thefuck) {
+				$env:PYTHONIOENCODING = 'utf-8'
+				if ($EshellUI.CommandNotFound.HinttingText) {
+					Write-Host $EshellUI.CommandNotFound.HinttingText
+				}
+				$Command = [Microsoft.PowerShell.PSConsoleReadLine]::GetHistoryItems()[-1].CommandLine
+				$result = thefuck $Command
+				$result = if (!$LASTEXITCODE) {
+					Get-Command $result -ErrorAction Ignore
+				} else { $null }
+			}
+			if ($result) {
+				$EventArgs.Command = $result[0]
+			}
+			elseif ($EshellUI.CommandNotFound.HinttingFailedText) {
+				Write-Host $EshellUI.CommandNotFound.HinttingFailedText
+			}
+			$EventArgs.StopSearch = $true
+		}
+		if ($env:GITHUB_ACTION) {
+			Write-Host "ye just fucked up the github Action CI it cant work wirh my code, no fucking idea why"
+			$ExecutionContext.InvokeCommand.CommandNotFoundAction = $this.OtherData.BeforeEshLoaded.CommandNotFoundHandler
+		}
+		$this.OtherData.PartsMemoryUsage.EndAdd('CommandNotFoundHandler')
+
 		$this.OtherData.PartsMemoryUsage.BeginAdd('Commands')
 		Get-ChildItem "$PSScriptRoot/commands" *.ps1 | ForEach-Object { . $_.FullName }
 		$this.OtherData.PartsMemoryUsage.EndAdd('Commands')
@@ -401,6 +431,7 @@ $EshellUI = ValueEx @{
 		Remove-PSReadLineKeyHandler Enter
 		Set-PSReadLineKeyHandler Enter $this.OtherData.BeforeEshLoaded.EnterHandler
 		$PSDefaultParameterValues = $this.OtherData.BeforeEshLoaded.DefaultParameterValues
+		$ExecutionContext.InvokeCommand.CommandNotFoundAction = $this.OtherData.BeforeEshLoaded.CommandNotFoundHandler
 		$this.State.Started = $false
 	}
 	'method:AcceptLine' = {

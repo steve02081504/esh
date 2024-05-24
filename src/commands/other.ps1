@@ -242,3 +242,5 @@ function global:halt {
 	taskkill /f /im explorer.exe *> $null
 	Start-Process explorer.exe
 }
+
+function global:null{}
