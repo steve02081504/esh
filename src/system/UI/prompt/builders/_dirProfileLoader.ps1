@@ -30,33 +30,47 @@ $EshellUI.Prompt.Builders['_dirProfileLoader'] = {
 		logo = $EshellUI.DirProfile.logo
 		uuid = [Guid]::NewGuid().ToString()
 	}
+	if($profileDir -eq $null) { return }
+	$env:EshProfiledDir = Split-Path $profileDir
+	$env:EshProfileRoot = $profileDir
 	function New-DirProfile-Function {
-		param ([string]$funcname, [string]$Command)
-		$fname = "Start-$($EshellUI.DirProfile.uuid)-$funcname"
-		Invoke-Expression "function global:$fname { $Command }"
+		param ([string]$funcname, [string]$Command, [string]$DequalFunc)
+		if ($DequalFunc) { Invoke-Expression "function global:$DequalFunc { $Command }" }
+		$DequalFunc ??= $Command
 		if($alia=Get-Alias -Name $funcname -Scope global -ErrorAction Ignore) {
 			$EshellUI.DirProfile.backupcommands += @{
 				$alia.Name = $alia.Definition
 			}
 		}
-		Set-Alias -Name $funcname -Value $fname -Scope global -Force
+		Set-Alias -Name $funcname -Value $DequalFunc -Scope global -Force
 		$EshellUI.DirProfile.commands+=$funcname
 	}
 	Get-ChildItem "$profileDir/commands" -ErrorAction Ignore | ForEach-Object {
 		$Ext = [System.IO.Path]::GetExtension($_.Name)
 		$funcname = $_.BaseName
-		$Command = [System.IO.Path]::GetFullPath($_.FullName, $PWD.Path)
-		switch ($Ext) {
-			{$_ -in @('.js','.mjs')} {
-				$Command = "node $Command"
-				break
-			}
-			'.py' {
-				$Command = "python $Command"
+		$path = [System.IO.Path]::GetFullPath($_.FullName, $PWD.Path)
+		$Command = "Start-Process $path"
+		$DequalFunc = "Start-$($EshellUI.DirProfile.uuid)-$funcname"
+		$ExtList = @(
+			@{
+				list = @('.ps1','.exe','.cmd','.com')
+				action = { $Command = $path; $DequalFunc = '' }
+			},
+			@{ list = @('.js','.mjs'); actionSoftWare = 'node' }
+			@{ list = @('.py'); actionSoftWare = 'python' }
+			@{ list = @('.rb'); actionSoftWare = 'ruby' }
+			@{ list = @('.pl'); actionSoftWare = 'perl' }
+			@{ list = @('.php'); actionSoftWare = 'php' }
+			@{ list = @('.sh'); actionSoftWare = 'bash' }
+		)
+		foreach($item in $ExtList) {
+			if($item.list -contains $Ext) {
+				if ($item.actionSoftWare) { $Command = "$($item.actionSoftWare) $path" }
+				else { . $item.action }
 				break
 			}
 		}
-		New-DirProfile-Function $funcname $Command
+		New-DirProfile-Function $funcname $Command $DequalFunc
 	}
 	Get-Content "$profileDir/paths.txt" -ErrorAction Ignore | ForEach-Object {
 		$fullpath = [System.IO.Path]::GetFullPath($_, $PWD.Path)

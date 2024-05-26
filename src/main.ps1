@@ -112,9 +112,19 @@ $EshellUI = ValueEx @{
 			$LastExitCodeBackup = $global:LastExitCode
 			$OriginalPref = $ProgressPreference # Default is 'Continue'
 			$ProgressPreference = 'SilentlyContinue'
-			& $this.Pop()
-			$ProgressPreference = $OriginalPref
-			$global:LastExitCode = $LastExitCodeBackup
+			$Timer = Start-Job -ScriptBlock { Start-Sleep -Seconds 3 }
+			try {
+				& ($job=$this.Pop())
+			}
+			finally {
+				if ($Timer.State -ne 'Running') {
+					$text = "Background job $($job -replace '\s*\n\s*', ';' -replace '{;','{') timed out."
+					$EshellUI.Prompt.Refresh($text)
+				}
+				Remove-Job $Timer
+				$ProgressPreference = $OriginalPref
+				$global:LastExitCode = $LastExitCodeBackup
+			}
 		}
 		'method:Push' = {
 			param($Jobs)
@@ -224,20 +234,7 @@ $EshellUI = ValueEx @{
 					$LastFocus = $EshellUI.OtherData.GettingFocus
 					$EshellUI.OtherData.GettingFocus = $EshellUI.ParentPIDS -contains [esh.Win32]::GetForegroundProcessId()
 					if ($LastFocus -ne $EshellUI.OtherData.GettingFocus) {
-						$LastBuild = $EshellUI.Prompt.LastBuild
-						$NewPrompt = $EshellUI.Prompt.Get()
-						if ($LastBuild.Value -eq $NewPrompt) { return }
-						$PosNow = $Host.UI.RawUI.CursorPosition
-						if($LastBuild.LineNum -gt 0){
-							$VirtualTerminal.RollUp($LastBuild.LineNum - 1)
-							$VirtualTerminal.SetAbsoluteHorizontal(0)
-						}
-						else{
-							$VirtualTerminal.RestoreCursor | Out-Host
-						}
-						$VirtualTerminal.RestoreCursor
-						Write-Host $NewPrompt -NoNewline
-						$VirtualTerminal.SetAbsoluteHorizontal($PosNow.X)
+						$EshellUI.Prompt.Refresh()
 					}
 				}
 			}

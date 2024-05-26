@@ -8,6 +8,7 @@ $EshellUI.ExecutionHandlers.Add({
 	if ($line -match '^irm\s+.*\s*iex$' -and $line -like "*steam*") {
 		#禁止执行
 		[Microsoft.PowerShell.PSConsoleReadLine]::CancelLine()
+		Write-Host "`b`b  " -NoNewline
 		#输出警告
 		Write-Host
 		Write-Host "别搁这里执行脑瘫命令了，赶紧退款或者给店家差评吧。" -ForegroundColor Red
