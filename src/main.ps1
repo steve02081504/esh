@@ -118,7 +118,9 @@ $EshellUI = ValueEx @{
 			}
 			finally {
 				if ($Timer.State -ne 'Running') {
-					$text = "Background job $($job -replace '\s*\n\s*', ';' -replace '{;','{') timed out."
+					$text = "Background job $(
+						"{$($job -replace '\s*\n\s*', ';')}" -replace '{;','{' -replace ';}','}'
+					) timed out."
 					$EshellUI.Prompt.Refresh($text)
 				}
 				Remove-Job $Timer
@@ -343,10 +345,6 @@ $EshellUI = ValueEx @{
 				Write-Host $EshellUI.CommandNotFound.HinttingFailedText
 			}
 			$EventArgs.StopSearch = $true
-		}
-		if ($env:GITHUB_ACTION) {
-			Write-Host "ye just fucked up the github Action CI it cant work wirh my code, no fucking idea why"
-			$ExecutionContext.InvokeCommand.CommandNotFoundAction = $this.OtherData.BeforeEshLoaded.CommandNotFoundHandler
 		}
 		$this.OtherData.PartsMemoryUsage.EndAdd('CommandNotFoundHandler')
 
