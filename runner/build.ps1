@@ -67,7 +67,7 @@ process {
 		-TempDir "$PSScriptRoot/build" -iconFile $PSScriptRoot/../img/esh.ico `
 		-title 'E-Shell' -description 'E-Shell' -version '1960.7.17.13' `
 		-company 'E-tek' -product 'E-Sh' -copyright '(c) E-tek Corporation. All rights reserved.'
-	
+
 	if($MpressFile){
 		$OutputLength = (Get-Item "$PSScriptRoot/build/esh.exe").Length
 		& $MpressFile "$PSScriptRoot/build/esh.exe" -s | Out-Null
@@ -75,7 +75,7 @@ process {
 		if($ObfusLength -ne $OutputLength){
 			Write-Host "Compression complete -> $ObfusLength bytes"
 		}
-		elseif($LASTEXITCODE -eq 1){
+		elseif($LastExitCode -eq 1){
 			Write-Warning "Compression failed."
 		}
 	}

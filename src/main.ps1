@@ -20,7 +20,7 @@ $EshellUI = ValueEx @{
 		WindowsTerminal = [bool]$env:WT_SESSION
 		InScope = $EshellUI -ne $global:EshellUI
 		"method:InEnvPath" = {
-			param($Path=$env:Path)
+			param($Path = $env:Path)
 			$result = $false
 			$Path.Split(";") | ForEach-Object {
 				if ($_ -match "$([regex]::Escape($this.Sources.Path))[\\/]path*") {
@@ -71,11 +71,11 @@ $EshellUI = ValueEx @{
 
 	LoadingLog = ValueEx @{
 		__type__ = [System.Collections.ArrayList]
-		ErrorLevel = &{enum ErrorLevel{
+		ErrorLevel = & { enum ErrorLevel{
 				Info
 				Warning
 				Error
-		};[ErrorLevel]}
+		}; [ErrorLevel] }
 		'method:AddLog' = {
 			param($What, $Level)
 			$this.Add([PSCustomObject]@{
@@ -83,9 +83,9 @@ $EshellUI = ValueEx @{
 				Level = $Level
 			}) | Out-Null
 		}
-		'method:AddInfo' = {param($What);$this.AddLog($What, $this.ErrorLevel::Info)}
-		'method:AddWarning' = {param($What);$this.AddLog($What, $this.ErrorLevel::Warning)}
-		'method:AddError' = {param($What);$this.AddLog($What, $this.ErrorLevel::Error)}
+		'method:AddInfo' = { param($What); $this.AddLog($What, $this.ErrorLevel::Info) }
+		'method:AddWarning' = { param($What); $this.AddLog($What, $this.ErrorLevel::Warning) }
+		'method:AddError' = { param($What); $this.AddLog($What, $this.ErrorLevel::Error) }
 		'method:Print' = {
 			$this | ForEach-Object {
 				$What = $_.What # 这个变量是必须的，$_在switch中会被更新为switch的参数
@@ -129,7 +129,7 @@ $EshellUI = ValueEx @{
 			$Jobs | ForEach-Object { $this.Add($_) } | Out-Null
 		}
 		'method:Wait' = {
-			while($this.Count) { $this.PopAndRun() }
+			while ($this.Count) { $this.PopAndRun() }
 		}
 	}
 	OtherData = @{
@@ -157,7 +157,7 @@ $EshellUI = ValueEx @{
 			'method:View' = {
 				$Total = 0
 				$this.GetEnumerator() | ForEach-Object {
-					if($_.Value){
+					if ($_.Value) {
 						$Total += $_.Value
 						@{ $_.Key = Format-FileSize $_.Value }
 					}
@@ -171,7 +171,7 @@ $EshellUI = ValueEx @{
 		Get-Content "$($this.Sources.Path)/data/vars/$FileName.txt" -ErrorAction Ignore
 	}
 	'method:SaveVariable' = {
-		param($Value,$FileName)
+		param($Value, $FileName)
 		if ((-not $Value) -or ($this.LoadVariable($FileName) -eq $Value)) { return }
 		Set-Content "$($this.Sources.Path)/data/vars/$FileName.txt" $Value -NoNewline
 	}
@@ -213,10 +213,10 @@ $EshellUI = ValueEx @{
 		$this.OtherData.PartsMemoryUsage.EndAdd('BeforeEshLoadRecord')
 
 		$this.OtherData.PartsMemoryUsage.BeginAdd('RegisterEvents')
-		$this.RegisteredEvents=@{
+		$this.RegisteredEvents = @{
 			SaveVariables = @{
 				ID = 'PowerShell.Exiting'
-				Action = {$EshellUI.SaveVariables()}
+				Action = { $EshellUI.SaveVariables() }
 			}
 			BackgroundJobs = @{
 				ID = 'PowerShell.OnIdle'
@@ -237,7 +237,7 @@ $EshellUI = ValueEx @{
 				}
 			}
 		}
-		if($Arguments.NoVariableSaving){
+		if ($Arguments.NoVariableSaving) {
 			$this.RegisteredEvents.Remove('SaveVariables')
 		}
 		$this.RegisteredEvents.GetEnumerator() | ForEach-Object {
@@ -254,24 +254,24 @@ $EshellUI = ValueEx @{
 		. $PSScriptRoot/system/UI/icon.ps1
 
 		Set-PSReadLineKeyHandler -Key Tab -Function MenuComplete
-		if($this.Im.WindowsTerminal) {
+		if ($this.Im.WindowsTerminal) {
 			$WTPathreg = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\wt.exe"
 			$WindowsTerminalVersion = [regex]::match((Get-ItemProperty $WTPathreg).Path, "_(.*?)_").Groups[1].Value
 			$Loginfo = [System.Collections.ArrayList]@(
 				"Since failed to get Windows Terminal version from the registry, use Get-AppXPackage instead, which is extremely slow.",
 				"Please consider repairing the Windows Terminal installation."
 			)
-			if($WindowsTerminalVersion -eq "") {
+			if ($WindowsTerminalVersion -eq "") {
 				$WindowsTerminalVersion = "$((Get-AppXPackage "Microsoft.WindowsTerminal").Version)" # super slow
 				# auto fix registry, Remove it by `Remove-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\wt.exe" -Force` in root if you want retest
 				$FileName = "C:\Program Files\WindowsApps\Microsoft.WindowsTerminal_${WindowsTerminalVersion}_x64__8wekyb3d8bbwe\wt.exe"
-				if(Test-Path $FileName) {
-					try{
+				if (Test-Path $FileName) {
+					try {
 						New-Item -Path $WTPathreg -Force -ErrorAction Stop | Out-Null
 						New-ItemProperty -Path $WTPathreg -Name 'Path' -Value $FileName -PropertyType "String" -Force | Out-Null
 						$this.LoadingLog.AddInfo("Fixed Windows Terminal registry `"$WTPathreg`"")
 					}
-					catch{
+					catch {
 						$Loginfo.Insert(1, "Esh tried to fix this but failed.(See ``error`` for more info.)")
 						$Loginfo[2] = $Loginfo[2].Substring(0, $Loginfo[2].Length - 1) + " or run esh as root."
 						$this.LoadingLog.AddWarning($Loginfo -join "`n")
@@ -281,7 +281,7 @@ $EshellUI = ValueEx @{
 					$this.LoadingLog.AddWarning($Loginfo -join "`n")
 				}
 			}
-			if($WindowsTerminalVersion -eq "") {
+			if ($WindowsTerminalVersion -eq "") {
 				$WindowsTerminalVersion = "Unknown"
 				$this.LoadingLog.AddError($Loginfo -join "`n")
 			}
@@ -330,7 +330,7 @@ $EshellUI = ValueEx @{
 				}
 				$Command = [Microsoft.PowerShell.PSConsoleReadLine]::GetHistoryItems()[-1].CommandLine
 				$result = thefuck $Command
-				$result = if (!$LASTEXITCODE) {
+				$result = if (!$LastExitCode) {
 					Get-Command $result -ErrorAction Ignore
 				} else { $null }
 			}
@@ -433,24 +433,24 @@ $EshellUI = ValueEx @{
 		do {
 			try {
 				$StartExecutionTime = Get-Date
-				$(if($Expr){
+				$(if ($Expr) {
 					Invoke-Expression $Expr | Out-Default
 				} else { $global:ans }) *>&1 | Out-Host
 				$EndExecutionTime = Get-Date
 			}
 			catch {
-				if($_.Exception -is [System.Management.Automation.ParseException]) {
+				if ($_.Exception -is [System.Management.Automation.ParseException]) {
 					Write-Host '?>' -NoNewline
 					$Apply = Read-Host
-					if($Apply -ne ''){
+					if ($Apply -ne '') {
 						$Expr = $OriLine += "`n" + $Apply
 					}
-					else{ $EndExecutionTime = Get-Date }
+					else { $EndExecutionTime = Get-Date }
 				}
 				else { $EndExecutionTime = Get-Date }
 				if ($EndExecutionTime) {
-					$global:ans=$null
-					Out-Error ($global:err=$_)
+					$global:ans = $null
+					Out-Error ($global:err = $_)
 				}
 			}
 		} until ($EndExecutionTime -ne $null)
@@ -466,7 +466,7 @@ $EshellUI = ValueEx @{
 		param([switch]$NotEnterNestedPrompt = $false)
 		$HistoryId = 0
 		if (-not $NotEnterNestedPrompt) { $NestedPromptLevel++ }
-		function DefaultPrompt { 'esh' + '>' * ($NestedPromptLevel+1) }
+		function DefaultPrompt { 'esh' + '>' * ($NestedPromptLevel + 1) }
 		:repl while ($true) {
 			Write-Host -NoNewline $($global:prompt ?? $this.Prompt.Get() ?? $(DefaultPrompt))
 			$expr = PSConsoleHostReadLine
@@ -500,7 +500,7 @@ $EshellUI = ValueEx @{
 		try {
 			if (-not $this.State.Started) {
 				$this.Init($Invocation)
-				if(-not $Arguments.NoVariableLoading) {
+				if (-not $Arguments.NoVariableLoading) {
 					$this.LoadVariables()
 				}
 				$this.Start($Arguments)
@@ -522,16 +522,16 @@ $EshellUI = ValueEx @{
 		}
 	}
 	'method:CompileExeFile' = {
-		param($OutputFile=$PWD.Path)
-		if(IsLinuxPath $OutputFile){
+		param($OutputFile = $PWD.Path)
+		if (IsLinuxPath $OutputFile) {
 			$OutputFile = LinuxPathToWindowsPath $OutputFile
 		}
 		if (Test-Path $OutputFile -PathType Container) {
 			$OutputFile = Join-Path $OutputFile 'esh.exe'
 		}
 		if (Test-Path $OutputFile) {
-			try{ Remove-Item $OutputFile -Force -ErrorAction Stop }
-			catch{
+			try { Remove-Item $OutputFile -Force -ErrorAction Stop }
+			catch {
 				Write-Error "Failed to remove $OutputFile"
 				return
 			}

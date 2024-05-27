@@ -1,6 +1,6 @@
 function global:Test-Command($Command) {
 	if (!$Command) { return $false }
-	TempAssign '$ExecutionContext.InvokeCommand.CommandNotFoundAction',$null {
+	TempAssign '$ExecutionContext.InvokeCommand.CommandNotFoundAction', $null {
 		[bool]$(Get-Command $Command -ErrorAction Ignore)
 	}
 }
@@ -21,8 +21,5 @@ function global:Test-Call {
 	Invoke-Expression "function test { $($scriptblock.Ast.ParamBlock.Extent.Text);`$true }"
 	try {
 		Invoke-Expression "test $TestArgs"
-	}
-	catch {
-		$false
-	}
+	} catch { $false }
 }

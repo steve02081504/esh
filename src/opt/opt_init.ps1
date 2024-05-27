@@ -1,4 +1,4 @@
-if((Get-ExecutionPolicy) -eq 'Restricted'){ Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Force }
+if ((Get-ExecutionPolicy) -eq 'Restricted') { Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Force }
 if ($Script:eshDirFromEnv = Get-Command esh -ErrorAction Ignore) {
 	$Script:eshDir = Split-Path $(Split-Path $eshDirFromEnv.Source)
 }

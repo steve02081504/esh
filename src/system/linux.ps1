@@ -1,6 +1,6 @@
 #查找$EshellUI.MSYS.RootPath是否是可用的msys路径
 if (-not (Test-Path $EshellUI.MSYS.RootPath)) {
-	if(Test-Command rm.exe) {
+	if (Test-Command rm.exe) {
 		$Path = Split-Path (Get-Command rm.exe).Source
 		$EshellUI.MSYS.RootPath = $Path -replace "([\\/]usr)[\\/]?bin[\\/]?$"
 	}
@@ -13,7 +13,7 @@ if (-not (Test-Path $EshellUI.MSYS.RootPath)) {
 		$EshellUI.LoadingLog.AddInfo("Now MSYS RootPath is auto set to $($VirtualTerminal.Colors.Green)$($EshellUI.MSYS.RootPath)")
 		$EshellUI.SaveVariables()
 	}
-	else{
+	else {
 		$EshellUI.LoadingLog.AddWarning(
 "Auto set MSYS RootPath failed.
 Set it manually by $(
@@ -53,8 +53,8 @@ function global:IsLinuxPath([string]$Path) {
 
 #一个函数以处理linux路径到windows路径的转换
 function global:LinuxPathToWindowsPath([string]$Path) {
-	if ($PWD.Path -eq $env:USERPROFILE){
-		if($Path.StartsWith("./")) {
+	if ($PWD.Path -eq $env:USERPROFILE) {
+		if ($Path.StartsWith("./")) {
 			$Path = "~" + $Path.Substring(1)
 		}
 		elseif ($Path.StartsWith(".")) {
@@ -131,10 +131,7 @@ function global:AutoShortPath($Path) {
 	[regex]$matcher = "^($([regex]::Escape($HOME))|root:|$([regex]::Escape($EshellUI.MSYS.RootPath)))"
 	if ($matcher.IsMatch($Path)) {
 		WindowsPathToLinuxPath $Path
-	}
-	else {
-		$Path
-	}
+	} else { $Path }
 }
 
 if (Test-Command rm.exe) {
@@ -210,7 +207,7 @@ if (Test-Path $EshellUI.MSYS.RootPath) {
 			#则转换为windows路径
 			$Executable = LinuxPathToWindowsPath $Executable
 			$Expr = "$Executable $Rest"
-			if(Test-Command $Executable) {
+			if (Test-Command $Executable) {
 				return $Expr
 			}
 		}

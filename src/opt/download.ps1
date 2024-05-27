@@ -6,7 +6,7 @@ if (Get-Command git -ErrorAction Ignore) {
 		exit 1
 	}
 }
-else{
+else {
 	Remove-Item $env:TEMP/esh-master -Force -ErrorAction Ignore -Confirm:$false -Recurse
 	try { Invoke-WebRequest https://bit.ly/Esh-zip -OutFile $env:TEMP/Eshell.zip }
 	catch {

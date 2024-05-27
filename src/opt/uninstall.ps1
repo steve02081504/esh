@@ -1,6 +1,6 @@
 param(
-	[switch]$Force=$false,
-	[ValidateSet('no', 'yes', 'ask', 'auto')][string]$RemoveDir='auto'
+	[switch]$Force = $false,
+	[ValidateSet('no', 'yes', 'ask', 'auto')][string]$RemoveDir = 'auto'
 )
 
 . $PSScriptRoot/base.ps1
@@ -23,7 +23,7 @@ Get-ChildItem $profilesDir -Filter *profile.ps1 -ErrorAction Ignore | ForEach-Ob
 	$profileContent = Get-Content $theprofile
 	if ($profileContent -contains $startScript) {
 		$profileContent = $profileContent -replace [regex]::Escape($startScript), ''
-		if("$profileContent" -match "^\s*$") {
+		if ("$profileContent" -match "^\s*$") {
 			Remove-Item $theprofile -Force
 			Write-Host "已从 $theprofile 中移除 Esh 加载语句并删除该空文件。"
 		}
@@ -34,7 +34,7 @@ Get-ChildItem $profilesDir -Filter *profile.ps1 -ErrorAction Ignore | ForEach-Ob
 	}
 }
 
-if($IsWindows){
+if ($IsWindows) {
 	# 移除 Windows Terminal 的 Eshell 配置文件
 	$wtFragmentDir = "$env:LOCALAPPDATA\Microsoft\Windows Terminal\Fragments\esh"
 	if (Test-Path $wtFragmentDir) {

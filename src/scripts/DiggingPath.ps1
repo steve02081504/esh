@@ -5,11 +5,11 @@ function global:DiggingPath {
 		$Path = $PWD.Path,
 		$CheckPath = ''
 	)
-	if($Input) { if($Path){$CheckPath = $Path};$Path = $Input }
-	if(-not $Path) { return }
-	$DescriptionPath = if($CheckPath){ Join-Path $Path $CheckPath } else { $Path }
+	if ($Input) { if ($Path) { $CheckPath = $Path }; $Path = $Input }
+	if (-not $Path) { return }
+	$DescriptionPath = if ($CheckPath) { Join-Path $Path $CheckPath } else { $Path }
 	if (Test-Path $DescriptionPath) {
-		if($x=$DescriptionPath | ForEach-Object $Runner) {
+		if ($x = $DescriptionPath | ForEach-Object $Runner) {
 			return $x
 		}
 	}

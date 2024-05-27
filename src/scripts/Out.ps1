@@ -2,10 +2,10 @@ ${global:Out-Performance} = @{
 	Warning = @{
 		Color = 'Yellow'
 	}
-	Error = @{
+	Error   = @{
 		Color = 'Red'
 	}
-	Info = @{
+	Info    = @{
 		Color = 'Blue'
 	}
 }
@@ -15,9 +15,9 @@ function global:Out-Error($Value) {
 		$VirtualTerminal.Colors[
 			${global:Out-Performance}.Error.Color ??
 			(Get-Host).PrivateData.ErrorForegroundColor.ToString()
-		]+(
+		] + (
 		(($Value ?? $Input) | ForEach-Object { $_.ToString() }) -join "`r`n"
-		)+$VirtualTerminal.Colors.Default
+		) + $VirtualTerminal.Colors.Default
 	)
 }
 
@@ -26,9 +26,9 @@ function global:Out-Warning($Value) {
 		$VirtualTerminal.Colors[
 			${global:Out-Performance}.Warning.Color ??
 			(Get-Host).PrivateData.WarningForegroundColor.ToString()
-		]+(
+		] + (
 		(($Value ?? $Input) | ForEach-Object { $_.ToString() }) -join "`r`n"
-		)+$VirtualTerminal.Colors.Default
+		) + $VirtualTerminal.Colors.Default
 	)
 }
 
@@ -36,8 +36,8 @@ function global:Out-Info($Value) {
 	$Host.UI.WriteLine(
 		$VirtualTerminal.Colors[
 			${global:Out-Performance}.Info.Color ?? 'Default'
-		]+(
+		] + (
 		(($Value ?? $Input) | ForEach-Object { $_.ToString() }) -join "`r`n"
-		)+$VirtualTerminal.Colors.Default
+		) + $VirtualTerminal.Colors.Default
 	)
 }

@@ -7,7 +7,7 @@ if ($error.Count -eq $EshellUI.OtherData.BeforeEshLoaded.Errors.Count) {
 }
 
 . $PSScriptRoot/logo.ps1
-if(-not $Arguments.NoLogo) {
+if (-not $Arguments.NoLogo) {
 	$EshellUI.Logo.Print()
 }
 else {
@@ -18,7 +18,7 @@ else {
 	$host.UI.RawUI.CursorPosition = $CursorPos
 	Remove-Variable CursorPos
 }
-if($EshellUI.LoadingLog.Count -and -not $Arguments.NoLoadingLog) {
+if ($EshellUI.LoadingLog.Count -and -not $Arguments.NoLoadingLog) {
 	$EshellUI.LoadingLog.Print()
 	Write-Host
 }

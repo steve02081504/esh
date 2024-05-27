@@ -1,14 +1,14 @@
 . "$($EshellUI.Sources.Path)/src/scripts/DiggingPath.ps1"
 $EshellUI.DirProfile = @{
-	path = ''
-	commands = @()
+	path           = ''
+	commands       = @()
 	backupcommands = @{}
-	paths = @()
-	logo = ''
+	paths          = @()
+	logo           = ''
 }
 $EshellUI.Prompt.Builders['_dirProfileLoader'] = {
 	$profileDir = DiggingPath { $_ } $PWD.Path '.esh'
-	if($profileDir -eq $EshellUI.DirProfile.path) { return }
+	if ($profileDir -eq $EshellUI.DirProfile.path) { return }
 	$PathArray = $env:Path -split ';'
 	$EshellUI.DirProfile.commands -ne $null | ForEach-Object {
 		Remove-Alias -Name $_ -Scope global -Force -ErrorAction Ignore
@@ -23,27 +23,27 @@ $EshellUI.Prompt.Builders['_dirProfileLoader'] = {
 		Remove-Item function:\$($_.Name)
 	}
 	$EshellUI.DirProfile = @{
-		path = $profileDir
-		commands = @()
+		path           = $profileDir
+		commands       = @()
 		backupcommands = @{}
-		envpaths = @()
-		logo = $EshellUI.DirProfile.logo
-		uuid = [Guid]::NewGuid().ToString()
+		envpaths       = @()
+		logo           = $EshellUI.DirProfile.logo
+		uuid           = [Guid]::NewGuid().ToString()
 	}
-	if($profileDir -eq $null) { return }
+	if ($profileDir -eq $null) { return }
 	$env:EshProfiledDir = Split-Path $profileDir
 	$env:EshProfileRoot = $profileDir
 	function New-DirProfile-Function {
 		param ([string]$funcname, [string]$Command, [string]$DequalFunc)
 		if ($DequalFunc) { Invoke-Expression "function global:$DequalFunc { $Command }" }
 		$DequalFunc ??= $Command
-		if($alia=Get-Alias -Name $funcname -Scope global -ErrorAction Ignore) {
+		if ($alia = Get-Alias -Name $funcname -Scope global -ErrorAction Ignore) {
 			$EshellUI.DirProfile.backupcommands += @{
 				$alia.Name = $alia.Definition
 			}
 		}
 		Set-Alias -Name $funcname -Value $DequalFunc -Scope global -Force
-		$EshellUI.DirProfile.commands+=$funcname
+		$EshellUI.DirProfile.commands += $funcname
 	}
 	Get-ChildItem "$profileDir/commands" -ErrorAction Ignore | ForEach-Object {
 		$Ext = [System.IO.Path]::GetExtension($_.Name)
@@ -53,18 +53,18 @@ $EshellUI.Prompt.Builders['_dirProfileLoader'] = {
 		$DequalFunc = "Start-$($EshellUI.DirProfile.uuid)-$funcname"
 		$ExtList = @(
 			@{
-				list = @('.ps1','.exe','.cmd','.com')
+				list   = @('.ps1', '.exe', '.cmd', '.com')
 				action = { $Command = $path; $DequalFunc = '' }
 			},
-			@{ list = @('.js','.mjs'); actionSoftWare = 'node' }
+			@{ list = @('.js', '.mjs'); actionSoftWare = 'node' }
 			@{ list = @('.py'); actionSoftWare = 'python' }
 			@{ list = @('.rb'); actionSoftWare = 'ruby' }
 			@{ list = @('.pl'); actionSoftWare = 'perl' }
 			@{ list = @('.php'); actionSoftWare = 'php' }
 			@{ list = @('.sh'); actionSoftWare = 'bash' }
 		)
-		foreach($item in $ExtList) {
-			if($item.list -contains $Ext) {
+		foreach ($item in $ExtList) {
+			if ($item.list -contains $Ext) {
 				if ($item.actionSoftWare) { $Command = "$($item.actionSoftWare) $path" }
 				else { . $item.action }
 				break
@@ -74,25 +74,25 @@ $EshellUI.Prompt.Builders['_dirProfileLoader'] = {
 	}
 	Get-Content "$profileDir/paths.txt" -ErrorAction Ignore | ForEach-Object {
 		$fullpath = [System.IO.Path]::GetFullPath($_, $PWD.Path)
-		if($PathArray -notcontains $fullpath) {
-			$EshellUI.DirProfile.envpaths+=$fullpath
-			$PathArray+=$fullpath
+		if ($PathArray -notcontains $fullpath) {
+			$EshellUI.DirProfile.envpaths += $fullpath
+			$PathArray += $fullpath
 		}
 	}
 	$newlogo = Import-PowerShellDataFile "$profileDir/logo.psd1" -ErrorAction Ignore
 	$newlogo ??= Get-Content "$profileDir/logo.txt" -Raw -ErrorAction Ignore
-	if($EshellUI.DirProfile.logo -ne $newlogo) {
+	if ($EshellUI.DirProfile.logo -ne $newlogo) {
 		$EshellUI.DirProfile.logo = $newlogo
-		if($newlogo){ $VirtualTerminal.Colors[$newlogo.color??'default']+$($newlogo.logo??$newlogo) | Out-Host }
+		if ($newlogo) { $VirtualTerminal.Colors[$newlogo.color ?? 'default'] + $($newlogo.logo ?? $newlogo) | Out-Host }
 	}
-	$(if($EshellUI.DirProfile.commands.Count -gt 0 -or $EshellUI.DirProfile.envpaths.Count -gt 0) {
-		$VirtualTerminal.Colors.Magenta+'Path provided env:'
-		if($EshellUI.DirProfile.commands.Count -gt 0){
-			"$($EshellUI.DirProfile.commands.Count) commands:"+$VirtualTerminal.Colors.Green
+	$(if ($EshellUI.DirProfile.commands.Count -gt 0 -or $EshellUI.DirProfile.envpaths.Count -gt 0) {
+		$VirtualTerminal.Colors.Magenta + 'Path provided env:'
+		if ($EshellUI.DirProfile.commands.Count -gt 0) {
+			"$($EshellUI.DirProfile.commands.Count) commands:" + $VirtualTerminal.Colors.Green
 			$EshellUI.DirProfile.commands -join " "
 			$VirtualTerminal.Colors.Magenta
 		}
-		if($EshellUI.DirProfile.envpaths.Count -gt 0){
+		if ($EshellUI.DirProfile.envpaths.Count -gt 0) {
 			"$($EshellUI.DirProfile.envpaths.Count) enveronment paths"
 		}
 	}) | Out-Host

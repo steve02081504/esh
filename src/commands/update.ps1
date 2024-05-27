@@ -8,8 +8,7 @@ function global:Update-SAO-lib {
 	try {
 		#下载最新的SAO-lib
 		Invoke-WebRequest 'https://github.com/steve02081504/SAO-lib/raw/master/SAO-lib.txt' -OutFile "$eshDir/data/SAO-lib.txt"
-	}
-	catch {}
+	} catch {}
 }
 
 function global:Update-gcc-Kawaii {
@@ -34,11 +33,11 @@ function global:Update-EShell {
 		git pull --rebase
 		Set-Location $pathNow
 	}
-	else{
+	else {
 		$praentpath = Split-Path $eshDir
 		$datapath = "$eshDir/data"
 		try {
-			if (Test-Command git){
+			if (Test-Command git) {
 				# 升级到git仓库
 				git clone https://github.com/steve02081504/esh $datapath/esh --depth 1 --no-checkout
 				#移动并覆盖文件
@@ -50,7 +49,7 @@ function global:Update-EShell {
 				git reset --hard HEAD
 				Set-Location $pathNow
 			}
-			else{
+			else {
 				#下载最新的EShell
 				Invoke-WebRequest 'https://github.com/steve02081504/esh/archive/refs/heads/master.zip' -OutFile "$datapath/master.zip"
 				#删除除了data和desktop.ini文件夹以外的所有文件
@@ -62,8 +61,7 @@ function global:Update-EShell {
 				Remove-Item "$datapath/master.zip" -Force
 				Rename-Item "$praentpath/esh-master" "$eshDir"
 			}
-		}
-		catch {}
+		} catch {}
 	}
 	$eshDirFromEnv = $EshellUI.Im.InEnvPath()
 	. $eshDir/src/opt/install.ps1 -Fix

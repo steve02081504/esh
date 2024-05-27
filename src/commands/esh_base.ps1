@@ -87,16 +87,16 @@ if ($IsWindows) {
 					$Font = New-Object System.Drawing.Font('cascadia mono', 128)
 					$Width = 0
 					$ShadowHandled = ($Shadow.ToCharArray() | ForEach-Object {
-							if ($Width -eq 0) {
-								$Width = [Math]::Max([Math]::Floor(
-										[System.Windows.Forms.TextRenderer]::MeasureText($_, $Font).Width /
-										128) - 1, 0)
-							}
-							elseif ($_ -eq $LastChar) { $Width--; return }
-							else { $UseOriginal = $true }
-							$LastChar = $_
-							$_
-						}) -join ''
+						if ($Width -eq 0) {
+							$Width = [Math]::Max([Math]::Floor(
+									[System.Windows.Forms.TextRenderer]::MeasureText($_, $Font).Width /
+									128) - 1, 0)
+						}
+						elseif ($_ -eq $LastChar) { $Width--; return }
+						else { $UseOriginal = $true }
+						$LastChar = $_
+						$_
+					}) -join ''
 					if ($UseOriginal) { $ShadowHandled = $Shadow }
 					if ($ShadowHandled) { Write-Host $ShadowHandled }
 				}

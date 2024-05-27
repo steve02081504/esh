@@ -1,8 +1,8 @@
 using namespace System.Management.Automation.Host
 param(
-	[switch]$Force=$false,
-	[switch]$Fix=$false,
-	[ValidateSet('yes', 'no', 'ask', 'auto')][string]$StartEsh='auto'
+	[switch]$Force = $false,
+	[switch]$Fix = $false,
+	[ValidateSet('yes', 'no', 'ask', 'auto')][string]$StartEsh = 'auto'
 )
 
 . $PSScriptRoot/base.ps1
@@ -22,7 +22,7 @@ if ($IsWindows) {
 				if([System.Environment]::OSVersion.Version.Major -le 7){'-v 7.2.15'}
 			)"
 		}
-	}catch{}
+	} catch {}
 	if ((Test-Path "$eshDir/.git") -and (-not (Test-Path "$eshDir/.git/desktop.ini"))) {
 		Copy-Item "$eshDir/data/git_icon.ini" "$eshDir/.git/desktop.ini" -Force
 	}
@@ -38,14 +38,14 @@ if ($IsWindows) {
 		if (([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]'Administrator')) {
 			New-Item -ItemType SymbolicLink -Path "$eshDir/data/SAO-lib.txt" -Target "$eshDir/../SAO-lib/SAO-lib.txt" -Force
 		}
-		else{
-			try{
+		else {
+			try {
 				Start-Process -Wait -FilePath cmd.exe -ArgumentList "/c mklink `"$eshDir/data/SAO-lib.txt`" `"$eshDir/../SAO-lib/SAO-lib.txt`"" -Verb runas
-			}catch{}
+			} catch {}
 		}
 	}
 }
-if (-not $Fix){
+if (-not $Fix) {
 	if ((-not $eshDirFromEnv) -and (YorN "要安装 Esh 到环境变量吗？" -helpMessageY "将可以在任何地方使用``esh``或``EShell``命令" -SkipAsDefault:$Force)) {
 		$env:Path += "`;$eshDir/path"
 		$UserPath = [Environment]::GetEnvironmentVariable("Path", "User") + "`;$eshDir/path"
@@ -86,7 +86,7 @@ if (-not $Fix){
 				}
 			}
 			if (-not $added) {
-				if(-not $Force){
+				if (-not $Force) {
 					do {
 						$response = $Host.UI.PromptForChoice("未找到可用的profile文件", "选择你想要新建并添加Esh加载的配置文件", @(
 								[ChoiceDescription]::new("&0`b当前应用针对性配置文件", $profile),
@@ -110,14 +110,14 @@ if ($IsWindows) {
 		icon = "$eshDir/img/esh.ico"
 	}
 	$wtFragment = [ordered]@{
-		'$help' = "https://aka.ms/terminal-documentation"
+		'$help'   = "https://aka.ms/terminal-documentation"
 		'$schema' = "https://aka.ms/terminal-profiles-schema"
-		profiles = @(
+		profiles  = @(
 			[ordered]@{name = "Eshell" } + $WtProfileBase
 			[ordered]@{name = "Eshell (Root)" ; elevate = $true } + $WtProfileBase
 		)
 	}
-	$wtFragmentJson = ($wtFragment | ConvertTo-Json).Replace("`r`n", "`n").Replace("  ", "`t")+ "`n"
+	$wtFragmentJson = ($wtFragment | ConvertTo-Json).Replace("`r`n", "`n").Replace("  ", "`t") + "`n"
 	if (Test-Path $wtFragmentDir/esh.json) {
 		if ((Get-Content $wtFragmentDir/esh.json -Raw) -ne $wtFragmentJson) {
 			Set-Content $wtFragmentDir/esh.json $wtFragmentJson -NoNewline
@@ -133,7 +133,7 @@ if ($IsWindows) {
 if (-not (Get-Command pwsh -ErrorAction Ignore)) {
 	$Host.UI.WriteErrorLine("esh的运行需要PowerShell 6或以上`n访问 https://aka.ms/pscore6 来获取PowerShell 6+ 并使得``pwsh``命令在环境中可用以使得esh能够正常工作")
 }
-else{
+else {
 	[bool]$StartEsh = (-not $EshellUI) -and $(switch ($StartEsh) {
 		no { $false }
 		yes { $true }

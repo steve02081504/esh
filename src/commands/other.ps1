@@ -11,10 +11,7 @@ function global:mklink {
 			#转换为windows路径
 			$replaceList[$_] = LinuxPathToFullWindowsPath $_
 			$replaceList[$_]
-		}
-		else {
-			$_
-		}
+		} else { $_ }
 	}
 	#调用cmd的mklink
 	$result = . cmd /c mklink $RemainingArguments
@@ -73,8 +70,7 @@ function global:clear-emptys {
 	($paths ?? '.') | ForEach-Object {
 		if (IsLinuxPath $_) {
 			LinuxPathToWindowsPath $_
-		}
-		else { $_ }
+		} else { $_ }
 	} | ForEach-Object {
 		if ((Get-Item $_).PSIsContainer) {
 			$Count = { (Get-ChildItem $_ -Force | Measure-Object).Count }
@@ -226,14 +222,14 @@ function global:UntilSuccess {
 		[Parameter(ValueFromRemainingArguments = $true)]
 		$args
 	)
-	$LASTEXITCODE = 0
+	$LastExitCode = 0
 	$sb = [scriptblock]::Create($args)
 	do {
 		& $sb
-		if ($LASTEXITCODE -ne 0) {
+		if ($LastExitCode -ne 0) {
 			Start-Sleep $WaittingTime
 		}
-	}while ($LASTEXITCODE)
+	}while ($LastExitCode)
 }
 Set-Alias 'until-success' 'UntilSuccess' -Scope global
 Set-Alias 'us' 'UntilSuccess' -Scope global
@@ -243,4 +239,4 @@ function global:halt {
 	Start-Process explorer.exe
 }
 
-function global:null{}
+function global:null {}

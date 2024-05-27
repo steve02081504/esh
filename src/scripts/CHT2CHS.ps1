@@ -11,8 +11,7 @@ function global:CHS2CHT.base {
 	($str.ToCharArray() | ForEach-Object {
 		if (($_ -ge 256) -and ${CHS2CHT.data.alphas}.Contains($_)) {
 			${CHS2CHT.data.alphas}[$_]
-		}
-		else { $_ }
+		} else { $_ }
 	}) -join ''
 }
 function global:CHS2CHT {
@@ -31,8 +30,7 @@ function global:CHT2CHS.base {
 	($str.ToCharArray() | ForEach-Object {
 		if (($_ -ge 256) -and ${CHT2CHS.data.alphas}.Contains($_)) {
 			${CHT2CHS.data.alphas}[$_]
-		}
-		else { $_ }
+		} else { $_ }
 	}) -join ''
 }
 function global:CHT2CHS {

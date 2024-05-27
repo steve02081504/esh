@@ -19,14 +19,14 @@ Set-PSReadLineKeyHandler -Key Enter -ScriptBlock {
 	$global:ans = $($global:ans_array)
 	$global:err = $Error | Select-Object -SkipLast $EshellUI.OtherData.HistoryErrorCount
 	$EshellUI.OtherData.HistoryErrorCount = $Error.Count
-	foreach($Handler in $EshellUI.ExecutionHandlers) {
+	foreach ($Handler in $EshellUI.ExecutionHandlers) {
 		$aret = $Handler.Invoke($global:expr_now)
-		if($aret.Count -eq 1) { $aret = $aret[0] }
-		if($aret -is [string]) {
+		if ($aret.Count -eq 1) { $aret = $aret[0] }
+		if ($aret -is [string]) {
 			$EshellUI.AcceptLine($aret)
 			return
 		}
-		elseif($aret) { return }
+		elseif ($aret) { return }
 	}
 	[Microsoft.PowerShell.PSConsoleReadLine]::AcceptLine()
 }
