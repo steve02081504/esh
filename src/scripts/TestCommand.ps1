@@ -1,9 +1,8 @@
 function global:Test-Command($Command) {
 	if (!$Command) { return $false }
-	$backup = $ExecutionContext.InvokeCommand.CommandNotFoundAction
-	$ExecutionContext.InvokeCommand.CommandNotFoundAction = $null
-	[bool]$(Get-Command $Command -ErrorAction Ignore)
-	$ExecutionContext.InvokeCommand.CommandNotFoundAction = $backup
+	TempAssign '$ExecutionContext.InvokeCommand.CommandNotFoundAction',$null {
+		[bool]$(Get-Command $Command -ErrorAction Ignore)
+	}
 }
 function global:Test-Call {
 	[CmdletBinding()]

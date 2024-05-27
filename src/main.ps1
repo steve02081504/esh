@@ -109,23 +109,19 @@ $EshellUI = ValueEx @{
 			$job
 		}
 		'method:PopAndRun' = {
-			$LastExitCodeBackup = $global:LastExitCode
-			$OriginalPref = $ProgressPreference # Default is 'Continue'
-			$ProgressPreference = 'SilentlyContinue'
+			$job = $this.Pop()
 			$Timer = Start-Job -ScriptBlock { Start-Sleep -Seconds 3 }
 			try {
-				& ($job=$this.Pop())
+				TempAssign '$ProgressPreference', SilentlyContinue '$global:LastExitCode' $job
 			}
 			finally {
 				if ($Timer.State -ne 'Running') {
 					$text = "Background job $(
-						"{$($job -replace '\s*\n\s*', ';')}" -replace '{;','{' -replace ';}','}'
-					) timed out."
+							"{$($job -replace '\s*\n\s*', ';')}" -replace '{;','{' -replace ';}','}'
+						) timed out."
 					$EshellUI.Prompt.Refresh($text)
 				}
 				Remove-Job $Timer
-				$ProgressPreference = $OriginalPref
-				$global:LastExitCode = $LastExitCodeBackup
 			}
 		}
 		'method:Push' = {

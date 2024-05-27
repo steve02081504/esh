@@ -29,7 +29,7 @@ function global:ValueEx ($ValueAndMethods) {
 	return ,$ValueExed
 }
 function global:IndexEx ($Value, $Index, [switch]$Set = $false, $ValueToSet) {
-	if (-not $Index) { return , $Value }
+	if (-not $Index) { return ,$Value }
 	if ($Index.Contains('.')) {
 		$Index = $Index -split '\.'
 		$Index | Select-Object -SkipLast 1 | ForEach-Object {
@@ -47,4 +47,33 @@ function global:IndexEx ($Value, $Index, [switch]$Set = $false, $ValueToSet) {
 		else { $Result = $Value[$Index] }
 	}
 	return ,$Result
+}
+
+function global:TempAssign {
+	$Sb = $args[-1]
+	if ($Sb -isnot [scriptblock]) {
+		Write-Error "The last argument of TempAssign must be a scriptblock, get '$($Sb.GetType())'" -ErrorAction Stop
+	}
+	$list = @()
+	$namelist = @()
+	for ($i = 0; $i -lt $args.Count - 1; $i += 1) {
+		$VariableName = if ($args[$i] -is [Object[]]) { $args[$i][0] }
+		elseif ($args[$i] -is [string]) { $args[$i] }
+		else {
+			Write-Error "The $($i + 1)th argument of TempAssign must be a variable name or a pair" -ErrorAction Stop
+		}
+
+		$namelist += $VariableName
+		$list += Invoke-Expression $VariableName
+		if ($args[$i] -is [Object[]]) {
+			$Value = $args[$i][1]
+			Invoke-Expression "$VariableName = `$Value" | Out-Null
+		}
+	}
+	try { & $Sb }
+	finally {
+		for ($i = 0; $i -lt $namelist.Count; $i += 1) {
+			Invoke-Expression "$($namelist[$i]) = `$list[$i]" | Out-Null
+		}
+	}
 }
