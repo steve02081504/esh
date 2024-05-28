@@ -121,6 +121,7 @@ $EshellUI = ValueEx @{
 						) timed out."
 					$EshellUI.Prompt.Refresh($text)
 				}
+				Stop-Job $Timer
 				Remove-Job $Timer
 			}
 		}
