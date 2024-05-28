@@ -570,6 +570,13 @@ function global:cat {
 	}
 	if ($_RemainingArguments.Length -eq 0) {
 		#若RemainingArguments是空的
+		#json文件且nodejs可用？
+		if ([System.IO.Path]::GetExtension($Path) -eq ".json" -and (Test-Command node.exe)) {
+			#则调用node
+			node.exe $PSScriptRoot/cat_json.mjs $Path
+			if($LASTEXITCODE -eq 0){ return }
+		}
+
 		#则调用Get-Content
 		if (Test-Path $Path) {
 			Get-Content $Path
