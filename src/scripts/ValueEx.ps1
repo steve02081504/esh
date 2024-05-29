@@ -70,7 +70,13 @@ function global:TempAssign {
 			Invoke-Expression "$VariableName = `$Value" | Out-Null
 		}
 	}
-	try { & $Sb }
+	try {
+		# get caller's stackframe
+		$Stack = Get-PSCallStack
+		$Frame = $Stack[1]
+		$Variables = $Frame.GetFrameVariables()
+		$Sb.InvokeWithContext(@{},$Variables.Values,$Variables.args.Value)
+	}
 	finally {
 		for ($i = 0; $i -lt $namelist.Count; $i += 1) {
 			Invoke-Expression "$($namelist[$i]) = `$list[$i]" | Out-Null
