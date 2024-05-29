@@ -36,7 +36,7 @@ $EshellUI.Prompt.Builders['_dirProfileLoader'] = {
 	function New-DirProfile-Function {
 		param ([string]$funcname, [string]$Command, [string]$DequalFunc)
 		if ($DequalFunc) { Invoke-Expression "function global:$DequalFunc { $Command @args }" }
-		$DequalFunc ??= $Command
+		else { $DequalFunc = $Command }
 		if ($alia = Get-Alias -Name $funcname -Scope global -ErrorAction Ignore) {
 			$EshellUI.DirProfile.backupcommands += @{
 				$alia.Name = $alia.Definition
