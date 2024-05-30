@@ -323,6 +323,7 @@ $EshellUI = ValueEx @{
 		$this.OtherData.BeforeEshLoaded.CommandNotFoundHandler = $ExecutionContext.InvokeCommand.CommandNotFoundAction
 		$ExecutionContext.InvokeCommand.CommandNotFoundAction = {
 			param($Name, $EventArgs)
+			if ($Name.StartsWith('get-')) { return }
 			$EventArgs.Command = Get-Command null -ErrorAction Ignore
 			if (Test-Command thefuck) {
 				$env:PYTHONIOENCODING = 'utf-8'
