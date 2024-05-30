@@ -414,7 +414,6 @@ $EshellUI = ValueEx @{
 		}
 		$this.SaveVariables()
 		$function:prompt = $this.OtherData.BeforeEshLoaded.promptBackup
-		Remove-Item function:\Get-Command
 		$this.RegisteredEvents.GetEnumerator() | Where-Object { $_.Value.RawData } | ForEach-Object {
 			Unregister-Event -SubscriptionId $_.Value.RawData.SubscriptionId -Force
 		}
