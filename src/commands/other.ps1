@@ -187,10 +187,14 @@ function global:fsize {
 }
 
 if (Test-Command code.cmd) {
-	function global:code { code.cmd $args }
+	function global:code { code.cmd @args }
 }
 elseif (Test-Command code-insiders.cmd) {
-	function global:code { code-insiders.cmd $args }
+	function global:code { code-insiders.cmd @args }
+}
+
+if (Test-Command npm) {
+	function global:npm { npm.ps1 --no-fund @args }
 }
 
 function global:Clear-UserPath {
