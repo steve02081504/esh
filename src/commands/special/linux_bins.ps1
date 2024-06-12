@@ -3,11 +3,7 @@ while (Test-Path Alias:cd) {
 	Remove-Item Alias:cd
 }
 function global:cd {
-	param(
-		#其余的参数
-		[Parameter(ValueFromRemainingArguments = $true)]
-		[System.Collections.ArrayList]$_RemainingArguments
-	)
+	$_RemainingArguments = [System.Collections.ArrayList]$args
 	#从RemainingArguments中提取Path
 	$Path = $null
 	for ($i = 0; $i -lt $_RemainingArguments.Count; $i++) {
@@ -16,7 +12,12 @@ function global:cd {
 			$_RemainingArguments.RemoveAt($i)
 			continue
 		}
-		if ($arg.StartsWith("-")) {
+		if ($arg -is [System.IO.FileInfo]) {
+			$Path = $arg
+			$_RemainingArguments.RemoveAt($i)
+			break
+		}
+		elseif ($arg.StartsWith("-")) {
 			continue
 		}
 		$Path = $arg
@@ -119,12 +120,7 @@ while (Test-Path Alias:ls) {
 	Remove-Item Alias:ls
 }
 function global:ls {
-	param(
-		#其余的参数
-		[Parameter(ValueFromRemainingArguments = $true)]
-		[System.Collections.ArrayList]$_RemainingArguments
-	)
-	$_RemainingArguments ??= @()
+	$_RemainingArguments = [System.Collections.ArrayList]$args
 	$IsLinuxBin = $false
 	$WinArgs = $_RemainingArguments | ForEach-Object {
 		# 跳过参数部分
@@ -186,16 +182,17 @@ while (Test-Path Alias:rm) {
 	Remove-Item Alias:rm
 }
 function global:rm {
-	param(
-		#其余的参数
-		[Parameter(ValueFromRemainingArguments = $true)]
-		[System.Collections.ArrayList]$_RemainingArguments
-	)
+	$_RemainingArguments = [System.Collections.ArrayList]$args
 	#从RemainingArguments中提取Path
 	$Path = $null
 	for ($i = 0; $i -lt $_RemainingArguments.Count; $i++) {
 		$arg = $_RemainingArguments[$i]
-		if ($arg.StartsWith("-")) {
+		if ($arg -is [System.IO.FileInfo]) {
+			$Path = $arg
+			$_RemainingArguments.RemoveAt($i)
+			break
+		}
+		elseif ($arg.StartsWith("-")) {
 			continue
 		}
 		$Path = $arg
@@ -252,16 +249,17 @@ while (Test-Path Alias:mv) {
 	Remove-Item Alias:mv
 }
 function global:mv {
-	param(
-		#其余的参数
-		[Parameter(ValueFromRemainingArguments = $true)]
-		[System.Collections.ArrayList]$_RemainingArguments
-	)
+	$_RemainingArguments = [System.Collections.ArrayList]$args
 	#从RemainingArguments中提取Path
 	$Path = $null
 	for ($i = 0; $i -lt $_RemainingArguments.Count; $i++) {
 		$arg = $_RemainingArguments[$i]
-		if ($arg.StartsWith("-")) {
+		if ($arg -is [System.IO.FileInfo]) {
+			$Path = $arg
+			$_RemainingArguments.RemoveAt($i)
+			break
+		}
+		elseif ($arg.StartsWith("-")) {
 			continue
 		}
 		$Path = $arg
@@ -272,7 +270,12 @@ function global:mv {
 	$Destination = ""
 	for ($i = 0; $i -lt $_RemainingArguments.Count; $i++) {
 		$arg = $_RemainingArguments[$i]
-		if ($arg.StartsWith("-")) {
+		if ($arg -is [System.IO.FileInfo]) {
+			$Destination = $arg
+			$_RemainingArguments.RemoveAt($i)
+			break
+		}
+		elseif ($arg.StartsWith("-")) {
 			continue
 		}
 		$Destination = $arg
@@ -333,16 +336,17 @@ while (Test-Path Alias:cp) {
 	Remove-Item Alias:cp
 }
 function global:cp {
-	param(
-		#其余的参数
-		[Parameter(ValueFromRemainingArguments = $true)]
-		[System.Collections.ArrayList]$_RemainingArguments
-	)
+	$_RemainingArguments = [System.Collections.ArrayList]$args
 	#从RemainingArguments中提取Path
 	$Path = $null
 	for ($i = 0; $i -lt $_RemainingArguments.Count; $i++) {
 		$arg = $_RemainingArguments[$i]
-		if ($arg.StartsWith("-")) {
+		if ($arg -is [System.IO.FileInfo]) {
+			$Path = $arg
+			$_RemainingArguments.RemoveAt($i)
+			break
+		}
+		elseif ($arg.StartsWith("-")) {
 			continue
 		}
 		$Path = $arg
@@ -353,7 +357,12 @@ function global:cp {
 	$Destination = ""
 	for ($i = 0; $i -lt $_RemainingArguments.Count; $i++) {
 		$arg = $_RemainingArguments[$i]
-		if ($arg.StartsWith("-")) {
+		if ($arg -is [System.IO.FileInfo]) {
+			$Destination = $arg
+			$_RemainingArguments.RemoveAt($i)
+			break
+		}
+		elseif ($arg.StartsWith("-")) {
 			continue
 		}
 		$Destination = $arg
@@ -410,16 +419,17 @@ function global:cp {
 }
 
 function global:mkdir {
-	param(
-		#其余的参数
-		[Parameter(ValueFromRemainingArguments = $true)]
-		[System.Collections.ArrayList]$_RemainingArguments
-	)
+	$_RemainingArguments = [System.Collections.ArrayList]$args
 	#从RemainingArguments中提取Path
 	$Path = $null
 	for ($i = 0; $i -lt $_RemainingArguments.Count; $i++) {
 		$arg = $_RemainingArguments[$i]
-		if ($arg.StartsWith("-")) {
+		if ($arg -is [System.IO.FileInfo]) {
+			$Path = $arg
+			$_RemainingArguments.RemoveAt($i)
+			break
+		}
+		elseif ($arg.StartsWith("-")) {
 			continue
 		}
 		$Path = $arg
@@ -472,16 +482,18 @@ function global:mkdir {
 }
 
 function global:touch {
-	param(
-		#其余的参数
-		[Parameter(ValueFromRemainingArguments = $true)]
-		[System.Collections.ArrayList]$_RemainingArguments
-	)
+	if ($Input) { $ContentToSet = $Input -join "`n" }
+	$_RemainingArguments = [System.Collections.ArrayList]$args
 	#从RemainingArguments中提取Path
 	$Path = $null
 	for ($i = 0; $i -lt $_RemainingArguments.Count; $i++) {
 		$arg = $_RemainingArguments[$i]
-		if ($arg.StartsWith("-")) {
+		if ($arg -is [System.IO.FileInfo]) {
+			$Path = $arg
+			$_RemainingArguments.RemoveAt($i)
+			break
+		}
+		elseif ($arg.StartsWith("-")) {
 			continue
 		}
 		$Path = $arg
@@ -496,6 +508,11 @@ function global:touch {
 	if (IsLinuxPath $Path) {
 		#则转换为windows路径
 		$Path = LinuxPathToWindowsPath $Path
+	}
+	if ($ContentToSet) {
+		$ContentToSet | Out-File $Path -Encoding utf8
+		Get-Item $Path
+		return
 	}
 	$IsLinuxBin = $Path.Length -eq 0
 	if ($IsLinuxBin) {
@@ -538,16 +555,17 @@ while (Test-Path Alias:cat) {
 	Remove-Item Alias:cat
 }
 function global:cat {
-	param(
-		#其余的参数
-		[Parameter(ValueFromRemainingArguments = $true)]
-		[System.Collections.ArrayList]$_RemainingArguments
-	)
+	$_RemainingArguments = [System.Collections.ArrayList]$args
 	#从RemainingArguments中提取Path
 	$Path = $null
 	for ($i = 0; $i -lt $_RemainingArguments.Count; $i++) {
 		$arg = $_RemainingArguments[$i]
-		if ($arg.StartsWith("-")) {
+		if ($arg -is [System.IO.FileInfo]) {
+			$Path = $arg
+			$_RemainingArguments.RemoveAt($i)
+			break
+		}
+		elseif ($arg.StartsWith("-")) {
 			continue
 		}
 		$Path = $arg
