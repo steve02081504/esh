@@ -28,6 +28,10 @@ function global:cd {
 	if (-not "$_RemainingArguments") {
 		$_RemainingArguments = @()
 	}
+	if ($Path -eq '/?') {
+		cmd.exe /c cd /?
+		return
+	}
 	#若path是linux路径
 	if (IsLinuxPath $Path) {
 		#则转换为windows路径
@@ -59,12 +63,12 @@ function global:cd {
 				}
 			}
 		}
-		if (Test-Path $Path) {
+		if (Test-Path $Path -PathType Container) {
 			Set-Location $Path
 		}
 		else {
 			$linuxPath = LinuxPathToWindowsPath $Path
-			if (Test-Path $linuxPath) {
+			if (Test-Path $linuxPath -PathType Container) {
 				Set-Location $linuxPath
 			}
 			else {

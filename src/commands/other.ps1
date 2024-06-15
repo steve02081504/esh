@@ -243,4 +243,9 @@ function global:halt {
 	Start-Process explorer.exe
 }
 
+function global:clswl {
+	Clear-Host
+	$EshellUI.Logo.Print()
+}
+
 function global:null {}
