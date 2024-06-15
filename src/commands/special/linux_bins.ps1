@@ -53,7 +53,7 @@ function global:cd {
 				$PreviousPath = Join-Path $PreviousPath $CurrentPath
 				$Path = $ChildPath
 				if (-not (Test-Path $PreviousPath)) {
-					Out-Error "bash: cd: ${PreviousPath}: No such file or directory"
+					Out-Error "bash: cd: $(AutoShortPath $PreviousPath): No such file or directory"
 				}
 				#若是符号链接
 				if ((Get-Item $PreviousPath).Attributes -band [System.IO.FileAttributes]::ReparsePoint) {
@@ -62,6 +62,11 @@ function global:cd {
 					continue
 				}
 			}
+		}
+		if (Test-Path $Path -PathType Leaf) {
+			$DirPath = Split-Path $Path
+			Out-Warning "bash: cd: $(AutoShortPath $Path): Is a file, guessing you meant $(AutoShortPath $DirPath)"
+			$Path = $DirPath
 		}
 		if (Test-Path $Path -PathType Container) {
 			Set-Location $Path
@@ -72,7 +77,7 @@ function global:cd {
 				Set-Location $linuxPath
 			}
 			else {
-				Out-Error "bash: cd: ${Path}: No such file or directory"
+				Out-Error "bash: cd: $(AutoShortPath $Path): No such file or directory"
 			}
 		}
 		return
