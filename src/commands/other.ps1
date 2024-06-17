@@ -248,4 +248,9 @@ function global:clswl {
 	$EshellUI.Logo.Print()
 }
 
+function global:disconnect {
+	Write-Error "$($VirtualTerminal.Colors.Red)You can't disconnect from your own machine, do you mean $($VirtualTerminal.Colors.Yellow)power $($VirtualTerminal.Colors.Default)off $($VirtualTerminal.Colors.Red)or $($VirtualTerminal.Colors.Yellow)shutdown$($VirtualTerminal.Colors.Red)?"
+}
+Set-Alias dc disconnect -Scope global
+
 function global:null {}

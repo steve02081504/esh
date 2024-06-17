@@ -37,12 +37,26 @@ function global:cd {
 		#则转换为windows路径
 		$Path = LinuxPathToWindowsPath $Path
 	}
+	#若path满足%\w+%
+	while ($Path -match '%(\w+)%') {
+		$Path = $Path -replace "%$($Matches[1])%", [System.Environment]::GetEnvironmentVariable($Matches[1])
+	}
 	#调用原始的cd..?
 	#让我们根据RemainingArguments的风格来判断是调用cd还是Set-Location
 	#cd是bash提供的内置命令，没有单独的可执行文件
 	#所以我们只能通过Set-Location来模拟cd的行为
 	$IsLinuxBin = $Path.Length -eq 0
 	function baseCD ($Path, [switch]$IsFollowSymbolicLink = $true) {
+		function FailedOutPut($ValidPath) {
+			$ValidPath ??= $Path
+			while ($ValidPath -and !(Test-Path $ValidPath -PathType Container)) {
+				$ValidPath = Split-Path $ValidPath
+			}
+			"bash: cd: $(AutoShortPath $Path): No such file or directory"
+			if ($ValidPath) {
+				"Last Valid Path: $(AutoShortPath $ValidPath)"
+			}
+		}
 		$Path ??= '~'
 		if (-not $IsFollowSymbolicLink) {
 			#循环分割路径，检查每一级路径是否是符号链接
@@ -52,8 +66,8 @@ function global:cd {
 				$ChildPath = Split-Path $Path -Leaf
 				$PreviousPath = Join-Path $PreviousPath $CurrentPath
 				$Path = $ChildPath
-				if (-not (Test-Path $PreviousPath)) {
-					Out-Error "bash: cd: $(AutoShortPath $PreviousPath): No such file or directory"
+				if (-not (Test-Path $PreviousPath -PathType Container)) {
+					FailedOutPut $PreviousPath | Out-Error
 				}
 				#若是符号链接
 				if ((Get-Item $PreviousPath).Attributes -band [System.IO.FileAttributes]::ReparsePoint) {
@@ -77,7 +91,7 @@ function global:cd {
 				Set-Location $linuxPath
 			}
 			else {
-				Out-Error "bash: cd: $(AutoShortPath $Path): No such file or directory"
+				FailedOutPut | Out-Error
 			}
 		}
 		return
@@ -157,6 +171,10 @@ function global:ls {
 			$_
 		}
 	}
+	#若path满足%\w+%
+	while ($Path -match '%(\w+)%') {
+		$Path = $Path -replace "%$($Matches[1])%", [System.Environment]::GetEnvironmentVariable($Matches[1])
+	}
 	$IsLinuxBin = !(Test-Call Get-ChildItem $WinArgs)
 	# 特殊照顾下参数有-f|-R的情况 因为太常用了
 	if ($_RemainingArguments -ccontains "-f" -or $_RemainingArguments -ccontains "-R") {
@@ -216,6 +234,10 @@ function global:rm {
 	if (IsLinuxPath $Path) {
 		#则转换为windows路径
 		$Path = LinuxPathToWindowsPath $Path
+	}
+	#若path满足%\w+%
+	while ($Path -match '%(\w+)%') {
+		$Path = $Path -replace "%$($Matches[1])%", [System.Environment]::GetEnvironmentVariable($Matches[1])
 	}
 	$IsLinuxBin = $Path.Length -eq 0
 	if ($IsLinuxBin) {
@@ -304,6 +326,13 @@ function global:mv {
 		#则转换为windows路径
 		$Destination = LinuxPathToWindowsPath $Destination
 	}
+	#若path满足%\w+%
+	while ($Path -match '%(\w+)%') {
+		$Path = $Path -replace "%$($Matches[1])%", [System.Environment]::GetEnvironmentVariable($Matches[1])
+	}
+	while ($Destination -match '%(\w+)%') {
+		$Destination = $Destination -replace "%$($Matches[1])%", [System.Environment]::GetEnvironmentVariable($Matches[1])
+	}
 	$IsLinuxBin = $Path.Length -eq 0 -and $Destination.Length -eq 0
 	if ($IsLinuxBin) {
 		mv.exe @args
@@ -391,6 +420,13 @@ function global:cp {
 		#则转换为windows路径
 		$Destination = LinuxPathToWindowsPath $Destination
 	}
+	#若path满足%\w+%
+	while ($Path -match '%(\w+)%') {
+		$Path = $Path -replace "%$($Matches[1])%", [System.Environment]::GetEnvironmentVariable($Matches[1])
+	}
+	while ($Destination -match '%(\w+)%') {
+		$Destination = $Destination -replace "%$($Matches[1])%", [System.Environment]::GetEnvironmentVariable($Matches[1])
+	}
 	$IsLinuxBin = $Path.Length -eq 0 -and $Destination.Length -eq 0
 	if ($IsLinuxBin) {
 		cp.exe @args
@@ -453,6 +489,10 @@ function global:mkdir {
 	if (IsLinuxPath $Path) {
 		#则转换为windows路径
 		$Path = LinuxPathToWindowsPath $Path
+	}
+	#若path满足%\w+%
+	while ($Path -match '%(\w+)%') {
+		$Path = $Path -replace "%$($Matches[1])%", [System.Environment]::GetEnvironmentVariable($Matches[1])
 	}
 	$IsLinuxBin = $Path.Length -eq 0
 	if ($IsLinuxBin) {
@@ -517,6 +557,10 @@ function global:touch {
 	if (IsLinuxPath $Path) {
 		#则转换为windows路径
 		$Path = LinuxPathToWindowsPath $Path
+	}
+	#若path满足%\w+%
+	while ($Path -match '%(\w+)%') {
+		$Path = $Path -replace "%$($Matches[1])%", [System.Environment]::GetEnvironmentVariable($Matches[1])
 	}
 	if ($ContentToSet) {
 		$ContentToSet | Out-File $Path -Encoding utf8
@@ -589,6 +633,10 @@ function global:cat {
 	if (IsLinuxPath $Path) {
 		#则转换为windows路径
 		$Path = LinuxPathToWindowsPath $Path
+	}
+	#若path满足%\w+%
+	while ($Path -match '%(\w+)%') {
+		$Path = $Path -replace "%$($Matches[1])%", [System.Environment]::GetEnvironmentVariable($Matches[1])
 	}
 	$IsLinuxBin = $Path.Length -eq 0
 	if ($IsLinuxBin) {
