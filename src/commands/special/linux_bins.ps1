@@ -54,7 +54,7 @@ function global:cd {
 			}
 			"bash: cd: $(AutoShortPath $Path): No such file or directory"
 			if ($ValidPath) {
-				"Last Valid Path: $(AutoShortPath $ValidPath)"
+				"Last valid path: $(AutoShortPath $ValidPath)"
 			}
 		}
 		$Path ??= '~'
@@ -103,7 +103,7 @@ function global:cd {
 	}
 	#cd: usage: cd [-L|[-P [-e]] [-@]] [dir]
 	if (-not $IsLinuxBin) {
-		$IsLinuxBin = !(Test-Call Set-Location $_RemainingArguments)
+		$IsLinuxBin = !(Test-Call Set-Location $args)
 	}
 	if ($IsLinuxBin) {
 		#cd是bash提供的内置命令，没有单独的可执行文件
@@ -127,7 +127,16 @@ function global:cd {
 				#-@的意思是显示扩展属性，我们直接不支持这个功能
 			}
 			else {
-				bash -c "cd $Path $_RemainingArguments"
+				$result = bash -c "cd $Path $_RemainingArguments"
+				if ($LASTEXITCODE) {
+					$SillyPath = $args -join ' '
+					if (Test-Path $SillyPath) {
+						"Guessing you meant $($VirtualTerminal.Colors.Cyan)`"$(AutoShortPath $SillyPath)`"$($VirtualTerminal.Colors.Default), changing to it."
+						baseCD $SillyPath
+						return
+					}
+				}
+				$result
 				return
 			}
 		}
