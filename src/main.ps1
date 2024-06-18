@@ -297,6 +297,10 @@ $EshellUI = ValueEx @{
 		. $PSScriptRoot/system/linux.ps1
 		$this.OtherData.PartsMemoryUsage.EndAdd('linux')
 
+		$this.OtherData.PartsMemoryUsage.BeginAdd('cmd')
+		. $PSScriptRoot/system/cmd.ps1
+		$this.OtherData.PartsMemoryUsage.EndAdd('cmd')
+
 		$this.OtherData.PartsMemoryUsage.BeginAdd('Prompt')
 		. $PSScriptRoot/system/UI/prompt/main.ps1
 		. $PSScriptRoot/system/steam.ps1

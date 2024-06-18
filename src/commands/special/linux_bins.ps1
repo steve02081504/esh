@@ -38,9 +38,7 @@ function global:cd {
 		$Path = LinuxPathToWindowsPath $Path
 	}
 	#若path满足%\w+%
-	while ($Path -match '%(\w+)%') {
-		$Path = $Path -replace "%$($Matches[1])%", [System.Environment]::GetEnvironmentVariable($Matches[1])
-	}
+	$Path = HandleCmdPath $Path
 	#调用原始的cd..?
 	#让我们根据RemainingArguments的风格来判断是调用cd还是Set-Location
 	#cd是bash提供的内置命令，没有单独的可执行文件
@@ -181,9 +179,7 @@ function global:ls {
 		}
 	}
 	#若path满足%\w+%
-	while ($Path -match '%(\w+)%') {
-		$Path = $Path -replace "%$($Matches[1])%", [System.Environment]::GetEnvironmentVariable($Matches[1])
-	}
+	$Path = HandleCmdPath $Path
 	$IsLinuxBin = !(Test-Call Get-ChildItem $WinArgs)
 	# 特殊照顾下参数有-f|-R的情况 因为太常用了
 	if ($_RemainingArguments -ccontains "-f" -or $_RemainingArguments -ccontains "-R") {
@@ -245,9 +241,7 @@ function global:rm {
 		$Path = LinuxPathToWindowsPath $Path
 	}
 	#若path满足%\w+%
-	while ($Path -match '%(\w+)%') {
-		$Path = $Path -replace "%$($Matches[1])%", [System.Environment]::GetEnvironmentVariable($Matches[1])
-	}
+	$Path = HandleCmdPath $Path
 	$IsLinuxBin = $Path.Length -eq 0
 	if ($IsLinuxBin) {
 		rm.exe $_RemainingArguments
@@ -336,12 +330,8 @@ function global:mv {
 		$Destination = LinuxPathToWindowsPath $Destination
 	}
 	#若path满足%\w+%
-	while ($Path -match '%(\w+)%') {
-		$Path = $Path -replace "%$($Matches[1])%", [System.Environment]::GetEnvironmentVariable($Matches[1])
-	}
-	while ($Destination -match '%(\w+)%') {
-		$Destination = $Destination -replace "%$($Matches[1])%", [System.Environment]::GetEnvironmentVariable($Matches[1])
-	}
+	$Path = HandleCmdPath $Path
+	$Destination = HandleCmdPath $Destination
 	$IsLinuxBin = $Path.Length -eq 0 -and $Destination.Length -eq 0
 	if ($IsLinuxBin) {
 		mv.exe @args
@@ -430,12 +420,8 @@ function global:cp {
 		$Destination = LinuxPathToWindowsPath $Destination
 	}
 	#若path满足%\w+%
-	while ($Path -match '%(\w+)%') {
-		$Path = $Path -replace "%$($Matches[1])%", [System.Environment]::GetEnvironmentVariable($Matches[1])
-	}
-	while ($Destination -match '%(\w+)%') {
-		$Destination = $Destination -replace "%$($Matches[1])%", [System.Environment]::GetEnvironmentVariable($Matches[1])
-	}
+	$Path = HandleCmdPath $Path
+	$Destination = HandleCmdPath $Destination
 	$IsLinuxBin = $Path.Length -eq 0 -and $Destination.Length -eq 0
 	if ($IsLinuxBin) {
 		cp.exe @args
@@ -500,9 +486,7 @@ function global:mkdir {
 		$Path = LinuxPathToWindowsPath $Path
 	}
 	#若path满足%\w+%
-	while ($Path -match '%(\w+)%') {
-		$Path = $Path -replace "%$($Matches[1])%", [System.Environment]::GetEnvironmentVariable($Matches[1])
-	}
+	$Path = HandleCmdPath $Path
 	$IsLinuxBin = $Path.Length -eq 0
 	if ($IsLinuxBin) {
 		mkdir.exe @args
@@ -568,9 +552,7 @@ function global:touch {
 		$Path = LinuxPathToWindowsPath $Path
 	}
 	#若path满足%\w+%
-	while ($Path -match '%(\w+)%') {
-		$Path = $Path -replace "%$($Matches[1])%", [System.Environment]::GetEnvironmentVariable($Matches[1])
-	}
+	$Path = HandleCmdPath $Path
 	if ($ContentToSet) {
 		$ContentToSet | Out-File $Path -Encoding utf8
 		Get-Item $Path
@@ -644,9 +626,7 @@ function global:cat {
 		$Path = LinuxPathToWindowsPath $Path
 	}
 	#若path满足%\w+%
-	while ($Path -match '%(\w+)%') {
-		$Path = $Path -replace "%$($Matches[1])%", [System.Environment]::GetEnvironmentVariable($Matches[1])
-	}
+	$Path = HandleCmdPath $Path
 	$IsLinuxBin = $Path.Length -eq 0
 	if ($IsLinuxBin) {
 		cat.exe @args

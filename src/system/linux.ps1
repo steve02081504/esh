@@ -202,8 +202,10 @@ if (Test-Path $EshellUI.MSYS.RootPath) {
 			}
 			$Rest = $Line.Substring($Executable.Length).Trim()
 		}
-		#若当前行以/开头
-		if ($Executable.StartsWith("/") -or $Executable.StartsWith("~")) {
+		#若path满足%\w+%
+		$Executable = HandleCmdPath $Executable
+		#若path是linux路径
+		if (IsLinuxPath $Executable) {
 			#则转换为windows路径
 			$Executable = LinuxPathToWindowsPath $Executable
 			$Expr = "$Executable $Rest"
@@ -231,12 +233,16 @@ if (Test-Path $EshellUI.MSYS.RootPath) {
 			}
 			$WordToComplete = $WordToComplete.Substring(1, $WordToComplete.Length - 2)
 		}
-		if (IsLinuxPath $WordToComplete) {
+		#若path满足%\w+%
+		$WordAfterComplete = HandleCmdPath $WordToComplete
+		if (IsLinuxPath $WordAfterComplete) {
 			#则转换为windows路径
-			$WordAfterComplete = LinuxPathToWindowsPath $WordToComplete + '/'
+			$WordAfterComplete = LinuxPathToWindowsPath $WordAfterComplete + '/'
 			if ($HasQuote) {
 				$WordAfterComplete = '"' + $WordAfterComplete + '"'
 			}
+		}
+		if ($WordAfterComplete -ne $WordToComplete) {
 			$CursorOfBegin = $Cursor - $WordToComplete.Length
 			$CursorOfEnd = $Cursor - $CursorOfBegin + $WordAfterComplete.Length
 			[Microsoft.PowerShell.PSConsoleReadLine]::Replace($CursorOfBegin, $WordToComplete.Length, $WordAfterComplete)
