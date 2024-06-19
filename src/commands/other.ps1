@@ -111,11 +111,12 @@ function global:dirsync {
 	}
 }
 
-function global:Format-FileSize {
-	param(
-		[Parameter(Mandatory = $true)]
-		[double]$size
-	)
+function global:Format-FileSize($size) {
+	$size ??= $Input | Where-Object { $_ -ne $null }
+	if ($size.Count -gt 1) {
+		$size | ForEach-Object { Format-FileSize $_ }
+		return
+	}
 	if ($size -lt 0) {
 		return '-' + (Format-FileSize (-$size))
 	}
