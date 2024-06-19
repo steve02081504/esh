@@ -295,6 +295,9 @@ $EshellUI = ValueEx @{
 
 		$this.OtherData.PartsMemoryUsage.BeginAdd('linux')
 		. $PSScriptRoot/system/linux.ps1
+		if (Test-Command bash) {
+			$global:BASH_VERSION = bash -c 'echo "${BASH_VERSION}"'
+		}
 		$this.OtherData.PartsMemoryUsage.EndAdd('linux')
 
 		$this.OtherData.PartsMemoryUsage.BeginAdd('cmd')
