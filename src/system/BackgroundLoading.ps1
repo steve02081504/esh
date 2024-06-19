@@ -1,6 +1,6 @@
 $EshellUI.BackgroundJobs.Push(@(
 	{
-		$EshellUI.OtherData.PartsMemoryUsage.BeginAdd('ls-view')
+		$EshellUI.OtherData.PartsUsage.BeginAdd('ls-view')
 		Update-FormatData -PrependPath "$($EshellUI.Sources.Path)/data/formatxml/ls.bare.format.ps1xml"
 		if ($Host.UI.SupportsVirtualTerminal) {
 			# https://github.com/ryanoasis/nerd-fonts/releases/latest/download/FiraCode.zip
@@ -13,10 +13,10 @@ $EshellUI.BackgroundJobs.Push(@(
 				Set-TerminalIconPathResolver { param ($Path) AutoShortPath $Path }
 			}
 		}
-		$EshellUI.OtherData.PartsMemoryUsage.EndAdd('ls-view')
+		$EshellUI.OtherData.PartsUsage.EndAdd('ls-view')
 	}
 	{
-		$EshellUI.OtherData.PartsMemoryUsage.BeginAdd('discord-rpc')
+		$EshellUI.OtherData.PartsUsage.BeginAdd('discord-rpc')
 		if (-not (Get-Module -ListAvailable discordrpc)) {
 			Install-Module discordrpc -Repository PSGallery -Force
 		}
@@ -39,7 +39,7 @@ $EshellUI.BackgroundJobs.Push(@(
 			}
 		}
 		Start-DSClient @params
-		$EshellUI.OtherData.PartsMemoryUsage.EndAdd('discord-rpc')
+		$EshellUI.OtherData.PartsUsage.EndAdd('discord-rpc')
 	}
 	{
 		# 若$env:Path中存在XXXX/app-XXX\resources\app\git\mingw64\bin
@@ -66,75 +66,75 @@ $EshellUI.BackgroundJobs.Push(@(
 			}
 		}
 		if (Test-Command git) {
-			$EshellUI.OtherData.PartsMemoryUsage.BeginAdd('tab-git')
+			$EshellUI.OtherData.PartsUsage.BeginAdd('tab-git')
 			if (-not (Get-Module -ListAvailable posh-git)) {
 				Install-Module posh-git -Force
 			}
 			Import-Module posh-git
-			$EshellUI.OtherData.PartsMemoryUsage.EndAdd('tab-git')
+			$EshellUI.OtherData.PartsUsage.EndAdd('tab-git')
 		}
 	}
 	{
 		#set thefuck as alias 'fk'
 		if (Test-Command thefuck) {
-			$EshellUI.OtherData.PartsMemoryUsage.BeginAdd('thefuck')
+			$EshellUI.OtherData.PartsUsage.BeginAdd('thefuck')
 			try {
 				$env:PYTHONIOENCODING = 'utf-8'
 				$f = "$(thefuck --alias global:fk)"
 				if ($f) { Invoke-Expression $f }
 			} catch {}
-			$EshellUI.OtherData.PartsMemoryUsage.EndAdd('thefuck')
+			$EshellUI.OtherData.PartsUsage.EndAdd('thefuck')
 		}
 	}
 	{
 		if (Test-Command npm) {
-			$EshellUI.OtherData.PartsMemoryUsage.BeginAdd('tab-npm')
+			$EshellUI.OtherData.PartsUsage.BeginAdd('tab-npm')
 			if (-not (Get-Module -ListAvailable npm-completion)) {
 				Install-Module npm-completion -Force
 			}
 			Import-Module npm-completion
-			$EshellUI.OtherData.PartsMemoryUsage.EndAdd('tab-npm')
+			$EshellUI.OtherData.PartsUsage.EndAdd('tab-npm')
 		}
 	}
 	{
-		$EshellUI.OtherData.PartsMemoryUsage.BeginAdd('Cht2Chs')
+		$EshellUI.OtherData.PartsUsage.BeginAdd('Cht2Chs')
 		. "$($EshellUI.Sources.Path)/src/scripts/CHT2CHS.ps1"
-		$EshellUI.OtherData.PartsMemoryUsage.EndAdd('Cht2Chs')
+		$EshellUI.OtherData.PartsUsage.EndAdd('Cht2Chs')
 		if (Test-Path 'C:\ProgramData\BlueStacks_nxt') {
-			$EshellUI.OtherData.PartsMemoryUsage.BeginAdd('Apk-Commands')
+			$EshellUI.OtherData.PartsUsage.BeginAdd('Apk-Commands')
 			. "$($EshellUI.Sources.Path)/src/commands/special/BlueStacks.ps1"
-			$EshellUI.OtherData.PartsMemoryUsage.EndAdd('Apk-Commands')
+			$EshellUI.OtherData.PartsUsage.EndAdd('Apk-Commands')
 		}
 	}
 	{
 		#import appx with -UseWindowsPowerShell to avoid [Operation is not supported on this platform. (0x80131539)]
 		if (Test-Command powershell) {
-			$EshellUI.OtherData.PartsMemoryUsage.BeginAdd('Appx-Compatibility')
+			$EshellUI.OtherData.PartsUsage.BeginAdd('Appx-Compatibility')
 			Import-Module Appx -UseWindowsPowerShell 3> $null
-			$EshellUI.OtherData.PartsMemoryUsage.EndAdd('Appx-Compatibility')
+			$EshellUI.OtherData.PartsUsage.EndAdd('Appx-Compatibility')
 		}
 	}
 	{
 		#vcpkg integrate powershell
 		if ($EshellUI.OtherData.ReloadSafeVariables.vcpkgFunctionExported) { return }
 		if (Test-Command vcpkg) {
-			$EshellUI.OtherData.PartsMemoryUsage.BeginAdd('tab-vcpkg')
+			$EshellUI.OtherData.PartsUsage.BeginAdd('tab-vcpkg')
 			$presetPath = Split-Path $((Get-Command 'vcpkg').source)
 			Import-Module "$presetPath/scripts/posh-vcpkg"
 			#take TabExpansion function to global
 			Rename-Item function:TabExpansion global:TabExpansion -Force
 			$EshellUI.OtherData.ReloadSafeVariables.vcpkgFunctionExported = $true
-			$EshellUI.OtherData.PartsMemoryUsage.EndAdd('tab-vcpkg')
+			$EshellUI.OtherData.PartsUsage.EndAdd('tab-vcpkg')
 		}
 	}
 	{
 		if (Test-Command yarn) {
-			$EshellUI.OtherData.PartsMemoryUsage.BeginAdd('tab-yarn')
+			$EshellUI.OtherData.PartsUsage.BeginAdd('tab-yarn')
 			if (-not (Get-Module -ListAvailable yarn-completion)) {
 				Install-Module yarn-completion -Force
 			}
 			Import-Module yarn-completion
-			$EshellUI.OtherData.PartsMemoryUsage.EndAdd('tab-yarn')
+			$EshellUI.OtherData.PartsUsage.EndAdd('tab-yarn')
 		}
 	}
 ))

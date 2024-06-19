@@ -110,6 +110,7 @@ $EshellUI = ValueEx @{
 		}
 		'method:PopAndRun' = {
 			$job = $this.Pop()
+			$EshellUI.BackgroundJobRunning = $true
 			$Timer = Start-Job -ScriptBlock { Start-Sleep -Seconds 3 }
 			try {
 				TempAssign '$ProgressPreference', SilentlyContinue '$global:LastExitCode' $job
@@ -123,6 +124,7 @@ $EshellUI = ValueEx @{
 				}
 				Stop-Job $Timer
 				Remove-Job $Timer
+				$EshellUI.BackgroundJobRunning = $null
 			}
 		}
 		'method:Push' = {
@@ -138,32 +140,57 @@ $EshellUI = ValueEx @{
 		VariableSaveList = @{
 			'MSYSRootPath' = 'MSYS.RootPath'
 		}
-		PartsMemoryUsage = ValueEx @{
+		PartsUsage = ValueEx @{
 			__type__ = [System.Collections.Specialized.OrderedDictionary]
 			'#pushing_array' = [System.Collections.ArrayList]@()
-			PwshBase = $script:MyProcess.WorkingSet64
+			PwshBase = @{
+				MemorySize = $script:MyProcess.WorkingSet64
+				Time = (Get-Date) - $script:MyProcess.StartTime
+			}
+			Total = @{
+				MemorySize = 0
+				Time = [timespan]::Zero
+			}
 			'method:BeginAdd' = {
 				param ($Name)
-				$this['#pushing_array'].Add($EshellUI.UpdateProcess().WorkingSet64) | Out-Null
-				$this[$Name] = -1
+				$PushingArray = $this['#pushing_array']
+				$PushingArray.Add(@{
+					MemorySize = $EshellUI.UpdateProcess().WorkingSet64
+				}) | Out-Null
+				$this[$Name] = @{
+					MemorySize = 0
+					Time = [timespan]::Zero
+					IsBackground = $EshellUI.BackgroundJobRunning
+				}
+				$PushingArray[-1].TimeBegin = Get-Date
 			}
 			'method:EndAdd' = {
 				param ($Name)
-				$this[$Name] = ($EshellUI.UpdateProcess().WorkingSet64 - $this['#pushing_array'][-1])
-				$this['#pushing_array'].RemoveAt($this['#pushing_array'].Count - 1)
-				for ($i = 0; $i -lt $this['#pushing_array'].Count; $i++) {
-					$this['#pushing_array'][$i] += $this[$Name]
+				$PushingArray = $this['#pushing_array']
+				$EndTime = Get-Date
+				$MemoryUsageNow = $EshellUI.UpdateProcess().WorkingSet64
+				$PushingData = $PushingArray[-1]
+				$this[$Name] = @{
+					MemorySize = $MemoryUsageNow - $PushingData.MemorySize
+					Time = $EndTime - $PushingData.TimeBegin
+					IsBackground = $EshellUI.BackgroundJobRunning
 				}
+				$PushingArray.RemoveAt($PushingArray.Count - 1)
+				for ($i = 0; $i -lt $PushingArray.Count; $i++) {
+					$PushingArray[$i].MemorySize += $this[$Name].MemorySize
+					$PushingArray[$i].TimeBegin += $this[$Name].Time
+				}
+				$this.Total.MemorySize += $this[$Name].MemorySize
+				$this.Total.Time += $this[$Name].Time
 			}
 			'method:View' = {
-				$Total = 0
-				$this.GetEnumerator() | ForEach-Object {
-					if ($_.Value) {
-						$Total += $_.Value
-						@{ $_.Key = Format-FileSize $_.Value }
-					}
-				}
-				@{ Total = Format-FileSize $Total }
+				$this.GetEnumerator() | Where-Object { !$_.Key.StartsWith('#') } |
+					Format-Table -AutoSize -Property @(
+						@{Name = 'Name'; Expression = { $_.Key }},
+						@{Name = 'MemorySize'; Expression = { Format-FileSize $_.Value.MemorySize }},
+						@{Name = 'Time'; Expression = { $_.Value.Time } }
+						@{Name = 'IsBackground'; Expression = { $_.Value.IsBackground } }
+					)
 			}
 		}
 	}
@@ -196,11 +223,11 @@ $EshellUI = ValueEx @{
 			return
 		}
 
-		$this.OtherData.PartsMemoryUsage.BeginAdd('EshellBase')
+		$this.OtherData.PartsUsage.BeginAdd('EshellBase')
 
 		$LastExitCode = 72 #Do not remove this line
 
-		$this.OtherData.PartsMemoryUsage.BeginAdd('BeforeEshLoadRecord')
+		$this.OtherData.PartsUsage.BeginAdd('BeforeEshLoadRecord')
 		$this.OtherData.BeforeEshLoaded = @{
 			FunctionList = Get-ChildItem function:\
 			VariableList = Get-ChildItem variable:\
@@ -211,9 +238,9 @@ $EshellUI = ValueEx @{
 			EnterHandler = (Get-PSReadLineKeyHandler Enter).Function
 			DefaultParameterValues = $PSDefaultParameterValues
 		}
-		$this.OtherData.PartsMemoryUsage.EndAdd('BeforeEshLoadRecord')
+		$this.OtherData.PartsUsage.EndAdd('BeforeEshLoadRecord')
 
-		$this.OtherData.PartsMemoryUsage.BeginAdd('RegisterEvents')
+		$this.OtherData.PartsUsage.BeginAdd('RegisterEvents')
 		$this.RegisteredEvents = @{
 			SaveVariables = @{
 				ID = 'PowerShell.Exiting'
@@ -246,7 +273,7 @@ $EshellUI = ValueEx @{
 			Register-EngineEvent $_.ID -SupportEvent -Action $_.Action
 			$_.RawData = (Get-EventSubscriber -Force)[-1]
 		}
-		$this.OtherData.PartsMemoryUsage.EndAdd('RegisterEvents')
+		$this.OtherData.PartsUsage.EndAdd('RegisterEvents')
 
 		. $PSScriptRoot/system/base.ps1
 
@@ -289,27 +316,27 @@ $EshellUI = ValueEx @{
 			$this.OtherData.WindowsTerminalVersion = $WindowsTerminalVersion
 		}
 
-		$this.OtherData.PartsMemoryUsage.BeginAdd('autovars')
+		$this.OtherData.PartsUsage.BeginAdd('autovars')
 		. $PSScriptRoot/system/autovars.ps1
-		$this.OtherData.PartsMemoryUsage.EndAdd('autovars')
+		$this.OtherData.PartsUsage.EndAdd('autovars')
 
-		$this.OtherData.PartsMemoryUsage.BeginAdd('linux')
+		$this.OtherData.PartsUsage.BeginAdd('linux')
 		. $PSScriptRoot/system/linux.ps1
 		if (Test-Command bash) {
 			$global:BASH_VERSION = bash -c 'echo "${BASH_VERSION}"'
 		}
-		$this.OtherData.PartsMemoryUsage.EndAdd('linux')
+		$this.OtherData.PartsUsage.EndAdd('linux')
 
-		$this.OtherData.PartsMemoryUsage.BeginAdd('cmd')
+		$this.OtherData.PartsUsage.BeginAdd('cmd')
 		. $PSScriptRoot/system/cmd.ps1
-		$this.OtherData.PartsMemoryUsage.EndAdd('cmd')
+		$this.OtherData.PartsUsage.EndAdd('cmd')
 
-		$this.OtherData.PartsMemoryUsage.BeginAdd('Prompt')
+		$this.OtherData.PartsUsage.BeginAdd('Prompt')
 		. $PSScriptRoot/system/UI/prompt/main.ps1
 		. $PSScriptRoot/system/steam.ps1
-		$this.OtherData.PartsMemoryUsage.EndAdd('Prompt')
+		$this.OtherData.PartsUsage.EndAdd('Prompt')
 
-		$this.OtherData.PartsMemoryUsage.BeginAdd('BackgroundLoadings')
+		$this.OtherData.PartsUsage.BeginAdd('BackgroundLoadings')
 		. $PSScriptRoot/system/BackgroundLoading.ps1
 		if (-not $Arguments.NoProfile) {
 			$this.BackgroundJobs.Push({
@@ -324,9 +351,9 @@ $EshellUI = ValueEx @{
 		if ($Arguments.NoBackgroundLoading) {
 			$this.BackgroundJobs.Wait()
 		}
-		$this.OtherData.PartsMemoryUsage.EndAdd('BackgroundLoadings')
+		$this.OtherData.PartsUsage.EndAdd('BackgroundLoadings')
 
-		$this.OtherData.PartsMemoryUsage.BeginAdd('CommandNotFoundHandler')
+		$this.OtherData.PartsUsage.BeginAdd('CommandNotFoundHandler')
 		$this.OtherData.BeforeEshLoaded.CommandNotFoundHandler = $ExecutionContext.InvokeCommand.CommandNotFoundAction
 		$ExecutionContext.InvokeCommand.CommandNotFoundAction = {
 			param($Name, $EventArgs)
@@ -352,20 +379,20 @@ $EshellUI = ValueEx @{
 			$EventArgs.StopSearch = $true
 		}
 		Invoke-Expression "function global:Get-Command {$(Get-Call-Signature Get-Command);Get-Command-Fixed @PSBoundParameters}"
-		$this.OtherData.PartsMemoryUsage.EndAdd('CommandNotFoundHandler')
+		$this.OtherData.PartsUsage.EndAdd('CommandNotFoundHandler')
 
-		$this.OtherData.PartsMemoryUsage.BeginAdd('Commands')
+		$this.OtherData.PartsUsage.BeginAdd('Commands')
 		Get-ChildItem "$PSScriptRoot/commands" *.ps1 | ForEach-Object { . $_.FullName }
-		$this.OtherData.PartsMemoryUsage.EndAdd('Commands')
+		$this.OtherData.PartsUsage.EndAdd('Commands')
 
-		$this.OtherData.PartsMemoryUsage.BeginAdd('Fixers')
+		$this.OtherData.PartsUsage.BeginAdd('Fixers')
 		Get-ChildItem "$PSScriptRoot/Fixers" *.ps1 | ForEach-Object { . $_.FullName }
-		$this.OtherData.PartsMemoryUsage.EndAdd('Fixers')
+		$this.OtherData.PartsUsage.EndAdd('Fixers')
 
 		. $PSScriptRoot/system/UI/loaded.ps1 -Arguments $Arguments
 
 
-		$this.OtherData.PartsMemoryUsage.BeginAdd('AfterEshLoadRecord')
+		$this.OtherData.PartsUsage.BeginAdd('AfterEshLoadRecord')
 		$this.State.Started = $true
 		$this.OtherData.AfterEshLoaded = @{
 			FunctionList = Get-ChildItem function:\
@@ -373,13 +400,13 @@ $EshellUI = ValueEx @{
 			AliasesList = Get-ChildItem alias:\
 			Errors = $Error
 		}
-		$this.OtherData.PartsMemoryUsage.EndAdd('AfterEshLoadRecord')
+		$this.OtherData.PartsUsage.EndAdd('AfterEshLoadRecord')
 
-		$this.OtherData.PartsMemoryUsage.BeginAdd('FocusRecord')
+		$this.OtherData.PartsUsage.BeginAdd('FocusRecord')
 		$this.OtherData.GettingFocus = $EshellUI.ParentPIDS -contains [esh.Win32]::GetForegroundProcessId()
-		$this.OtherData.PartsMemoryUsage.EndAdd('FocusRecord')
+		$this.OtherData.PartsUsage.EndAdd('FocusRecord')
 
-		$this.OtherData.PartsMemoryUsage.EndAdd('EshellBase')
+		$this.OtherData.PartsUsage.EndAdd('EshellBase')
 	}
 	'method:Reload' = {
 		$this.SaveVariables()
