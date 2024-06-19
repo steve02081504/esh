@@ -148,8 +148,8 @@ $EshellUI = ValueEx @{
 				Time = (Get-Date) - $script:MyProcess.StartTime
 			}
 			Total = @{
-				MemorySize = 0
-				Time = [timespan]::Zero
+				MemorySize = $script:MyProcess.WorkingSet64
+				Time = (Get-Date) - $script:MyProcess.StartTime
 			}
 			'method:BeginAdd' = {
 				param ($Name)
@@ -224,6 +224,8 @@ $EshellUI = ValueEx @{
 		}
 
 		$this.OtherData.PartsUsage.BeginAdd('EshellBase')
+
+		[System.GC]::TryStartNoGCRegion(270mb) | Out-Null # disable GC for fast startup, the eneablement of GC will be done in last BackgroundJob
 
 		$LastExitCode = 72 #Do not remove this line
 
@@ -322,9 +324,6 @@ $EshellUI = ValueEx @{
 
 		$this.OtherData.PartsUsage.BeginAdd('linux')
 		. $PSScriptRoot/system/linux.ps1
-		if (Test-Command bash) {
-			$global:BASH_VERSION = bash -c 'echo "${BASH_VERSION}"'
-		}
 		$this.OtherData.PartsUsage.EndAdd('linux')
 
 		$this.OtherData.PartsUsage.BeginAdd('cmd')

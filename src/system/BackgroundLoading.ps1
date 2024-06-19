@@ -1,5 +1,15 @@
 $EshellUI.BackgroundJobs.Push(@(
 	{
+		$EshellUI.OtherData.PartsUsage.BeginAdd('linux-env')
+		if (Test-Command locale) {
+			$env:LANG ??= $env:LANGUAGE ??= $env:LC_ALL ??= $(locale -uU)
+		}
+		if (Test-Command bash) {
+			$global:BASH_VERSION = bash -c 'echo "${BASH_VERSION}"'
+		}
+		$EshellUI.OtherData.PartsUsage.EndAdd('linux-env')
+	}
+	{
 		$EshellUI.OtherData.PartsUsage.BeginAdd('ls-view')
 		Update-FormatData -PrependPath "$($EshellUI.Sources.Path)/data/formatxml/ls.bare.format.ps1xml"
 		if ($Host.UI.SupportsVirtualTerminal) {
@@ -136,5 +146,12 @@ $EshellUI.BackgroundJobs.Push(@(
 			Import-Module yarn-completion
 			$EshellUI.OtherData.PartsUsage.EndAdd('tab-yarn')
 		}
+	}
+	{
+		$EshellUI.OtherData.PartsUsage.BeginAdd('final-gc')
+		[System.GC]::EndNoGCRegion()
+		[System.GC]::Collect()
+		[System.GC]::WaitForPendingFinalizers()
+		$EshellUI.OtherData.PartsUsage.EndAdd('final-gc')
 	}
 ))

@@ -32,10 +32,6 @@ Set it manually by $(
 	}
 }
 
-if (Test-Command locale) {
-	$env:LANG ??= $env:LANGUAGE ??= $env:LC_ALL ??= $(locale -uU)
-}
-
 function global:Test-PathEx($Path) {
 	if (IsLinuxPath $Path) { $Path = LinuxPathToWindowsPath $Path }
 	return Test-Path $Path
@@ -134,7 +130,7 @@ function global:AutoShortPath($Path) {
 	} else { $Path }
 }
 
-if (Test-Command rm.exe) {
+if ((Test-Command rm.exe) || (Test-Command /bin/rm)) {
 	. "$($EshellUI.Sources.Path)/src/commands/special/linux_bins.ps1"
 }
 
