@@ -225,7 +225,9 @@ $EshellUI = ValueEx @{
 
 		$this.OtherData.PartsUsage.BeginAdd('EshellBase')
 
-		[System.GC]::TryStartNoGCRegion(270mb) | Out-Null # disable GC for fast startup, the eneablement of GC will be done in last BackgroundJob
+		if ([System.Runtime.GCSettings]::LatencyMode -ne 'NoGCRegion') {
+			[System.GC]::TryStartNoGCRegion(270mb) | Out-Null # disable GC for fast startup, the eneablement of GC will be done in last BackgroundJob
+		}
 
 		$LastExitCode = 72 #Do not remove this line
 
@@ -408,7 +410,6 @@ $EshellUI = ValueEx @{
 		$this.OtherData.PartsUsage.EndAdd('EshellBase')
 	}
 	'method:Reload' = {
-		$this.SaveVariables()
 		$this.Remove()
 		. "$($this.Sources.Path)/src/main.ps1"
 		$EshellUI.Init($this.Invocation)
@@ -460,6 +461,8 @@ $EshellUI = ValueEx @{
 		$PSDefaultParameterValues = $this.OtherData.BeforeEshLoaded.DefaultParameterValues
 		$ExecutionContext.InvokeCommand.CommandNotFoundAction = $this.OtherData.BeforeEshLoaded.CommandNotFoundHandler
 		$this.State.Started = $false
+		if ([System.Runtime.GCSettings]::LatencyMode -eq 'NoGCRegion') { [System.GC]::EndNoGCRegion() }
+		[System.GC]::Collect([System.GC]::MaxGeneration, [System.GCCollectionMode]::Aggressive, $true, $true)
 	}
 	'method:AcceptLine' = {
 		param($Expr)

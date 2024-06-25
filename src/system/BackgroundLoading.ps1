@@ -149,7 +149,7 @@ $EshellUI.BackgroundJobs.Push(@(
 	}
 	{
 		$EshellUI.OtherData.PartsUsage.BeginAdd('final-gc')
-		[System.GC]::EndNoGCRegion()
+		if ([System.Runtime.GCSettings]::LatencyMode -eq 'NoGCRegion') { [System.GC]::EndNoGCRegion() }
 		[System.GC]::Collect([System.GC]::MaxGeneration, [System.GCCollectionMode]::Aggressive, $true, $true)
 		$EshellUI.OtherData.PartsUsage.EndAdd('final-gc')
 	}
