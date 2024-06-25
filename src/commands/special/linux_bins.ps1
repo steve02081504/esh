@@ -83,6 +83,18 @@ function global:cd {
 		if (Test-Path $Path -PathType Container) {
 			Set-Location $Path
 		}
+		elseif (Test-Command $Path) {
+			$CmdPath = (Get-Command $Path).Source
+			if (!$CmdPath -and (Test-Command "$Path.exe")) { $CmdDirPath = (Get-Command "$Path.exe").Source }
+			if ($CmdPath) { $CmdDirPath = Split-Path $CmdPath -ErrorAction Ignore }
+			if ($CmdDirPath -and (Test-Path $CmdDirPath -PathType Container)) {
+				Out-Warning "bash: cd: $(AutoShortPath $Path): Is a command, guessing you meant $(AutoShortPath $CmdDirPath)"
+				Set-Location $CmdDirPath
+			}
+			else {
+				FailedOutPut | Out-Error
+			}
+		}
 		else {
 			$linuxPath = LinuxPathToWindowsPath $Path
 			if (Test-Path $linuxPath -PathType Container) {
