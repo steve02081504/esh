@@ -498,7 +498,7 @@ function global:mkdir {
 		New-Item $Path -ItemType Directory
 		return
 	}
-	$IsLinuxBin = !(Test-Call New-Item $_RemainingArguments)
+	$IsLinuxBin = !(Test-Call New-Item $args)
 	if ($IsLinuxBin) {
 		#若是linux的mkdir.exe
 		#则调用mkdir.exe
