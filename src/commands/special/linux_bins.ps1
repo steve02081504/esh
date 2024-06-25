@@ -84,12 +84,26 @@ function global:cd {
 			Set-Location $Path
 		}
 		elseif (Test-Command $Path) {
-			$CmdPath = (Get-Command $Path).Source
-			if (!$CmdPath -and (Test-Command "$Path.exe")) { $CmdDirPath = (Get-Command "$Path.exe").Source }
-			if ($CmdPath) { $CmdDirPath = Split-Path $CmdPath -ErrorAction Ignore }
-			if ($CmdDirPath -and (Test-Path $CmdDirPath -PathType Container)) {
-				Out-Warning "bash: cd: $(AutoShortPath $Path): Is a command, guessing you meant $(AutoShortPath $CmdDirPath)"
-				Set-Location $CmdDirPath
+			$Cmd = Get-Command $Path
+			$CmdPath = switch ($Cmd.CommandType) {
+				Application { $Cmd.Source }
+				Function {
+					if(Test-Path $Cmd.Source) { $Cmd.Source }
+					elseif (Test-Path $Cmd.Definition) { $Cmd.Definition }
+					elseif ($Cmd.Source) {
+						$module = Get-Module $Cmd.Source
+						if ($module) { $module.ModuleBase }
+					}
+					elseif (Test-Command "$Path.exe") {
+						(Get-Command "$Path.exe").Source
+					}
+				}
+			}
+
+			if ($CmdPath -and (Test-Path $CmdPath -PathType Leaf)) { $CmdPath = Split-Path $CmdPath -ErrorAction Ignore }
+			if ($CmdPath -and (Test-Path $CmdPath -PathType Container)) {
+				Out-Warning "bash: cd: $(AutoShortPath $Path): Is a command, guessing you meant $(AutoShortPath $CmdPath)"
+				Set-Location $CmdPath
 			}
 			else {
 				FailedOutPut | Out-Error
