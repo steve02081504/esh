@@ -289,28 +289,33 @@ $EshellUI = ValueEx @{
 		if ($this.Im.WindowsTerminal) {
 			$WTPathreg = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\wt.exe"
 			$WindowsTerminalVersion = [regex]::match((Get-ItemProperty $WTPathreg).Path, "_(.*?)_").Groups[1].Value
-			$Loginfo = [System.Collections.ArrayList]@(
-				"Since failed to get Windows Terminal version from the registry, use Get-AppXPackage instead, which is extremely slow.",
-				"Please consider repairing the Windows Terminal installation."
-			)
 			if ($WindowsTerminalVersion -eq "") {
-				$WindowsTerminalVersion = "$((Get-AppXPackage "Microsoft.WindowsTerminal").Version)" # super slow
-				# auto fix registry, Remove it by `Remove-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\wt.exe" -Force` in root if you want retest
-				$FileName = "C:\Program Files\WindowsApps\Microsoft.WindowsTerminal_${WindowsTerminalVersion}_x64__8wekyb3d8bbwe\wt.exe"
-				if (Test-Path $FileName) {
-					try {
-						New-Item -Path $WTPathreg -Force -ErrorAction Stop | Out-Null
-						New-ItemProperty -Path $WTPathreg -Name 'Path' -Value $FileName -PropertyType "String" -Force | Out-Null
-						$this.LoadingLog.AddInfo("Fixed Windows Terminal registry `"$WTPathreg`"")
+				$startTime = Get-Date
+				$WindowsTerminalVersion = "$((Get-AppXPackage "Microsoft.WindowsTerminal").Version)" # may super slow
+				$EndTime = Get-Date
+				$DiffTime = $EndTime - $startTime
+				if ($DiffTime.TotalSeconds -gt 1) {
+					$Loginfo = [System.Collections.ArrayList]@(
+						"Since failed to get Windows Terminal version from the registry, use Get-AppXPackage instead, which is extremely slow: $($DiffTime.TotalSeconds) seconds.",
+						"Please consider repairing the Windows Terminal installation."
+					)
+					# auto fix registry, Remove it by `Remove-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\wt.exe" -Force` in root if you want retest
+					$FileName = "C:\Program Files\WindowsApps\Microsoft.WindowsTerminal_${WindowsTerminalVersion}_x64__8wekyb3d8bbwe\wt.exe"
+					if (Test-Path $FileName) {
+						try {
+							New-Item -Path $WTPathreg -Force -ErrorAction Stop | Out-Null
+							New-ItemProperty -Path $WTPathreg -Name 'Path' -Value $FileName -PropertyType "String" -Force | Out-Null
+							$this.LoadingLog.AddInfo("Fixed Windows Terminal registry `"$WTPathreg`"")
+						}
+						catch {
+							$Loginfo.Insert(1, "Esh tried to fix this but failed.(See ``error`` for more info.)")
+							$Loginfo[2] = $Loginfo[2].Substring(0, $Loginfo[2].Length - 1) + " or run esh as root."
+							$this.LoadingLog.AddWarning($Loginfo -join "`n")
+						}
 					}
-					catch {
-						$Loginfo.Insert(1, "Esh tried to fix this but failed.(See ``error`` for more info.)")
-						$Loginfo[2] = $Loginfo[2].Substring(0, $Loginfo[2].Length - 1) + " or run esh as root."
+					else {
 						$this.LoadingLog.AddWarning($Loginfo -join "`n")
 					}
-				}
-				else {
-					$this.LoadingLog.AddWarning($Loginfo -join "`n")
 				}
 			}
 			if ($WindowsTerminalVersion -eq "") {
