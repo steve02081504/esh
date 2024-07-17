@@ -1,0 +1,2 @@
+$env:DOTNET_CLI_UI_LANGUAGE ??= "en_US"
+$env:NUGET_CLI_LANGUAGE ??= "en_US"

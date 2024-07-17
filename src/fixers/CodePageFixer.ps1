@@ -13,3 +13,6 @@ if ($IsWindows -and
 	try { $host.UI.RawUI.CursorPosition = $CursorPosBackUp } catch { $Error.RemoveAt(0) }
 	Remove-Variable @('CursorPosBackUp', 'TestText')
 }
+else {
+	$OutputEncoding = [console]::InputEncoding = [console]::OutputEncoding = [System.Text.Encoding]::UTF8
+}

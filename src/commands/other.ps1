@@ -255,3 +255,63 @@ function global:disconnect {
 Set-Alias dc disconnect -Scope global
 
 function global:null {}
+
+if ($PSGetAPIKey) {
+	Invoke-Expression @"
+function global:Publish-Module-Base {
+	$([System.Management.Automation.ProxyCommand]::Create((Get-Command Get-Command)))
+}
+"@
+	function global:Publish-Module {
+		param(
+			[Parameter(ParameterSetName = 'ModuleNameParameterSet', Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+			[ValidateNotNullOrEmpty()]
+			[string]${Name},
+
+			[Parameter(ParameterSetName = 'ModulePathParameterSet', Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+			[ValidateNotNullOrEmpty()]
+			[string]${Path},
+
+			[Parameter(ParameterSetName = 'ModuleNameParameterSet')]
+			[ValidateNotNullOrEmpty()]
+			[string]${RequiredVersion},
+
+			[string]${NuGetApiKey}=$PSGetAPIKey,
+
+			[ValidateNotNullOrEmpty()]
+			[string]${Repository},
+
+			[Parameter(ValueFromPipelineByPropertyName = $true)][pscredential]
+			[System.Management.Automation.CredentialAttribute()]${Credential},
+
+			[ValidateSet('2.0')]
+			[version]${FormatVersion},
+
+			[string[]]${ReleaseNotes},
+
+			[ValidateNotNullOrEmpty()]
+			[string[]]${Tags},
+
+			[ValidateNotNullOrEmpty()]
+			[uri]${LicenseUri},
+
+			[ValidateNotNullOrEmpty()]
+			[uri]${IconUri},
+
+			[ValidateNotNullOrEmpty()]
+			[uri]${ProjectUri},
+
+			[Parameter(ParameterSetName = 'ModuleNameParameterSet')]
+			[ValidateNotNullOrEmpty()]
+			[string[]]${Exclude},
+
+			[switch]${Force},
+
+			[Parameter(ParameterSetName = 'ModuleNameParameterSet')]
+			[switch]${AllowPrerelease},
+
+			[switch]${SkipAutomaticTags}
+		)
+		Publish-Module-Base @PSBoundParameters
+	}
+}

@@ -111,7 +111,7 @@ $EshellUI = ValueEx @{
 		'method:PopAndRun' = {
 			$job = $this.Pop()
 			$EshellUI.BackgroundJobRunning = $true
-			$Timer = Start-Job -ScriptBlock { Start-Sleep -Seconds 3 }
+			$Timer = Start-Job -ScriptBlock { Start-Sleep -Seconds 7 }
 			try {
 				TempAssign '$ProgressPreference', SilentlyContinue '$global:LastExitCode' $job
 			}
