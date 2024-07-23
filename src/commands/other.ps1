@@ -165,7 +165,7 @@ function global:fsize {
 	#对于每个参数
 	$paths | ForEach-Object {
 		#若参数是文件夹
-		if ((Test-Path $_) -and (Get-ChildItem $_ -Force | Measure-Object).Count -gt 0) {
+		if ((Test-Path $_ -PathType Container) -and (Get-ChildItem $_ -Force | Measure-Object).Count -gt 0) {
 			#以表格形式输出文件夹下的大小
 			Get-ChildItem $_ -Force | ForEach-Object {
 				if ($_.PSIsContainer) {
@@ -183,6 +183,9 @@ function global:fsize {
 			#输出文件大小
 			$size = (Get-Item $_).Length
 			"{0,10} {1}" -f (Format-FileSize $size), $_
+		}
+		else {
+			Write-Error "Cannot find path $_"
 		}
 	}
 }
