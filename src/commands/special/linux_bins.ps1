@@ -660,11 +660,37 @@ function global:cat {
 	}
 	if ($_RemainingArguments.Length -eq 0) {
 		#若RemainingArguments是空的
-		#json文件且nodejs可用？
-		if ([System.IO.Path]::GetExtension($Path) -eq ".json" -and (Test-Command node.exe)) {
-			#则调用node
-			node.exe $PSScriptRoot/cat_json.mjs $Path
-			if($LASTEXITCODE -eq 0){ return }
+		#json文件
+		if ([System.IO.Path]::GetExtension($Path) -eq ".json") {
+			try {
+				$FileResult = Get-Content $Path
+				$result = $FileResult | ConvertFrom-Json
+				if ("$FileResult" -eq ($result | ConvertTo-Json -Depth 100 -Compress)) {
+					Add-Member -InputObject $result -MemberType ScriptMethod -Name "toString" -Value {
+						$this | ConvertTo-Json -Depth 100 -Compress
+					} -Force
+				}
+				elseif (($result | ConvertTo-Json -Depth 100 | ConvertFrom-Json | ConvertTo-Json -Depth 100) -eq ($result | ConvertTo-Json -Depth 100)) {
+					Add-Member -InputObject $result -MemberType ScriptMethod -Name "toString" -Value {
+						$this | ConvertTo-Json -Depth 100
+					} -Force
+				}
+			}
+			catch { }
+			if ($expr_now.StartsWith("cat ")) { # 无输出对象到控制台
+				$global:ans_array = [System.Collections.ArrayList]@($result ?? $FileResult) # 设置输出对象
+				# nodejs可用？
+				if (Test-Command node.exe) {
+					#则调用node
+					node.exe $PSScriptRoot/cat_json.mjs $Path
+					if($LASTEXITCODE -eq 0){ return }
+				}
+				Write-Host $FileResult
+				return
+			}
+			else {
+				return $result
+			}
 		}
 
 		#则调用Get-Content
