@@ -224,6 +224,15 @@ function global:regedit {
 	}
 }
 
+function global:explorer {
+	if ($args.Count -eq 0) {
+		explorer.exe .
+	}
+	else {
+		explorer.exe $args
+	}
+}
+
 function global:UntilSuccess {
 	param (
 		[int]$WaittingTime = 0,
