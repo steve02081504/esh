@@ -1,11 +1,11 @@
 function global:mklink {
 	param(
 		[Parameter(ValueFromRemainingArguments = $true)]
-		[string[]]$RemainingArguments
+		[string[]]$_RemainingArguments
 	)
 	$replaceList = @{}
 	#对于每个参数
-	$RemainingArguments = $RemainingArguments | ForEach-Object {
+	$_RemainingArguments = $_RemainingArguments | ForEach-Object {
 		#若参数长度不是2且是linux路径
 		if (($_.Length -ne 2) -and (IsLinuxPath $_)) {
 			#转换为windows路径
@@ -13,8 +13,28 @@ function global:mklink {
 			$replaceList[$_]
 		} else { $_ }
 	}
+	foreach ($path in $_RemainingArguments) {
+		if ($path.Length -gt 2) {
+			if (!$toPath) {
+				$toPath = $path
+			}
+			elseif (!$formPath){
+				$formPath = $path
+			}
+		}
+	}
+	if (Test-Path $formPath -ErrorAction Ignore) {
+		if (Test-Path $toPath -ErrorAction Ignore) {
+			Remove-Item $toPath -Confirm
+		}
+		if (Test-Path $formPath -PathType Container -ErrorAction Ignore) {
+			if ($_RemainingArguments -notcontains '/j') {
+				$_RemainingArguments += '/j'
+			}
+		}
+	}
 	#调用cmd的mklink
-	$result = . cmd /c mklink $RemainingArguments
+	$result = . cmd /c mklink $_RemainingArguments
 	if ($result) {
 		$replaceList.GetEnumerator() | ForEach-Object {
 			$result = $result.Replace($_.Value, $_.Key)
@@ -29,15 +49,15 @@ function global:reboot {
 function global:shutdown {
 	param(
 		[Parameter(ValueFromRemainingArguments = $true)]
-		[string[]]$RemainingArguments
+		[string[]]$_RemainingArguments
 	)
-	if ($RemainingArguments.Length -eq 0) {
+	if ($_RemainingArguments.Length -eq 0) {
 		#默认为立即关机
 		shutdown.exe /s /t 0
 	}
 	else {
 		#关机
-		shutdown.exe $RemainingArguments
+		shutdown.exe $_RemainingArguments
 	}
 }
 Set-Alias poweroff shutdown -Scope global
