@@ -9,8 +9,8 @@ $EshellUI.ExecutionHandlers.Add({
 		#禁止执行
 		[Microsoft.PowerShell.PSConsoleReadLine]::CancelLine()
 		Write-Host "`b`b  " -NoNewline
-		#输出警告
 		Write-Host
+		#输出警告
 		Write-Host "别搁这里执行脑瘫命令了，赶紧退款或者给店家差评吧。" -ForegroundColor Red
 		return 1
 	}

@@ -19,6 +19,18 @@ Set-PSReadLineKeyHandler -Key Enter -ScriptBlock {
 	$global:ans = $($global:ans_array)
 	$global:err = $Error | Select-Object -SkipLast $EshellUI.OtherData.HistoryErrorCount
 	$EshellUI.OtherData.HistoryErrorCount = $Error.Count
+	$parseError = $null
+	$global:expr_ast = $global:expr_ast_now
+	$global:bad_expr = $global:bad_expr_now
+	$global:bad_expr_now = $false
+	$global:expr_ast_now = [System.Management.Automation.Language.Parser]::ParseInput($global:expr_now, [ref]$null, [ref]$parseError)
+	if (!$parseError) {
+		$global:expr_ast_now.FindAll({ param($ast) $ast -is [System.Management.Automation.Language.CommandAst] }, $true)| ForEach-Object {
+			if (!(Test-Command $_.CommandElements[0])) {
+				$global:bad_expr_now = $true
+			}
+		}
+	} else { $global:bad_expr_now = $true }
 	foreach ($Handler in $EshellUI.ExecutionHandlers) {
 		$aret = $Handler.Invoke($global:expr_now)
 		if ($aret.Count -eq 1) { $aret = $aret[0] }

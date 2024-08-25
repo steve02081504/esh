@@ -337,6 +337,12 @@ $EshellUI = ValueEx @{
 		. $PSScriptRoot/system/cmd.ps1
 		$this.OtherData.PartsUsage.EndAdd('cmd')
 
+		if (Test-Command node) {
+			$this.OtherData.PartsUsage.BeginAdd('js')
+			. $PSScriptRoot/system/js.ps1
+			$this.OtherData.PartsUsage.EndAdd('js')
+		}
+
 		$this.OtherData.PartsUsage.BeginAdd('Prompt')
 		. $PSScriptRoot/system/UI/prompt/main.ps1
 		. $PSScriptRoot/system/steam.ps1
