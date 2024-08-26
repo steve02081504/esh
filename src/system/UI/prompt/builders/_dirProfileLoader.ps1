@@ -37,9 +37,6 @@ $EshellUI.Prompt.Builders['_dirProfileLoader'] = {
 	$env:EshProfiledDir = Split-Path $profileDir
 	$env:EshProfileRoot = $profileDir
 	(Get-PSReadlineOption).HistorySavePath = "$profileDir\shell-history.txt"
-	Get-Content "$profileDir\shell-history.txt" -ErrorAction Ignore | ForEach-Object {
-		[Microsoft.PowerShell.PSConsoleReadLine]::AddToHistory($_)
-	}
 	function New-DirProfile-Function {
 		param ([string]$funcname, [string]$Command, [string]$DequalFunc)
 		if ($DequalFunc) { Invoke-Expression "function global:$DequalFunc { $Command @args }" }
