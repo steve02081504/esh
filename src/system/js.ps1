@@ -6,10 +6,10 @@ $EshellUI.ExecutionHandlers.Add({
 	if ($global:bad_expr_now) {
 		#测试作为js脚本的合法性
 		$LastExitCodeBackup = $global:LastExitCode
-		$jsexpr = "console.log(($line))"
+		$jsexpr = "new Promise(async resolve => resolve(($line))).then(console.log)"
 		node $PSScriptRoot/../scripts/check_js.mjs $jsexpr *> $null
 		if ($global:LastExitCode) {
-			$jsexpr = $line
+			$jsexpr = "new Promise(async resolve => {$line; resolve()}).then(console.log)"
 			node $PSScriptRoot/../scripts/check_js.mjs $jsexpr *> $null
 		}
 		if ($global:LastExitCode) { $global:LastExitCode = $LastExitCodeBackup; return }
