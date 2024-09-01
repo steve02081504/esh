@@ -49,6 +49,10 @@ $EshellUI = ValueEx @{
 		$this.Invocation = $Invocation
 		$this.Process = Get-Process -ID $PID
 		$this.ParentProcess = $this.Process.Parent
+		$this.RootProcess = $this.ParentProcess
+		while ($this.RootProcess.Parent) {
+			$this.RootProcess = $this.RootProcess.Parent
+		}
 		$this.Im.StartedFrom = @{
 			WindowsTerminal = $this.ParentProcess.Name -eq 'WindowsTerminal.exe'
 			FileExplorer = $this.ParentProcess.Name -eq 'explorer.exe'

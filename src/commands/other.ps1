@@ -18,7 +18,7 @@ function global:mklink {
 			if (!$toPath) {
 				$toPath = $path
 			}
-			elseif (!$formPath){
+			elseif (!$formPath) {
 				$formPath = $path
 			}
 		}
@@ -271,9 +271,31 @@ function global:UntilSuccess {
 Set-Alias 'until-success' 'UntilSuccess' -Scope global
 Set-Alias 'us' 'UntilSuccess' -Scope global
 
-function global:halt {
-	taskkill /f /im explorer.exe *> $null
+function global:Get-RootProcess($Process) {
+	while ($Process.Parent) {
+		$Process = $Process.Parent
+	}
+	$Process
+}
+
+function global:Start-StartupProcesses {
+	# todo
+	# Get-CimInstance Win32_StartupCommand
+}
+
+function global:halt([switch]$Force,[switch]$bare) {
+	Get-Process | Where-Object {
+		if ($Force) {
+			(Get-RootProcess $_).Id -ne $EshellUI.RootProcess.Id
+		}
+		else {
+			$_.ProcessName -eq 'explorer'
+		}
+	} | Stop-Process -Force | Out-Null
 	Start-Process explorer.exe
+	if ($Force -and !$bare) {
+		Start-StartupProcesses
+	}
 }
 
 function global:clswl {
@@ -308,7 +330,7 @@ function global:Publish-Module-Base {
 			[ValidateNotNullOrEmpty()]
 			[string]${RequiredVersion},
 
-			[string]${NuGetApiKey}=$PSGetAPIKey,
+			[string]${NuGetApiKey} = $PSGetAPIKey,
 
 			[ValidateNotNullOrEmpty()]
 			[string]${Repository},
