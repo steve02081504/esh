@@ -23,7 +23,9 @@ $EshellUI.Prompt.Builders['_dirProfileLoader'] = {
 	Get-Command -Name "Start-$($EshellUI.DirProfile.uuid)-*" | ForEach-Object {
 		Remove-Item function:\$($_.Name)
 	}
-	(Get-PSReadlineOption).HistorySavePath = $EshellUI.DirProfile.backupHistory
+	if ($EshellUI.DirProfile.backupHistory) {
+		(Get-PSReadlineOption).HistorySavePath = $EshellUI.DirProfile.backupHistory
+	}
 	$EshellUI.DirProfile = @{
 		path           = $profileDir
 		commands       = @()
@@ -36,7 +38,9 @@ $EshellUI.Prompt.Builders['_dirProfileLoader'] = {
 	if ($profileDir -eq $null) { return }
 	$env:EshProfiledDir = Split-Path $profileDir
 	$env:EshProfileRoot = $profileDir
-	(Get-PSReadlineOption).HistorySavePath = "$profileDir\shell-history.txt"
+	if (Test-Path "$profileDir\shell-history.txt" -PathType Leaf) {
+		(Get-PSReadlineOption).HistorySavePath = "$profileDir\shell-history.txt"
+	}
 	function New-DirProfile-Function {
 		param ([string]$funcname, [string]$Command, [string]$DequalFunc)
 		if ($DequalFunc) { Invoke-Expression "function global:$DequalFunc { $Command @args }" }
