@@ -278,24 +278,34 @@ function global:Get-RootProcess($Process) {
 	$Process
 }
 
-function global:Start-StartupProcesses {
-	# todo
-	# Get-CimInstance Win32_StartupCommand
-}
-
-function global:halt([switch]$Force,[switch]$bare) {
-	Get-Process | Where-Object {
+function global:halt([switch]$Force, [switch]$bare) {
+	$Commands = if ($Force -and !$bare) {
+		if (!(Get-Command Get-PSAutorun -ErrorAction Ignore)) {
+			$path = $env:PSModulePath -split ';' | Select-Object -First 1
+			Save-Module AutoRuns -Path $path | Out-Null
+		}
+		Get-PSAutorun -Logon | ForEach-Object { $_.Value }
+	}
+	$Process = Get-Process
+	$ProcessPaths = $Process | ForEach-Object { $_.Path }
+	$Commands = $Commands | Where-Object { $cmd = $_ ; $ProcessPaths | Where-Object { $cmd.IndexOf($_) -ne -1 } }
+	$Process | Where-Object {
 		if ($Force) {
 			(Get-RootProcess $_).Id -ne $EshellUI.RootProcess.Id
 		}
 		else {
 			$_.ProcessName -eq 'explorer'
 		}
-	} | Stop-Process -Force | Out-Null
-	Start-Process explorer.exe
-	if ($Force -and !$bare) {
-		Start-StartupProcesses
+	} | ForEach-Object{ Write-Output "Stopping $($_.ProcessName) ($($_.Id))" ; Stop-Process $_ -Force } 1> "~/halt.log"
+	if (!(Get-Process | Where-Object { $_.ProcessName -eq 'explorer' })) {
+		Start-Process explorer.exe
 	}
+	Start-Sleep -Seconds 1
+	(New-Object -comObject Shell.Application).Windows() | Where-Object { $null -ne $_.FullName } | Where-Object { $_.FullName.toLower().Endswith('\explorer.exe') } | ForEach-Object { $_.Quit() }
+	$Process = Get-Process
+	$ProcessPaths = $Process | ForEach-Object { $_.Path }
+	$Commands | Where-Object { $cmd = $_ ; $ProcessPaths | Where-Object { $cmd.IndexOf($_) -eq -1 } } | ForEach-Object { Invoke-Expression $_ }
+	Remove-Item -Path ~/halt.log
 }
 
 function global:clswl {
