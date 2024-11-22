@@ -190,11 +190,11 @@ function global:fsize {
 			Get-ChildItem $_ -Force | ForEach-Object {
 				if ($_.PSIsContainer) {
 					$size = (Get-ChildItem $_ -Recurse -Force | Measure-Object -Property Length -Sum).Sum
-					"{0,10} {1}" -f (Format-FileSize $size), $_.Name
+					"{0,10} {1}" -f (Format-FileSize $size), $(AutoShortPath $_)
 				}
 				else {
 					$size = $_.Length
-					"{0,10} {1}" -f (Format-FileSize $size), $_.Name
+					"{0,10} {1}" -f (Format-FileSize $size), $(AutoShortPath $_)
 				}
 			}
 		}
@@ -202,7 +202,7 @@ function global:fsize {
 		elseif (Test-Path $_) {
 			#输出文件大小
 			$size = (Get-Item $_).Length
-			"{0,10} {1}" -f (Format-FileSize $size), $_
+			"{0,10} {1}" -f (Format-FileSize $size), $(AutoShortPath $_)
 		}
 		else {
 			Write-Error "Cannot find path $_"
@@ -210,11 +210,35 @@ function global:fsize {
 	}
 }
 
-if (Test-Command code.cmd) {
-	function global:code { code.cmd @args }
+if (Test-Command cursor.cmd) {
+	function global:cursor {
+		if ($args.Count -eq 1 -and (IsLinuxPath $args[0])) {
+			cursor.cmd (LinuxPathToWindowsPath $args[0])
+		}
+		else {
+			cursor.cmd @args
+		}
+	}
+}
+elseif (Test-Command code.cmd) {
+	function global:code {
+		if ($args.Count -eq 1 -and (IsLinuxPath $args[0])) {
+			code.cmd (LinuxPathToWindowsPath $args[0])
+		}
+		else {
+			code.cmd @args
+		}
+	}
 }
 elseif (Test-Command code-insiders.cmd) {
-	function global:code { code-insiders.cmd @args }
+	function global:code {
+		if ($args.Count -eq 1 -and (IsLinuxPath $args[0])) {
+			code-insiders.cmd (LinuxPathToWindowsPath $args[0])
+		}
+		else {
+			code-insiders.cmd @args
+		}
+	}
 }
 
 if (Test-Command npm) {
@@ -291,7 +315,7 @@ function global:halt([switch]$Force, [switch]$bare) {
 	$Commands = $Commands | Where-Object { $cmd = $_ ; $ProcessPaths | Where-Object { $cmd.IndexOf($_) -ne -1 } }
 	$Process | Where-Object {
 		if ($Force) {
-			(Get-RootProcess $_).Id -ne $EshellUI.RootProcess.Id
+			(Get-RootProcess $_).Id -ne $EshellUI.RootProcess.Id -and @('WindowsTerminal') -notcontains $_.ProcessName
 		}
 		else {
 			$_.ProcessName -eq 'explorer'
