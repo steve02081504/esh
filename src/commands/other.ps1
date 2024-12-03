@@ -246,6 +246,7 @@ elseif (Test-Command code.cmd) {
 elseif (Test-Command code-insiders.cmd) {
 	geneEditorWapper code code-insiders.cmd
 }
+Remove-Item Function:\geneEditorWapper -Force
 
 if (Test-Command npm) {
 	function global:npm { npm.ps1 --no-fund @args }
