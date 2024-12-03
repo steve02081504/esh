@@ -210,35 +210,41 @@ function global:fsize {
 	}
 }
 
-if (Test-Command cursor.cmd) {
-	function global:cursor {
-		if ($args.Count -eq 1 -and (IsLinuxPath $args[0])) {
-			cursor.cmd (LinuxPathToWindowsPath $args[0])
+function geneEditorWapper {
+	param (
+		[Parameter(Mandatory = $true)]
+		[string]$EditorName,
+		[Parameter(Mandatory = $true)]
+		[string]$BaseCommand
+	)
+	Invoke-Expression @"
+function global:$EditorName {
+	# 对于所有参数
+	`$args = `$args | ForEach-Object {
+		# 若是ErrorRecord
+		if (`$_ -is [System.Management.Automation.ErrorRecord]) {
+			`$_.InvocationInfo.ScriptName
 		}
-		else {
-			cursor.cmd @args
+		# 若参数是linux路径
+		elseif (IsLinuxPath `$_) {
+			# 转换为windows路径
+			LinuxPathToWindowsPath `$_
 		}
+		else { `$_ }
 	}
+	if (`$args -is [string]) { `$args = @(`$args) }
+	. $BaseCommand @args
+}
+"@
+}
+if (Test-Command cursor.cmd) {
+	geneEditorWapper cursor cursor.cmd
 }
 elseif (Test-Command code.cmd) {
-	function global:code {
-		if ($args.Count -eq 1 -and (IsLinuxPath $args[0])) {
-			code.cmd (LinuxPathToWindowsPath $args[0])
-		}
-		else {
-			code.cmd @args
-		}
-	}
+	geneEditorWapper code code.cmd
 }
 elseif (Test-Command code-insiders.cmd) {
-	function global:code {
-		if ($args.Count -eq 1 -and (IsLinuxPath $args[0])) {
-			code-insiders.cmd (LinuxPathToWindowsPath $args[0])
-		}
-		else {
-			code-insiders.cmd @args
-		}
-	}
+	geneEditorWapper code code-insiders.cmd
 }
 
 if (Test-Command npm) {
@@ -401,5 +407,23 @@ function global:Publish-Module-Base {
 			[switch]${SkipAutomaticTags}
 		)
 		Publish-Module-Base @PSBoundParameters
+	}
+}
+
+while (Test-Path Alias:where) {
+	Remove-Item Alias:where -Force
+}
+function global:where {
+	$Inputs = @($Input)
+	try {
+		$result = $Inputs | Where-Object @args
+		if ($result) { return $result }
+		else { throw }
+	}
+	catch {
+		if (!$Inputs -and (!$($args | Where-Object { $_ -isnot [string] }).Count)) {
+			where.exe @args
+		}
+		else { throw $_ }
 	}
 }

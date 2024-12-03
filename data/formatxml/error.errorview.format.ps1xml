@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Configuration>
+	<ViewDefinitions>
+		<View>
+			<Name>ErrorInstance</Name>
+			<OutOfBand />
+			<ViewSelectedBy>
+				<TypeName>System.Management.Automation.ErrorRecord</TypeName>
+			</ViewSelectedBy>
+			<CustomControl>
+				<CustomEntries>
+					<CustomEntry>
+						<CustomItem>
+							<ExpressionBinding>
+								<ScriptBlock>
+									$where = if($_.InvocationInfo.MyCommand.Name) {
+										$_.InvocationInfo.MyCommand.Name+': '
+									}
+									elseif ($_.InvocationInfo.CommandOrigin) {
+										$_.InvocationInfo.CommandOrigin.ToString() + ': '
+									}
+									else{
+										'some where: '
+									}
+									Write-Host $where -ForegroundColor Red -NoNewline
+									if ($_.InvocationInfo.ScriptName) {
+										$scriptPath = $_.InvocationInfo.ScriptName -replace [regex]::Escape($EshellUI.Sources.Path), "esh:internal"
+										$scriptPath = AutoShortPath $scriptPath
+										if ($scriptPath[2] -ne ":") {
+											$scriptPath = $scriptPath -replace "\\", "/"
+										}
+										Write-Host $scriptPath -ForegroundColor Cyan -NoNewline
+										Write-Host ":" -NoNewline
+										Write-Host $_.InvocationInfo.ScriptLineNumber -ForegroundColor Yellow -NoNewline
+										Write-Host
+									}
+									$what = if ($_.Exception.Message) {
+										$_.Exception.Message
+									}
+									elseif ($_.CategoryInfo.Reason) {
+										$_.CategoryInfo.Reason
+									}
+									else {
+										'unknown Error'
+									}
+									if (($what + $where).Length -lt 23 -and $($what + $where) -notmatch 'Error|Exception') {
+										$ErrorName = 'Error'
+										$what = $ErrorName + ': ' + $what
+									}
+									Write-Host $what -ForegroundColor Red
+									if ($_.InvocationInfo.ScriptName) {
+										Write-Host 'You can use ' -ForegroundColor Cyan -NoNewline
+										Write-Host "'" -NoNewline
+										Write-Host "code `$err" -ForegroundColor Yellow -NoNewline
+										Write-Host "' " -NoNewline
+										Write-Host 'to edit the script that caused this error.' -ForegroundColor Cyan
+									}
+								</ScriptBlock>
+							</ExpressionBinding>
+						</CustomItem>
+					</CustomEntry>
+				</CustomEntries>
+			</CustomControl>
+		</View>
+	</ViewDefinitions>
+</Configuration>

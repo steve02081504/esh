@@ -53,6 +53,9 @@ $EshellUI.Prompt.Builders['_dirProfileLoader'] = {
 		Set-Alias -Name $funcname -Value $DequalFunc -Scope global -Force
 		$EshellUI.DirProfile.commands += $funcname
 	}
+	if (Test-Path "$profileDir/commands_runner_settings.psd1") {
+		$runnerSettings = Import-PowerShellDataFile "$profileDir/commands_runner_settings.psd1" -ErrorAction Ignore
+	}
 	Get-ChildItem "$profileDir/commands" -ErrorAction Ignore | ForEach-Object {
 		$Ext = [System.IO.Path]::GetExtension($_.Name)
 		$funcname = $_.BaseName
@@ -64,12 +67,12 @@ $EshellUI.Prompt.Builders['_dirProfileLoader'] = {
 				list   = @('.ps1', '.exe', '.cmd', '.com')
 				action = { $Command = $path; $DequalFunc = '' }
 			},
-			@{ list = @('.js', '.mjs'); actionSoftWare = 'node' }
-			@{ list = @('.py'); actionSoftWare = 'python' }
-			@{ list = @('.rb'); actionSoftWare = 'ruby' }
-			@{ list = @('.pl'); actionSoftWare = 'perl' }
-			@{ list = @('.php'); actionSoftWare = 'php' }
-			@{ list = @('.sh'); actionSoftWare = 'bash' }
+			@{ list = @('.js', '.mjs'); actionSoftWare = $runnerSettings.js ?? 'node' }
+			@{ list = @('.py'); actionSoftWare = $runnerSettings.python ?? 'python' }
+			@{ list = @('.rb'); actionSoftWare = $runnerSettings.ruby ?? 'ruby' }
+			@{ list = @('.pl'); actionSoftWare = $runnerSettings.perl ?? 'perl' }
+			@{ list = @('.php'); actionSoftWare = $runnerSettings.php ?? 'php' }
+			@{ list = @('.sh'); actionSoftWare = $runnerSettings.bash ?? 'bash' }
 		)
 		foreach ($item in $ExtList) {
 			if ($item.list -contains $Ext) {

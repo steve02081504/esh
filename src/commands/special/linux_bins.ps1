@@ -296,7 +296,7 @@ function global:rm {
 		}
 		$_RemainingArguments = $_RemainingArguments -join " "
 		$_RemainingArguments = $_RemainingArguments.Trim()
-		rm.exe $Path $_RemainingArguments
+		Invoke-Expression "rm.exe $Path $_RemainingArguments"
 	}
 	else {
 		#否则调用Remove-Item

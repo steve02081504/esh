@@ -248,6 +248,10 @@ $EshellUI = ValueEx @{
 		}
 		$this.OtherData.PartsUsage.EndAdd('BeforeEshLoadRecord')
 
+		$this.OtherData.PartsUsage.BeginAdd('ErrorView')
+		Update-FormatData -PrependPath "$($EshellUI.Sources.Path)/data/formatxml/error.errorview.format.ps1xml"
+		$this.OtherData.PartsUsage.EndAdd('ErrorView')
+
 		$this.OtherData.PartsUsage.BeginAdd('RegisterEvents')
 		$this.RegisteredEvents = @{
 			SaveVariables = @{
