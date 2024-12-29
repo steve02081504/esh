@@ -327,7 +327,7 @@ function global:halt([switch]$Force, [switch]$bare) {
 		else {
 			$_.ProcessName -eq 'explorer'
 		}
-	} | ForEach-Object{ Write-Output "Stopping $($_.ProcessName) ($($_.Id))" ; Stop-Process $_ -Force } 1> "~/halt.log"
+	} | ForEach-Object { Write-Output "Stopping $($_.ProcessName) ($($_.Id))" ; Stop-Process $_ -Force } 1> "~/halt.log"
 	if (!(Get-Process | Where-Object { $_.ProcessName -eq 'explorer' })) {
 		Start-Process explorer.exe
 	}
@@ -428,3 +428,27 @@ function global:where {
 		else { throw $_ }
 	}
 }
+
+function global:Set-MouseButton {
+	param(
+		[ValidateSet("L", "R", 'Left', 'Right', "Auto")]
+		[string]$Mode = "Auto"
+	)
+
+	[bool]$Mode = if ($Mode -eq "L" -or $Mode -eq "Left") {
+		1
+	} elseif ($Mode -eq "R" -or $Mode -eq "Right") {
+		0
+	} else {
+		-not [esh.Win32]::SwapMouseButton($true)
+	}
+
+	[esh.Win32]::SwapMouseButton($Mode) | Out-Null
+
+	if ($Mode) {
+		Write-Host "Mouse button mode: Left"
+	} else {
+		Write-Host "Mouse button mode: Right"
+	}
+}
+Set-Alias smb Set-MouseButton -Scope global
