@@ -352,19 +352,14 @@ Set-Alias dc disconnect -Scope global
 function global:null {}
 
 if ($PSGetAPIKey) {
-	Invoke-Expression @"
-function global:Publish-Module-Base {
-	$([System.Management.Automation.ProxyCommand]::Create((Get-Command Get-Command)))
-}
-"@
-	function global:Publish-Module {
+	function global:Publish-Module-Fixed {
+		[CmdletBinding(DefaultParameterSetName = 'ModulePathParameterSet', SupportsShouldProcess = $true, ConfirmImpact = 'Medium', PositionalBinding = $false, HelpUri = 'https://go.microsoft.com/fwlink/?LinkID=398575')]
 		param(
 			[Parameter(ParameterSetName = 'ModuleNameParameterSet', Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
 			[ValidateNotNullOrEmpty()]
 			[string]${Name},
 
-			[Parameter(ParameterSetName = 'ModulePathParameterSet', Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
-			[ValidateNotNullOrEmpty()]
+			[Parameter(ParameterSetName = 'ModulePathParameterSet', ValueFromPipelineByPropertyName = $true)]
 			[string]${Path},
 
 			[Parameter(ParameterSetName = 'ModuleNameParameterSet')]
@@ -407,8 +402,57 @@ function global:Publish-Module-Base {
 
 			[switch]${SkipAutomaticTags}
 		)
-		Publish-Module-Base @PSBoundParameters
+		begin {
+			try {
+				$outBuffer = $null
+				if ($PSBoundParameters.TryGetValue('OutBuffer', [ref]$outBuffer)) {
+					$PSBoundParameters['OutBuffer'] = 1
+				}
+				$PSBoundParameters.NuGetApiKey = $NuGetApiKey
+				if ((!$Name) -and (!$Path)) { $PSBoundParameters.Path = '.' }
+
+				$wrappedCmd = $ExecutionContext.InvokeCommand.GetCommand('Publish-Module', [System.Management.Automation.CommandTypes]::Function)
+				$scriptCmd = { & $wrappedCmd @PSBoundParameters }
+
+				$steppablePipeline = $scriptCmd.GetSteppablePipeline()
+				$steppablePipeline.Begin($PSCmdlet)
+			}
+			catch {
+				throw
+			}
+		}
+
+		process {
+			try {
+				$steppablePipeline.Process($_)
+			}
+			catch {
+				throw
+			}
+		}
+
+		end {
+			try {
+				$steppablePipeline.End()
+			}
+			catch {
+				throw
+			}
+		}
+
+		clean {
+			if ($null -ne $steppablePipeline) {
+				$steppablePipeline.Clean()
+			}
+		}
+		<#
+
+		.ForwardHelpTargetName Publish-Module
+		.ForwardHelpCategory Function
+
+		#>
 	}
+	New-Alias -Name Publish-Module -Value Publish-Module-Fixed -Scope Global
 }
 
 while (Test-Path Alias:where) {
