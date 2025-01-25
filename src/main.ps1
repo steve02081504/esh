@@ -488,7 +488,7 @@ $EshellUI = ValueEx @{
 		$OriLine = $global:expr_now
 		[Microsoft.PowerShell.PSConsoleReadLine]::CancelLine()
 		Write-Host "`b`b  "
-		$Expr = $Expr.Replace('$','$global:').Replace('`$global:script:','$script:').Replace('`$global:local:','$local:').Replace('`$global:env:','$env:').Replace('`$global:function:','$function:').Replace('`$global:variable:','$variable:').Replace('`$global:alias:','$alias:')
+		$Expr = $Expr -replace '^\s+$', '$global:' -replace '$global:global', '$global:'
 		do {
 			try {
 				$StartExecutionTime = Get-Date
