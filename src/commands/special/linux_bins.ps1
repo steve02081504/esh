@@ -17,6 +17,14 @@ function global:cd {
 			$_RemainingArguments.RemoveAt($i)
 			break
 		}
+		elseif ($arg -is [System.Management.Automation.ExternalScriptInfo]) {
+			$Path = $arg.Source
+			if (Test-Path $Path -PathType Leaf) {
+				$Path = Split-Path $Path
+			}
+			$_RemainingArguments.RemoveAt($i)
+			break
+		}
 		elseif ($arg.StartsWith("-")) {
 			continue
 		}
