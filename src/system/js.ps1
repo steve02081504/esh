@@ -4,6 +4,9 @@ $EshellUI.ExecutionHandlers.Add({
 	)
 	#若当前表达式不是合法ps脚本
 	if ($global:bad_expr_now) {
+		if ($line -match '^[\w\.\s]+$') { #简单内容不认为合法
+			return
+		}
 		#测试作为js脚本的合法性
 		$LastExitCodeBackup = $global:LastExitCode
 		if ($line -match '^\s*\$(?<assign>([^=\s\+\-\*\/\"\'']*|\{.*?\}))\s*=\b\s*(?<value>.*)$') {
