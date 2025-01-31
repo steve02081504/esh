@@ -13,11 +13,10 @@ $EshellUI.ExecutionHandlers.Add({
 			$assign = $Matches['assign']
 			$line = $Matches['value']
 		}
-		$jsexpr = "_ => {$line}"
-		deno --allow-scripts --allow-all $PSScriptRoot/../scripts/check_js.mjs $jsexpr *> $null
+		$jsexpr = deno --allow-scripts --allow-all $PSScriptRoot/../scripts/check_js.mjs $line
 		if ($global:LastExitCode) { $global:LastExitCode = $LastExitCodeBackup; return }
 
-		$jsexpr = "new Promise(async resolve => resolve(eval(``$line``)))"
+		$jsexpr = "new Promise(async resolve => resolve(eval(``$jsexpr``)))"
 		"$(if($assign){"`$$assign = "})deno eval '$($jsexpr -replace "'", "''").then(async r => (await import(`"node:util`")).inspect(r, {colors: true})).then(console.log).catch(e => console.log(```${e.name}: `${e.message}``))'"
 	}
 }) | Out-Null
