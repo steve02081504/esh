@@ -11,7 +11,8 @@ function global:mklink {
 			#转换为windows路径
 			$replaceList[$_] = LinuxPathToFullWindowsPath $_
 			$replaceList[$_]
-		} else { $_ }
+		}
+		else { $_ }
 	}
 	foreach ($path in $_RemainingArguments) {
 		if ($path.Length -gt 2) {
@@ -90,7 +91,8 @@ function global:clear-emptys {
 	($paths ?? '.') | ForEach-Object {
 		if (IsLinuxPath $_) {
 			LinuxPathToWindowsPath $_
-		} else { $_ }
+		}
+		else { $_ }
 	} | ForEach-Object {
 		if ((Get-Item $_).PSIsContainer) {
 			$Count = { (Get-ChildItem $_ -Force | Measure-Object).Count }
@@ -481,9 +483,11 @@ function global:Set-MouseButton {
 
 	[bool]$Mode = if ($Mode -eq "L" -or $Mode -eq "Left") {
 		1
-	} elseif ($Mode -eq "R" -or $Mode -eq "Right") {
+	}
+	elseif ($Mode -eq "R" -or $Mode -eq "Right") {
 		0
-	} else {
+	}
+	else {
 		-not [esh.Win32]::SwapMouseButton($true)
 	}
 
@@ -491,8 +495,48 @@ function global:Set-MouseButton {
 
 	if ($Mode) {
 		Write-Host "Mouse button mode: Left"
-	} else {
+	}
+	else {
 		Write-Host "Mouse button mode: Right"
 	}
 }
 Set-Alias smb Set-MouseButton -Scope global
+
+function global:SystemAutoFix {
+	if (!$EShellUI.Im.Sudo) {
+		Write-Error "You must run this command as root, try sudo."
+		return
+	}
+	net stop bits
+	net stop wuauserv
+	net stop CryptSvc
+	net stop msiserver
+	net stop appidsvc
+
+	Remove-Item $env:SystemRoot\SoftwareDistribution -Force -Recurse -ErrorAction Ignore
+	Remove-Item $env:SystemRoot\system32\catroot2 -Force -Recurse -ErrorAction Ignore
+	# Rename-Item $env:SystemRoot\softwaredistribution softwaredistribution.old -Force
+	# Rename-Item $env:SystemRoot\system32\catroot2 catroot2.old -Force
+
+	regsvr32.exe /s atl.dll
+	regsvr32.exe /s urlmon.dll
+	regsvr32.exe /s mshtml.dll
+
+	netsh winsock reset
+	netsh winsock reset proxy
+
+	rundll32.exe pnpclean.dll, RunDLL_PnpClean /DRIVERS /MAXCLEAN
+
+	Dism /Online /Cleanup-Image /ScanHealth
+	Dism /Online /Cleanup-Image /CheckHealth
+	Dism /Online /Cleanup-Image /RestoreHealth
+	Dism /Online /Cleanup-Image /StartComponentCleanup
+
+	SFC /SCANNOW
+
+	net start bits
+	net start wuauserv
+	net start CryptSvc
+	net start msiserver
+	net start appidsvc
+}
