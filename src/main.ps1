@@ -488,12 +488,13 @@ $EshellUI = ValueEx @{
 		$OriLine = $global:expr_now
 		$YIndexBackup = $host.UI.RawUI.CursorPosition.Y
 		[Microsoft.PowerShell.PSConsoleReadLine]::CancelLine()
-		Write-Host "`b`b  "
+		Write-Host "`b`b  " -NoNewline
 		try {
 			if ($host.UI.RawUI.CursorPosition.Y -ne $YIndexBackup) {
 				$host.UI.RawUI.CursorPosition = New-Object System.Management.Automation.Host.Coordinates 0, $YIndexBackup
 			}
 		} catch { }
+		Write-Host
 		$Expr = $Expr -replace '^\s+$', '$global:' -replace '$global:global', '$global:'
 		do {
 			try {
