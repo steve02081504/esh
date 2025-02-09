@@ -18,15 +18,15 @@ Set-PSReadLineKeyHandler -Key Enter -ScriptBlock {
 	$global:expr_now = $Cursor = $null
 	[Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$global:expr_now, [ref]$Cursor)
 	$global:ans = $($global:ans_array)
+	$global:ans_array = [System.Collections.ArrayList]@()
 	$global:err = $Error | Select-Object -SkipLast $EshellUI.OtherData.HistoryErrorCount
-	$EshellUI.OtherData.HistoryErrorCount = $Error.Count
 	$global:expr_err_now = $null
 	$global:expr_ast = $global:expr_ast_now
 	$global:bad_expr = $global:bad_expr_now
 	$global:bad_expr_now = $false
 	$global:expr_ast_now = [System.Management.Automation.Language.Parser]::ParseInput($global:expr_now, [ref]$null, [ref]$global:expr_err_now)
 	if (!$global:expr_err_now) {
-		$global:expr_ast_now.FindAll({ param($ast) $ast -is [System.Management.Automation.Language.CommandAst] }, $true)| ForEach-Object {
+		$global:expr_ast_now.FindAll({ param($ast) $ast -is [System.Management.Automation.Language.CommandAst] }, $true) | ForEach-Object {
 			if (!(Test-Command $_.CommandElements[0])) {
 				$global:bad_expr_now = $true
 				$global:expr_err_now = try {
@@ -36,16 +36,33 @@ Set-PSReadLineKeyHandler -Key Enter -ScriptBlock {
 		}
 	} else { $global:bad_expr_now = $true }
 	foreach ($Recorder in $EshellUI.ExecutionRecorders) {
-		$Recorder.Invoke($global:expr_now)
-	}
-	foreach ($Handler in $EshellUI.ExecutionHandlers) {
-		$aret = $Handler.Invoke($global:expr_now)
-		if ($aret.Count -eq 1) { $aret = $aret[0] }
-		if ($aret -is [string]) {
-			$EshellUI.AcceptLine($aret)
-			return
+		try {
+			$Recorder.Invoke($global:expr_now)
 		}
-		elseif ($aret) { return }
+		catch {
+			Write-Host
+			Write-Host $_ -ForegroundColor Red
+			Write-Host $_.ScriptStackTrace
+		}
+	}
+	$EshellUI.OtherData.HistoryErrorCount = $Error.Count
+	foreach ($Handler in $EshellUI.ExecutionHandlers) {
+		try {
+			$aret = $Handler.Invoke($global:expr_now)
+			if ($aret.Count -eq 1) { $aret = $aret[0] }
+			if ($aret -is [string]) {
+				$EshellUI.AcceptLine($aret)
+				return
+			}
+			elseif ($aret) {
+				Write-Error "Invalid return value from ExecutionHandler, type: $($aret.GetType())"
+			}
+		}
+		catch {
+			Write-Host
+			Write-Host $_ -ForegroundColor Red
+			Write-Host $_.ScriptStackTrace
+		}
 	}
 	[Microsoft.PowerShell.PSConsoleReadLine]::AcceptLine()
 }
