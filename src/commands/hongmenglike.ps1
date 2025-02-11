@@ -1,13 +1,20 @@
 if ($env:EdenOS) {
 	if (Test-Command git.exe) {
 		function global:git {
-			if ($args -eq '-v') {
-				$result = git.exe $args
-				$result -replace '.windows', '.EDENOS'
+			begin {
+				if ($args -ne '-v') {
+					$pipe = { git.exe $args }.GetSteppablePipeline($MyInvocation.CommandOrigin, $args)
+					$pipe.Begin($MyInvocation.ExpectingInput, $ExecutionContext)
+				}
 			}
-			else {
-				git.exe $args
+			process {
+				if ($args -eq '-v') {
+					$result = git.exe $args
+					$result -replace '.windows', '.EDENOS'
+				}
+				else { $pipe.Process($_) }
 			}
+			end { if ($args -ne '-v') { $pipe.End() } }
 		}
 	}
 

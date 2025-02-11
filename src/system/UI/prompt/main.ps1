@@ -67,7 +67,14 @@ $EshellUI.Prompt = ValueEx @{
 #遍历脚本所在文件夹
 Get-ChildItem $PSScriptRoot/builders *.ps1 | Sort-Object -Property Name | ForEach-Object { . $_.FullName }
 
+$EshellUI.AfterExecutionHandlers = [System.Collections.ArrayList]@()
 function global:prompt {
+	foreach ($Handler in $EshellUI.AfterExecutionHandlers) {
+		try {
+			$Handler.Invoke($global:expr_now)
+		}
+		catch { }
+	}
 	try {
 		$VirtualTerminal.SaveCursor + $EshellUI.Prompt.Get()
 	}

@@ -48,18 +48,18 @@ function global:reboot {
 	shutdown.exe /r /t 0
 }
 function global:shutdown {
-	param(
-		[Parameter(ValueFromRemainingArguments = $true)]
-		[string[]]$_RemainingArguments
-	)
-	if ($_RemainingArguments.Length -eq 0) {
-		#默认为立即关机
-		shutdown.exe /s /t 0
+	begin {
+		if ($args.Length -eq 0) {
+			#默认为立即关机
+			shutdown.exe /s /t 0
+		}
+		else {
+			$pipe = { shutdown.exe $args }.GetSteppablePipeline($MyInvocation.CommandOrigin, $args)
+			$pipe.Begin($MyInvocation.ExpectingInput, $ExecutionContext)
+		}
 	}
-	else {
-		#关机
-		shutdown.exe $_RemainingArguments
-	}
+	process { if ($args.Length) { $pipe.Process($_) } }
+	end { if ($args.Length) { $pipe.End() } }
 }
 Set-Alias poweroff shutdown -Scope global
 
@@ -251,7 +251,14 @@ elseif (Test-Command code-insiders.cmd) {
 Remove-Item Function:\geneEditorWapper -Force
 
 if (Test-Command npm) {
-	function global:npm { npm.ps1 --no-fund @args }
+	function global:npm {
+		begin {
+			$pipe = { npm.ps1 --no-fund @args }.GetSteppablePipeline($MyInvocation.CommandOrigin, $args)
+			$pipe.Begin($MyInvocation.ExpectingInput, $ExecutionContext)
+		}
+		process { $pipe.Process($_) }
+		end { $pipe.End() }
+	}
 }
 
 function global:Clear-UserPath {
