@@ -483,9 +483,7 @@ $EshellUI = ValueEx @{
 		if ([System.Runtime.GCSettings]::LatencyMode -eq 'NoGCRegion') { [System.GC]::EndNoGCRegion() }
 		[System.GC]::Collect([System.GC]::MaxGeneration, [System.GCCollectionMode]::Aggressive, $true, $true)
 	}
-	'method:AcceptLine' = {
-		param($Expr)
-		$OriLine = $global:expr_now
+	'method:CancelLine' = {
 		$YIndexBackup = $host.UI.RawUI.CursorPosition.Y
 		[Microsoft.PowerShell.PSConsoleReadLine]::CancelLine()
 		Write-Host "`b`b  " -NoNewline
@@ -495,6 +493,11 @@ $EshellUI = ValueEx @{
 			}
 		} catch { }
 		Write-Host
+	}
+	'method:AcceptLine' = {
+		param($Expr)
+		$OriLine = $global:expr_now
+		$this.CancelLine()
 		$Expr = $Expr -replace '^\s+$', '$global:' -replace '$global:global', '$global:'
 		do {
 			try {

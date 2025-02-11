@@ -51,7 +51,8 @@ Set-PSReadLineKeyHandler -Key Enter -ScriptBlock {
 			$aret = $Handler.Invoke($global:expr_now)
 			if ($aret.Count -eq 1) { $aret = $aret[0] }
 			if ($aret -is [string]) {
-				$EshellUI.AcceptLine($aret)
+				if ($aret) { $EshellUI.AcceptLine($aret) }
+				else { $EshellUI.CancelLine() }
 				return
 			}
 			elseif ($aret) {
