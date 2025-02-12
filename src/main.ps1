@@ -373,34 +373,6 @@ $EshellUI = ValueEx @{
 		}
 		$this.OtherData.PartsUsage.EndAdd('BackgroundLoadings')
 
-		$this.OtherData.PartsUsage.BeginAdd('CommandNotFoundHandler')
-		$this.OtherData.BeforeEshLoaded.CommandNotFoundHandler = $ExecutionContext.InvokeCommand.CommandNotFoundAction
-		$ExecutionContext.InvokeCommand.CommandNotFoundAction = {
-			param($Name, $EventArgs)
-			if ($Name.StartsWith('get-')) { return }
-			$EventArgs.Command = Get-Command null -ErrorAction Ignore
-			if (Test-Command thefuck) {
-				$env:PYTHONIOENCODING = 'utf-8'
-				if ($EshellUI.CommandNotFound.HinttingText) {
-					Write-Host $EshellUI.CommandNotFound.HinttingText
-				}
-				$Command = [Microsoft.PowerShell.PSConsoleReadLine]::GetHistoryItems()[-1].CommandLine
-				$result = thefuck $Command
-				$result = if (!$LastExitCode) {
-					Get-Command $result -ErrorAction Ignore
-				} else { $null }
-			}
-			if ($result) {
-				$EventArgs.Command = $result[0]
-			}
-			elseif ($EshellUI.CommandNotFound.HinttingFailedText) {
-				Write-Host $EshellUI.CommandNotFound.HinttingFailedText
-			}
-			$EventArgs.StopSearch = $true
-		}
-		Invoke-Expression "function global:Get-Command {$(Get-Call-Signature Get-Command);Get-Command-Fixed @PSBoundParameters}"
-		$this.OtherData.PartsUsage.EndAdd('CommandNotFoundHandler')
-
 		$this.OtherData.PartsUsage.BeginAdd('Commands')
 		Get-ChildItem "$PSScriptRoot/commands" *.ps1 | ForEach-Object { . $_.FullName }
 		$this.OtherData.PartsUsage.EndAdd('Commands')

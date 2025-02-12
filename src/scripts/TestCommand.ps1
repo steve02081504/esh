@@ -1,18 +1,6 @@
-Invoke-Expression @"
-function global:Get-Command-Base {
-	$([System.Management.Automation.ProxyCommand]::Create((Get-Command Get-Command)))
-}
-"@
-
-function global:Get-Command-Fixed {
-	TempAssign '$ExecutionContext.InvokeCommand.CommandNotFoundAction', $null {
-		Get-Command-Base @Args
-	}
-}
-
 function global:Test-Command($Command) {
 	if (!$Command) { return $false }
-	[bool]$(Get-Command-Fixed $Command -ErrorAction Ignore)
+	[bool]$(Get-Command $Command -ErrorAction Ignore)
 }
 
 function global:Get-Call-Signature {
@@ -23,7 +11,7 @@ function global:Get-Call-Signature {
 		[string]
 		$CommandName
 	)
-	$Command = Get-Command-Fixed $CommandName
+	$Command = Get-Command $CommandName
 
 	$proxyCode = [System.Management.Automation.ProxyCommand]::Create($Command)
 	$scriptblock = [ScriptBlock]::Create($proxyCode)
