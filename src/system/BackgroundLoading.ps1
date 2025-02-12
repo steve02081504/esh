@@ -10,6 +10,19 @@ $EshellUI.BackgroundJobs.Push(@(
 		$EshellUI.OtherData.PartsUsage.EndAdd('linux-env')
 	}
 	{
+		if ($EshellUI.FountAssist) {
+			$EshellUI.OtherData.PartsUsage.BeginAdd('fount-assist')
+			if (-not (Get-Module -ListAvailable fount-pwsh)) {
+				Install-Module fount-pwsh -Repository PSGallery -Force
+			}
+			Import-Module fount-pwsh
+			$FountUserName = $EshellUI.FountAssist -split ':' | Select-Object -First 1
+			$FountAssistChar = $EshellUI.FountAssist -split ':' | Select-Object -Last 1
+			Set-FountAssist $FountUserName $FountAssistChar
+			$EshellUI.OtherData.PartsUsage.EndAdd('fount-assist')
+		}
+	}
+	{
 		$EshellUI.OtherData.PartsUsage.BeginAdd('ls-view')
 		Update-FormatData -PrependPath "$($EshellUI.Sources.Path)/data/formatxml/ls.bare.format.ps1xml"
 		if ($Host.UI.SupportsVirtualTerminal) {

@@ -143,6 +143,7 @@ $EshellUI = ValueEx @{
 		ReloadSafeVariables = $EshellUI.OtherData.ReloadSafeVariables ?? @{}
 		VariableSaveList = @{
 			'MSYSRootPath' = 'MSYS.RootPath'
+			'FountAssist' = 'FountAssist'
 		}
 		PartsUsage = ValueEx @{
 			__type__ = [System.Collections.Specialized.OrderedDictionary]
