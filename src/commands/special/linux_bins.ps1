@@ -17,8 +17,13 @@ function global:cd {
 			$_RemainingArguments.RemoveAt($i)
 			break
 		}
-		elseif ($arg -is [System.Management.Automation.ExternalScriptInfo]) {
-			$Path = $arg.Source
+		elseif ($arg -is [System.Management.Automation.CommandInfo]) {
+			if (Test-Path $arg.Source) { $Path = $arg.Source }
+			elseif (Test-Path $arg.Definition) { $Path = $arg.Definition }
+			elseif ($arg.Source) {
+				$module = Get-Module $arg.Source
+				if ($module) { $Path = $module.ModuleBase }
+			}
 			if (Test-Path $Path -PathType Leaf) {
 				$Path = Split-Path $Path
 			}
