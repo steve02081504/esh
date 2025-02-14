@@ -46,6 +46,7 @@ Set-PSReadLineKeyHandler -Key Enter -ScriptBlock {
 		}
 	}
 	$EshellUI.OtherData.HistoryErrorCount = $Error.Count
+	if ($PSDebugContext) { [Microsoft.PowerShell.PSConsoleReadLine]::AcceptLine(); return }
 	foreach ($Handler in $EshellUI.ExecutionHandlers) {
 		try {
 			$aret = $Handler.Invoke($global:expr_now)

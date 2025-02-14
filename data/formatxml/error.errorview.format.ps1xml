@@ -13,6 +13,7 @@
 						<CustomItem>
 							<ExpressionBinding>
 								<ScriptBlock>
+									$result = ''
 									$where = if($_.InvocationInfo.MyCommand.Name) {
 										$_.InvocationInfo.MyCommand.Name+': '
 									}
@@ -22,17 +23,14 @@
 									else{
 										'some where: '
 									}
-									Write-Host $where -ForegroundColor Red -NoNewline
+									$result += $VirtualTerminal.Colors.Red + $where
 									if ($_.InvocationInfo.ScriptName) {
 										$scriptPath = $_.InvocationInfo.ScriptName -replace [regex]::Escape($EshellUI.Sources.Path), "esh:internal"
 										$scriptPath = AutoShortPath $scriptPath
 										if ($scriptPath[2] -ne ":") {
 											$scriptPath = $scriptPath -replace "\\", "/"
 										}
-										Write-Host $scriptPath -ForegroundColor Cyan -NoNewline
-										Write-Host ":" -NoNewline
-										Write-Host $_.InvocationInfo.ScriptLineNumber -ForegroundColor Yellow -NoNewline
-										Write-Host
+										$result += $VirtualTerminal.Colors.Cyan + $scriptPath + $VirtualTerminal.Colors.Reset + ":" + $VirtualTerminal.Colors.Yellow + $_.InvocationInfo.ScriptLineNumber + "`n"
 									}
 									$what = if ($_.Exception.Message) {
 										$_.Exception.Message
@@ -47,14 +45,11 @@
 										$ErrorName = 'Error'
 										$what = $ErrorName + ': ' + $what
 									}
-									Write-Host $what -ForegroundColor Red
+									$result += $VirtualTerminal.Colors.Red + $what
 									if ($_.InvocationInfo.ScriptName) {
-										Write-Host 'You can use ' -ForegroundColor Cyan -NoNewline
-										Write-Host "'" -NoNewline
-										Write-Host "code `$err" -ForegroundColor Yellow -NoNewline
-										Write-Host "' " -NoNewline
-										Write-Host 'to edit the script that caused this error.' -ForegroundColor Cyan
+										$result += "`n" + $VirtualTerminal.Colors.Cyan + 'You can use ' + $VirtualTerminal.Colors.Reset + "'" + $VirtualTerminal.Colors.Yellow + 'code $err' + $VirtualTerminal.Colors.Reset + "'" + $VirtualTerminal.Colors.Cyan + ' to edit the script that caused this error.'
 									}
+									$result + $VirtualTerminal.Colors.Reset
 								</ScriptBlock>
 							</ExpressionBinding>
 						</CustomItem>

@@ -188,7 +188,7 @@ function global:ls {
 	$IsLinuxBin = $false
 	$WinArgs = $_RemainingArguments | ForEach-Object {
 		# 跳过参数部分
-		if ($_.StartsWith("-")) {
+		if ($_ -is [string] -and $_.StartsWith("-")) {
 			return $_
 		}
 		#若是有效的文件路径，保持原样
@@ -202,7 +202,7 @@ function global:ls {
 		return $_
 	}
 	$linuxArgs = $_RemainingArguments | ForEach-Object {
-		if ($_.StartsWith("-")) {
+		if ($_ -is [string] -and $_.StartsWith("-")) {
 			return $_
 		}
 		if (Test-Path $_) {

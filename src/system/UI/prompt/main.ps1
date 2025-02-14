@@ -69,6 +69,7 @@ Get-ChildItem $PSScriptRoot/builders *.ps1 | Sort-Object -Property Name | ForEac
 
 $EshellUI.AfterExecutionHandlers = [System.Collections.ArrayList]@()
 function global:prompt {
+	if ($PSDebugContext) { return 'dbg >' }
 	foreach ($Handler in $EshellUI.AfterExecutionHandlers) {
 		try {
 			$Handler.Invoke($global:expr_now)
