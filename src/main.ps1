@@ -331,7 +331,7 @@ $EshellUI = ValueEx @{
 				$WindowsTerminalVersion = "Unknown"
 				$this.LoadingLog.AddError($Loginfo -join "`n")
 			}
-			$this.OtherData.WindowsTerminalVersion = $WindowsTerminalVersion
+			$this.OtherData.WindowsTerminalVersion = $env:WT_VERSION = $WindowsTerminalVersion
 		}
 
 		$this.OtherData.PartsUsage.BeginAdd('autovars')

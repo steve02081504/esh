@@ -83,6 +83,9 @@ function global:Start-apk {
 	}
 }
 
+if (!(Test-Command CHT2CHS)) {
+	. "$($EshellUI.Sources.Path)/src/scripts/CHT2CHS.ps1"
+}
 #对于每个appLabel 创建一个函数用于启动
 Show-apks | ForEach-Object {
 	$AppLabel = CHT2CHS $_.appLabel

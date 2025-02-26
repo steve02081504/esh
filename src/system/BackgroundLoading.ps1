@@ -121,11 +121,15 @@ $EshellUI.BackgroundJobs.Push(@(
 	}
 	{
 		$EshellUI.OtherData.PartsUsage.BeginAdd('Cht2Chs')
-		. "$($EshellUI.Sources.Path)/src/scripts/CHT2CHS.ps1"
+		if (!(Test-Command CHT2CHS)) {
+			. "$($EshellUI.Sources.Path)/src/scripts/CHT2CHS.ps1"
+		}
 		$EshellUI.OtherData.PartsUsage.EndAdd('Cht2Chs')
 		if (Test-Path 'C:\ProgramData\BlueStacks_nxt') {
 			$EshellUI.OtherData.PartsUsage.BeginAdd('Apk-Commands')
-			. "$($EshellUI.Sources.Path)/src/commands/special/BlueStacks.ps1"
+			if (!(Test-Command Show-apks)) {
+				. "$($EshellUI.Sources.Path)/src/commands/special/BlueStacks.ps1"
+			}
 			$EshellUI.OtherData.PartsUsage.EndAdd('Apk-Commands')
 		}
 	}

@@ -547,3 +547,102 @@ function global:SystemAutoFix {
 	net start msiserver
 	net start appidsvc
 }
+
+function global:fastfetch {
+	$logo = @"
+             ========================
+            ==========================
+           ============================
+          =====+++++++++++++++++++++++
+         =====++*
+        ======++
+        =====++:::::::::::::::::
+       =====++++=::::::::::::::::
+      =====++++++++++++++++++++++
+     ======++
+     =====++
+    =====++
+   ============================-::
+  ============================:::::
+   ====+++++++++++++++++++++++::::
+    ==++++++++++++++++++++++++++:
+"@ -split "`n"
+
+	$OS = Get-WmiObject Win32_OperatingSystem
+	$TotalMemoryGB = [Math]::Round($OS.TotalVisibleMemorySize / 1MB, 2)
+	$FreeMemoryGB = [Math]::Round($OS.FreePhysicalMemory / 1MB, 2)
+	$UsedMemoryGB = [Math]::Round(($TotalMemoryGB - $FreeMemoryGB), 2)
+	$Disks = Get-CimInstance Win32_LogicalDisk | Where-Object {$_.DriveType -eq 3} | ForEach-Object {
+		@{
+			DriveLetter = $_.DeviceID
+			VolumeName = $_.VolumeName
+			FreeSpaceGB = [Math]::Round($_.FreeSpace / 1GB, 2)
+			SizeGB = [Math]::Round($_.Size / 1GB, 2)
+			UsedSpaceGB = [Math]::Round(($_.Size - $_.FreeSpace) / 1GB, 2)
+			PercentFree = [Math]::Round(($_.FreeSpace / $_.Size) * 100, 2)
+		}
+	}
+	Add-Type -AssemblyName System.Windows.Forms
+	if (!(Test-Command Show-apks)) {
+		& $PSScriptRoot/special/BlueStacks.ps1
+	}
+	$info = [ordered]@{
+		Host = $env:COMPUTERNAME
+		OS = 'E.D.E.N.O.S.'
+		Kernel = 'MS-DOS v2.1'
+		Uptime = Get-Uptime
+		Packages = @(
+			@{
+				Name = "pacman"
+				Count = (pacman -Q | wc -l)
+			},
+			@{
+				Name = "apk"
+				Count = (Show-apks | Measure-Object | Select-Object -ExpandProperty Count)
+			},
+			@{
+				Name = "appx"
+				Count = (Get-AppxPackage | Measure-Object | Select-Object -ExpandProperty Count)
+			},
+			@{
+				Name = "deno"
+				Count = (Get-ChildItem ~/node_modules/.deno | Measure-Object | Select-Object -ExpandProperty Count)
+			},
+			@{
+				Name = "npm"
+				Count = (Get-ChildItem ~/node_modules | Measure-Object | Select-Object -ExpandProperty Count)
+			}
+		) | ForEach-Object { "$($_.Count)($($_.Name))" } | Join-String -Separator "; "
+		Shell = "E-Shell 1960.7.17"
+		Resolution = "$([System.Windows.Forms.Screen]::PrimaryScreen.Bounds.Width) x $([System.Windows.Forms.Screen]::PrimaryScreen.Bounds.Height)"
+		DE = if ($IsWindows) { [Runtime.InteropServices.RuntimeInformation]::OSDescription } else { $env:DE }
+		WM = if ($IsWindows) { "DirectX $((Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\DirectX").Version)" } else { $env:WM }
+		'WM Theme' = if ($IsWindows) { (Get-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Themes\HighContrast" -Name "Pre-High Contrast Scheme")."Pre-High Contrast Scheme" | Split-Path -Leaf } else { $env:WM }
+		'WM Font' = if ($IsWindows) { (Get-ItemProperty -Path "HKCU:\Console" -ErrorAction SilentlyContinue).FaceName } else { $env:WM }
+		'WM Font Size' = if ($IsWindows) { (Get-ItemProperty -Path "HKCU:\Console" -ErrorAction SilentlyContinue).FontSize } else { $env:WM }
+		'Terminal' = if ($IsWindows) { if ($EshellUI.Im.WindowsTerminal) { "Windows Terminal $($env:WT_VERSION)" } else { 'cmd.exe' } } else { $env:TERM }
+		CPU = "$(Get-CimInstance -ClassName Win32_Processor | Select-Object -ExpandProperty Name) @ $(Get-CimInstance -ClassName Win32_Processor | Select-Object -ExpandProperty MaxClockSpeed)MHz"
+		GPU = if ($IsWindows) { (Get-CimInstance -ClassName Win32_VideoController).Name } else { $env:GPU }
+		Memory = "$($UsedMemoryGB)GB / $($TotalMemoryGB)GB"
+		Disk = $Disks | ForEach-Object {
+			"$($_.VolumeName)($($_.UsedSpaceGB)gb/$($_.SizeGB)gb)"
+		} | Join-String -Separator "; "
+		"AI Assist" = $EshellUI.FountAssist
+	}
+
+	$logoMaxLength = $logo | ForEach-Object { $_.Length } | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum
+	$logoLength = $logoMaxLength + 3
+
+	$index = 0
+	foreach ($key in $info.Keys) {
+		if (!$info[$key]) { continue }
+		Write-Host $logo[$index] -ForegroundColor Magenta -NoNewline
+		$SpaceNum = $logoLength - $($logo[$index].Length)
+		$index += 1
+		Write-Host $(' '*$SpaceNum) -NoNewline
+		Write-Host '| ' -NoNewline -ForegroundColor Green
+		Write-Host $key -NoNewline -ForegroundColor Red
+		Write-Host ': ' -NoNewline
+		Write-Host $info[$key]
+	}
+}
