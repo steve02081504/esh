@@ -20,6 +20,9 @@ if ($env:EdenOS) {
 
 	if (Test-Command uname.exe) {
 		function global:uname {
+			if ($args -eq '-r') {
+				return 'MS-DOS v2.1'
+			}
 			$result = uname.exe $args
 			$result -ireplace 'MSYS_NT', 'EDENOS' -ireplace 'Msys', 'eden'
 		}
