@@ -457,6 +457,10 @@ $EshellUI = ValueEx @{
 		[System.GC]::Collect([System.GC]::MaxGeneration, [System.GCCollectionMode]::Aggressive, $true, $true)
 	}
 	'method:CancelLine' = {
+		# 获取缓冲区当前内容
+		$Expr = $null
+		[Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$Expr, [ref]$null)
+		if (!$Expr) { return }
 		$YIndexBackup = $host.UI.RawUI.CursorPosition.Y
 		[Microsoft.PowerShell.PSConsoleReadLine]::CancelLine()
 		Write-Host "`b`b  " -NoNewline
