@@ -739,3 +739,19 @@ function global:cat {
 		Invoke-Expression "Get-Content $Path $_RemainingArguments"
 	}
 }
+
+function global:which {
+	$result = $(which.exe @args *>&1)
+	if ($result -match '\((?<paths>.*)\)') {
+		$paths = $matches['paths']
+		$paths_arr = $paths -split ':'
+		$paths_arr = $paths_arr | ForEach-Object {
+			WindowsPathToLinuxPath $(LinuxPathToWindowsPath $_)
+		}
+		$newpath = $paths_arr -join ':'
+		"$result".Replace($paths, $newpath)
+	}
+	else {
+		$result
+	}
+}

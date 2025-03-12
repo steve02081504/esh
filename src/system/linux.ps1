@@ -103,7 +103,7 @@ function global:WindowsPathToLinuxPath([string]$Path) {
 		$Path = $Path.Substring(5)
 		if (-not $Path) { $Path = '/' }
 	}
-	elseif ($Path.StartsWith($HOME)) {
+	elseif ($Path.StartsWith($HOME, 'CurrentCultureIgnoreCase')) {
 		$Path = "~" + $Path.Substring($HOME.Length)
 	}
 	elseif ($Path.Length -lt 2) {}
