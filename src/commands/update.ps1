@@ -17,9 +17,9 @@ function global:Update-gcc-Kawaii {
 		mv /usr/share/locale/zh_CN/LC_MESSAGES/gcc.mo /usr/share/locale/zh_CN/LC_MESSAGES/gcc.mo.bak
 	}
 	$eshDir = $EshellUI.Sources.Path
-	Invoke-WebRequest 'https://github.com/Bill-Haku/kawaii-gcc/raw/main/gcc-zh.po' -OutFile "$eshDir/data/gcc-zh.po"
-	msgfmt "$eshDir/data/gcc-zh.po" -o /usr/share/locale/zh_CN/LC_MESSAGES/gcc.mo
-	Remove-Item "$eshDir/data/gcc-zh.po" -Force
+	Invoke-WebRequest 'https://github.com/Bill-Haku/kawaii-gcc/releases/latest/download/zh-kawaii.mo' -OutFile "$eshDir/data/gcc-zh.mo"
+	cp -f "$eshDir/data/gcc-zh.mo" /usr/share/locale/zh_CN/LC_MESSAGES/gcc.mo
+	mv -f "$eshDir/data/gcc-zh.mo" /mingw64/share/locale/zh_CN/LC_MESSAGES/gcc.mo
 	gcc
 }
 

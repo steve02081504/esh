@@ -387,6 +387,7 @@ function global:mv {
 		#若是linux的mv.exe
 		#则调用mv.exe
 		$Path = WindowsPathToLinuxPath $Path
+		$Destination = WindowsPathToLinuxPath $Destination
 		$_RemainingArguments = $_RemainingArguments | ForEach-Object {
 			#若是有效的文件路径
 			if (Test-Path $_) {
@@ -477,6 +478,7 @@ function global:cp {
 		#若是linux的cp.exe
 		#则调用cp.exe
 		$Path = WindowsPathToLinuxPath $Path
+		$Destination = WindowsPathToLinuxPath $Destination
 		$_RemainingArguments = $_RemainingArguments | ForEach-Object {
 			#若是有效的文件路径
 			if (Test-Path $_) {
