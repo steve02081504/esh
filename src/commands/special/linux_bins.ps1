@@ -694,10 +694,8 @@ function global:cat {
 			catch { }
 			if ($expr_now.StartsWith("cat ")) { # 无输出对象到控制台
 				$global:ans_array = [System.Collections.ArrayList]@($result ?? $FileResult) # 设置输出对象
-				# nodejs可用？
-				if (Test-Command node.exe) {
-					#则调用node
-					node.exe $PSScriptRoot/cat_json.mjs $Path
+				if (Test-Command deno) {
+					deno run --allow-all $PSScriptRoot/cat_json.mjs $Path
 					if($LASTEXITCODE -eq 0){ return }
 				}
 				Write-Host $FileResult

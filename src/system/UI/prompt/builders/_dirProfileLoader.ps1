@@ -67,7 +67,7 @@ $EshellUI.Prompt.Builders['_dirProfileLoader'] = {
 				list   = @('.ps1', '.exe', '.cmd', '.com')
 				action = { $Command = $path; $DequalFunc = '' }
 			},
-			@{ list = @('.js', '.mjs'); actionSoftWare = $runnerSettings.js ?? 'node' }
+			@{ list = @('.js', '.mjs'); actionSoftWare = $runnerSettings.js ?? 'deno run --allow-scripts --allow-all' }
 			@{ list = @('.py'); actionSoftWare = $runnerSettings.python ?? 'python' }
 			@{ list = @('.rb'); actionSoftWare = $runnerSettings.ruby ?? 'ruby' }
 			@{ list = @('.pl'); actionSoftWare = $runnerSettings.perl ?? 'perl' }

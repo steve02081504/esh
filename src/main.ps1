@@ -346,7 +346,7 @@ $EshellUI = ValueEx @{
 		. $PSScriptRoot/system/cmd.ps1
 		$this.OtherData.PartsUsage.EndAdd('cmd')
 
-		if (Test-Command node) {
+		if (Test-Command deno) {
 			$this.OtherData.PartsUsage.BeginAdd('js')
 			. $PSScriptRoot/system/js.ps1
 			$this.OtherData.PartsUsage.EndAdd('js')
