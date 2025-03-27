@@ -166,7 +166,7 @@ function global:Format-FileSize($size) {
 function global:fsize {
 	param(
 		[Parameter(ValueFromRemainingArguments = $true)]
-		[string[]]$paths
+		$paths
 	)
 	#若参数为空
 	if ($paths.Length -eq 0) {
@@ -180,25 +180,28 @@ function global:fsize {
 			#转换为windows路径
 			LinuxPathToWindowsPath $_
 		}
-		else {
+		elseif ($_ -is [System.Management.Automation.CommandInfo]) {
+			$Path = if (Test-Path $_.Source) { $_.Source }
+			elseif (Test-Path $_.Definition) { $_.Definition }
+			elseif ($_.Source) {
+				$module = Get-Module $_.Source
+				if ($module) { $module.ModuleBase }
+			}
+			$Path
+		}
+		elseif (Test-Path $_) {
 			$_
+		}
+		elseif (Test-Command $_) {
+			(Get-Command $_).Source
 		}
 	}
 	#对于每个参数
 	$paths | ForEach-Object {
 		#若参数是文件夹
 		if ((Test-Path $_ -PathType Container) -and (Get-ChildItem $_ -Force | Measure-Object).Count -gt 0) {
-			#以表格形式输出文件夹下的大小
-			Get-ChildItem $_ -Force | ForEach-Object {
-				if ($_.PSIsContainer) {
-					$size = (Get-ChildItem $_ -Recurse -Force | Measure-Object -Property Length -Sum).Sum
-					"{0,10} {1}" -f (Format-FileSize $size), $(AutoShortPath $_)
-				}
-				else {
-					$size = $_.Length
-					"{0,10} {1}" -f (Format-FileSize $size), $(AutoShortPath $_)
-				}
-			}
+			$size = (Get-ChildItem $_ -Recurse -Force | Measure-Object -Property Length -Sum).Sum
+			"{0,10} {1}" -f (Format-FileSize $size), $(AutoShortPath $_)
 		}
 		#若参数是文件
 		elseif (Test-Path $_) {
