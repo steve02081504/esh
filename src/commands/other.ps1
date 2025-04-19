@@ -226,8 +226,12 @@ function geneEditorWapper {
 function global:$EditorName {
 	# 对于所有参数
 	`$args = `$args | ForEach-Object {
+		# 若参数是命令
+		if (`$_ -is [System.Management.Automation.CommandInfo]) {
+			`$_.Source
+		}
 		# 若是ErrorRecord
-		if (`$_ -is [System.Management.Automation.ErrorRecord]) {
+		elseif (`$_ -is [System.Management.Automation.ErrorRecord]) {
 			`$_.InvocationInfo.ScriptName
 		}
 		# 若参数是linux路径
