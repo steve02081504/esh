@@ -653,3 +653,19 @@ function global:fastfetch {
 		Write-Host $info[$key]
 	}
 }
+
+function global:hex($num){
+	[System.Convert]::ToString($num, 16)
+}
+
+function global:bin($num) {
+	[System.Convert]::ToString($num, 2)
+}
+
+function global:dec($num) {
+	[System.Convert]::ToInt32($num, 10)
+}
+
+function global:oct($num) {
+	[System.Convert]::ToString($num, 8)
+}
