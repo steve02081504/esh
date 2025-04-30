@@ -114,6 +114,7 @@ function global:WindowsPathToLinuxPath([string]$Path) {
 		$Path = "/${DriveLetter}/${Path}"
 	}
 	$Path = $Path.Replace("\", "/")
+	$Path = $Path.Replace("/./", "/")
 	# '~/AppData/\w+/X -> ~/.X
 	if ($Path.StartsWith("~/AppData/")) {
 		$TestPath = $Path -replace ('\~/AppData/\w+/', "~/.")

@@ -675,10 +675,15 @@ function global:cat {
 	}
 	if ($_RemainingArguments.Length -eq 0) {
 		#若RemainingArguments是空的
+		if (!(Test-Path $Path)) {
+			"cat: $(AutoShortPath $Path): No such file or directory"
+			$LASTEXITCODE = 1
+			return
+		}
+		$FileResult = Get-Content $Path
 		#json文件
 		if ([System.IO.Path]::GetExtension($Path) -eq ".json") {
 			try {
-				$FileResult = Get-Content $Path
 				$result = $FileResult | ConvertFrom-Json
 				if ("$FileResult" -eq ($result | ConvertTo-Json -Depth 100 -Compress)) {
 					Add-Member -InputObject $result -MemberType ScriptMethod -Name "toString" -Value {
@@ -692,28 +697,20 @@ function global:cat {
 				}
 			}
 			catch { }
-			if ($expr_now.StartsWith("cat ")) { # 无输出对象到控制台
-				$global:ans_array = [System.Collections.ArrayList]@($result ?? $FileResult) # 设置输出对象
-				if (Test-Command deno) {
-					deno run --allow-all $PSScriptRoot/cat_json.mjs $Path
-					if($LASTEXITCODE -eq 0){ return }
-				}
-				Write-Host $FileResult
-				return
-			}
-			else {
-				return $result
-			}
 		}
 
-		#则调用Get-Content
-		if (Test-Path $Path) {
-			Get-Content $Path
+		if ($expr_now.StartsWith("cat ")) { # 无输出对象到控制台
+			$global:ans_array = [System.Collections.ArrayList]@($result ?? $FileResult) # 设置输出对象
+			if (Test-Command highlight) {
+				highlight $Path
+				if($LASTEXITCODE -eq 0){ return }
+			}
+			Write-Host $FileResult
+			return
 		}
 		else {
-			"cat: $(AutoShortPath $Path): No such file or directory"
+			return $result
 		}
-		return
 	}
 	$IsLinuxBin = !(Test-Call Get-Content $_RemainingArguments)
 	if ($IsLinuxBin) {

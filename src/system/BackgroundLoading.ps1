@@ -165,6 +165,13 @@ $EshellUI.BackgroundJobs.Push(@(
 		}
 	}
 	{
+		if (!(Test-Command highlight)) {
+			$EshellUI.OtherData.PartsUsage.BeginAdd('highlight-install')
+			npm install -g cli-highlight | Out-Null
+			$EshellUI.OtherData.PartsUsage.EndAdd('highlight-install')
+		}
+	}
+	{
 		$EshellUI.OtherData.PartsUsage.BeginAdd('final-gc')
 		if ([System.Runtime.GCSettings]::LatencyMode -eq 'NoGCRegion') { [System.GC]::EndNoGCRegion() }
 		[System.GC]::Collect([System.GC]::MaxGeneration, [System.GCCollectionMode]::Aggressive, $true, $true)
