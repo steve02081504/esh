@@ -101,7 +101,7 @@ function global:cd {
 			$CmdPath = switch ($Cmd.CommandType) {
 				Application { $Cmd.Source }
 				Function {
-					if(Test-Path $Cmd.Source) { $Cmd.Source }
+					if (Test-Path $Cmd.Source) { $Cmd.Source }
 					elseif (Test-Path $Cmd.Definition) { $Cmd.Definition }
 					elseif ($Cmd.Source) {
 						$module = Get-Module $Cmd.Source
@@ -292,7 +292,7 @@ function global:rm {
 		Remove-Item $Path
 		return
 	}
-	$IsLinuxBin = !(Test-Call Remove-Item $_RemainingArguments)
+	$IsLinuxBin = !(Test-Call Remove-Item @($Path, $_RemainingArguments))
 	if ($IsLinuxBin) {
 		#若是linux的rm.exe
 		#则调用rm.exe
@@ -382,7 +382,7 @@ function global:mv {
 		Move-Item $Path -Destination $Destination
 		return
 	}
-	$IsLinuxBin = !(Test-Call Move-Item $_RemainingArguments)
+	$IsLinuxBin = !(Test-Call Move-Item @($Path, $Destination, $_RemainingArguments))
 	if ($IsLinuxBin) {
 		#若是linux的mv.exe
 		#则调用mv.exe
@@ -473,7 +473,7 @@ function global:cp {
 		Copy-Item $Path -Destination $Destination
 		return
 	}
-	$IsLinuxBin = !(Test-Call Copy-Item $_RemainingArguments)
+	$IsLinuxBin = !(Test-Call Copy-Item @($Path, $Destination, $_RemainingArguments))
 	if ($IsLinuxBin) {
 		#若是linux的cp.exe
 		#则调用cp.exe
@@ -610,7 +610,7 @@ function global:touch {
 		New-Item $Path -ItemType File
 		return
 	}
-	$IsLinuxBin = !(Test-Call New-Item $_RemainingArguments)
+	$IsLinuxBin = !(Test-Call New-Item @($Path, $_RemainingArguments))
 	if ($IsLinuxBin) {
 		#若是linux的touch.exe
 		#则调用touch.exe
@@ -699,11 +699,12 @@ function global:cat {
 			catch { }
 		}
 
-		if ($expr_now.StartsWith("cat ")) { # 无输出对象到控制台
+		if ($expr_now.StartsWith("cat ")) {
+			# 无输出对象到控制台
 			$global:ans_array = [System.Collections.ArrayList]@($result ?? $FileResult) # 设置输出对象
 			if (Test-Command highlight) {
 				highlight $Path
-				if($LASTEXITCODE -eq 0){ return }
+				if ($LASTEXITCODE -eq 0) { return }
 			}
 			Write-Host $FileResult
 			return
@@ -712,7 +713,7 @@ function global:cat {
 			return $result
 		}
 	}
-	$IsLinuxBin = !(Test-Call Get-Content $_RemainingArguments)
+	$IsLinuxBin = !(Test-Call Get-Content @($Path, $_RemainingArguments))
 	if ($IsLinuxBin) {
 		#若是linux的cat.exe
 		#则调用cat.exe
