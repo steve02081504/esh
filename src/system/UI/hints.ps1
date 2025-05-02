@@ -20,7 +20,6 @@ $EshellUI.Hints = ValueEx @{
 }
 
 & {
-	$EshellUI.Hints.AddWithCommand('fk', 'fuck typos', 'thefuck')
 	$EshellUI.Hints.AddWithCommand('coffee', 'get a cup of coffee')
 	$EshellUI.Hints.AddWithCommand('poweron', 'turn on this computer')
 	$EshellUI.Hints.Add($(coffee))

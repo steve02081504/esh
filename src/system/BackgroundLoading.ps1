@@ -98,18 +98,6 @@ $EshellUI.BackgroundJobs.Push(@(
 		}
 	}
 	{
-		#set thefuck as alias 'fk'
-		if (Test-Command thefuck) {
-			$EshellUI.OtherData.PartsUsage.BeginAdd('thefuck')
-			try {
-				$env:PYTHONIOENCODING = 'utf-8'
-				$f = "$(thefuck --alias global:fk)"
-				if ($f) { Invoke-Expression $f }
-			} catch {}
-			$EshellUI.OtherData.PartsUsage.EndAdd('thefuck')
-		}
-	}
-	{
 		if (Test-Command npm) {
 			$EshellUI.OtherData.PartsUsage.BeginAdd('tab-npm')
 			if (-not (Get-Module -ListAvailable npm-completion)) {
