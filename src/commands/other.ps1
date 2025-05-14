@@ -669,3 +669,33 @@ function global:dec($num) {
 function global:oct($num) {
 	[System.Convert]::ToString($num, 8)
 }
+
+function global:Get-Promptlized-Dir {
+	$str = (Get-ChildItem -Recurse -File | ForEach-Object {
+		"$_" + ':'
+		'```'+ $(switch ($_.Extension) {
+			'.ps1' { 'pwsh' }
+			{$_ -in '.mjs', '.js', '.cjs'} { 'js' }
+			'.ts' { 'ts' }
+			'.json' { 'json' }
+			'.css' { 'css' }
+			'.html' { 'html' }
+			'.txt' { 'text' }
+			'.md' { 'md' }
+			{$_ -in '.yml', '.yaml'} { 'yaml' }
+			'.xml' { 'xml' }
+			'.py' { 'py' }
+			'.rb' { 'ruby' }
+			'.pl' { 'perl' }
+			'.php' { 'php' }
+			'.sh' { 'bash' }
+			'.cmd' { 'bat' }
+			{$_ -in '.c', '.h'} { 'c' }
+			{$_ -in '.cpp', '.hpp', '.cxx', '.hxx'} { 'cpp' }
+			Default {''}
+		})
+		(Get-Content $_) -join "`n"
+		'```'
+	}) -join "`n"
+	Set-Clipboard -Value $str
+}
