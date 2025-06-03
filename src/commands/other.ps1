@@ -296,7 +296,20 @@ function global:explorer {
 		explorer.exe .
 	}
 	else {
-		explorer.exe $args
+		$args = $args | ForEach-Object {
+			if ($_ -is [System.Management.Automation.CommandInfo]) {
+				$_.Source
+			}
+			elseif($_ -is [System.Management.Automation.ErrorRecord]) {
+				$_.InvocationInfo.ScriptName
+			}
+			elseif (IsLinuxPath $_) {
+				LinuxPathToWindowsPath $_
+			}
+			else { $_ }
+		}
+		if ($args -is [string]) { $args = @($args) }
+		explorer.exe @args
 	}
 }
 
