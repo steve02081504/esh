@@ -685,8 +685,11 @@ function global:oct($num) {
 
 function global:Get-Promptlized-Dir {
 	$str = (Get-ChildItem -Recurse -File | ForEach-Object {
+		$content = (Get-Content $_) -join "`n"
+		$quote = '```'
+		while($content.Contains($quote)) { $quote += '`' }
 		"$_" + ':'
-		'```'+ $(switch ($_.Extension) {
+		$quote+ $(switch ($_.Extension) {
 			'.ps1' { 'pwsh' }
 			{$_ -in '.mjs', '.js', '.cjs'} { 'js' }
 			'.ts' { 'ts' }
@@ -707,8 +710,25 @@ function global:Get-Promptlized-Dir {
 			{$_ -in '.cpp', '.hpp', '.cxx', '.hxx'} { 'cpp' }
 			Default {''}
 		})
-		(Get-Content $_) -join "`n"
-		'```'
+		$content
+		$quote
 	}) -join "`n"
 	Set-Clipboard -Value $str
+}
+
+function global:CleanUpComputer {
+	if (!$EShellUI.Im.Sudo) {
+		Write-Error "You must run this command as root, try sudo."
+		return
+	}
+	Clear-UserPath
+	Dism /Online /Cleanup-Image /startcomponentcleanup /resetbase
+	Remove-Item $env:TEMP\* -Recurse -Force -ErrorAction Ignore
+	Remove-Item $env:LOCALAPPDATA\Temp\* -Recurse -Force -ErrorAction Ignore
+	wevtutil cl System
+	wevtutil cl Application
+	Stop-Service -Name wuauserv -Force -ErrorAction SilentlyContinue
+	Remove-Item -Path "$env:windir\SoftwareDistribution\Download\*" -Recurse -Force -ErrorAction Ignore
+	Start-Service -Name wuauserv -ErrorAction SilentlyContinue
+	Remove-Item -Path "$env:windir\Prefetch\*" -Recurse -Force -ErrorAction Ignore
 }
