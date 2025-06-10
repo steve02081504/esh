@@ -753,3 +753,20 @@ function global:which {
 		$result
 	}
 }
+
+while (Test-Path Alias:man) {
+	Remove-Item Alias:man
+}
+function global:man {
+	if ($args.Count -eq 0) {
+		'what can I say'
+		'manba out.'
+		return
+	}
+	if (Test-Command man.exe) {
+		man.exe @args
+	}
+	else {
+		'type "man" to see how to use this command.'
+	}
+}
