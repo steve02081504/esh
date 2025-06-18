@@ -683,8 +683,14 @@ function global:oct($num) {
 	[System.Convert]::ToString($num, 8)
 }
 
-function global:Get-Promptlized-Dir {
-	$str = (Get-ChildItem -Recurse -File | ForEach-Object {
+function global:Get-Promptlized-Dir(
+	$Filter,
+	$Include,
+	$Exclude,
+	$Path = '.',
+	$Recurse = $true
+) {
+	$str = (Get-ChildItem -Recurse:$Recurse -Path $Path -Filter $Filter -Include $Include -Exclude $Exclude -File | ForEach-Object {
 		$content = (Get-Content $_) -join "`n"
 		$quote = '```'
 		while($content.Contains($quote)) { $quote += '`' }
