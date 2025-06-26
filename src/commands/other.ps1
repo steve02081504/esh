@@ -738,3 +738,21 @@ function global:CleanUpComputer {
 	Start-Service -Name wuauserv -ErrorAction SilentlyContinue
 	Remove-Item -Path "$env:windir\Prefetch\*" -Recurse -Force -ErrorAction Ignore
 }
+
+function global:Get-ScreenBufferAsText {
+    $stringBuilder = [System.Text.StringBuilder]::new()
+    $rawUI = $Host.UI.RawUI
+    $captureWidth = $rawUI.BufferSize.Width
+    $captureHeight = $rawUI.CursorPosition.Y
+    if ($captureHeight -le 0) { return "" }
+    $rectangle = [System.Management.Automation.Host.Rectangle]::new(0, 0, $captureWidth, $captureHeight)
+    $buffer = $rawUI.GetBufferContents($rectangle)
+    for ($y = 0; $y -lt $captureHeight; $y++) {
+        $lineContent = ""
+        for ($x = 0; $x -lt $captureWidth; $x++) {
+            $lineContent += $buffer[$y, $x].Character
+        }
+        $stringBuilder.AppendLine($lineContent.TrimEnd()) | Out-Null
+    }
+    return $stringBuilder.ToString().TrimEnd() -replace "`0", ""
+}
