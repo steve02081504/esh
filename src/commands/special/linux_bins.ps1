@@ -12,7 +12,12 @@ function global:cd {
 			$_RemainingArguments.RemoveAt($i)
 			continue
 		}
-		if ($arg -is [System.IO.FileInfo]) {
+		if ($arg -is [System.IO.DirectoryInfo]) {
+			$Path = $arg.FullName
+			$_RemainingArguments.RemoveAt($i)
+			break
+		}
+		elseif ($arg -is [System.IO.FileInfo]) {
 			$Path = $arg
 			$_RemainingArguments.RemoveAt($i)
 			break
