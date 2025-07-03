@@ -692,6 +692,7 @@ function global:Get-Promptlized-Dir(
 ) {
 	$str = (Get-ChildItem -Recurse:$Recurse -Path $Path -Filter $Filter -Include $Include -Exclude $Exclude -File | ForEach-Object {
 		$content = (Get-Content $_) -join "`n"
+		if ($content.IndexOf([byte]0) -ne -1) { return }
 		$quote = '```'
 		while($content.Contains($quote)) { $quote += '`' }
 		"$_" + ':'
