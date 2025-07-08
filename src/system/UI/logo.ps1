@@ -2,6 +2,7 @@
 $EshellUI.Logo = ValueEx @{
 	Parent = $EshellUI
 	'method:Print' = {
+		param($hint)
 		$local:EshellUI = $this.Parent
 		Write-Host -NoNewline "$($VirtualTerminal.ClearScreenDown)$($VirtualTerminal.Colors.Green)E-Shell"
 		if ($EshellUI.Im.Sudo) {
@@ -17,7 +18,7 @@ $EshellUI.Logo = ValueEx @{
 		Write-Host
 		Write-Host "$($VirtualTerminal.Styles.Italic)$($VirtualTerminal.Colors.BrightMagenta)(c)$($VirtualTerminal.Colors.Reset) E-tek Corporation.$($VirtualTerminal.Styles.NoItalic) $($VirtualTerminal.Styles.Underline)All rights reserved$($VirtualTerminal.Styles.NoUnderline)."
 
-		$EshellUI.Hints.PrintRandom()
+		if ($hint) { Write-Host $hint } else { $EshellUI.Hints.PrintRandom() }
 
 		Write-Host
 	}

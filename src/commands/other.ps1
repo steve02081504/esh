@@ -368,9 +368,12 @@ function global:halt([switch]$Force, [switch]$bare) {
 	Remove-Item -Path ~/halt.log
 }
 
-function global:clswl {
+function global:hint {
+	$EshellUI.Hints.GetRandom()
+}
+function global:clswl($hint) {
 	Clear-Host
-	$EshellUI.Logo.Print()
+	$EshellUI.Logo.Print($hint)
 }
 
 function global:disconnect {
