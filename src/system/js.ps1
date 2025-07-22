@@ -17,6 +17,6 @@ $EshellUI.ExecutionHandlers.Add({
 		if ($global:LastExitCode) { $global:LastExitCode = $LastExitCodeBackup; return }
 
 		$jsexpr = "new Promise(async resolve => resolve(eval(``$jsexpr``)))"
-		"$(if($assign){"`$$assign = "})deno eval '$($jsexpr -replace "'", "''").then(async r => (await import(`"node:util`")).inspect(r, {colors: true})).then(console.log).catch(e => console.log(```${e.name}: `${e.message}``))'"
+		"$(if($assign){"`$$assign = "})deno eval '$($jsexpr -replace "'", "''").then(async r => (await import(`"node:util`")).inspect(r, {colors: true})).then(console.log).catch(e => console.log(``%c`${e.name}: `${e.message}``, `"color: red`"))'"
 	}
 }) | Out-Null
