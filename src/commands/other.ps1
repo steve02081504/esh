@@ -760,3 +760,7 @@ function global:Get-ScreenBufferAsText {
     }
     return $stringBuilder.ToString().TrimEnd() -replace "`0", ""
 }
+
+function global:wsl {
+	esh
+}

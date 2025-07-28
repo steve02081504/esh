@@ -202,7 +202,7 @@ function global:ls {
 			return $_
 		}
 		#若是有效的文件路径，保持原样
-		if (Test-Path $_) {
+		if ($_ -ne '/' -and (Test-Path $_)) {
 			return $_
 		}
 		$winPath = LinuxPathToWindowsPath $_
