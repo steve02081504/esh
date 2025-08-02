@@ -196,7 +196,7 @@ while (Test-Path Alias:ls) {
 function global:ls {
 	$_RemainingArguments = [System.Collections.ArrayList]$args
 	$IsLinuxBin = $false
-	$WinArgs = $_RemainingArguments | ForEach-Object {
+	$WinArgs = @($_RemainingArguments | ForEach-Object {
 		# 跳过参数部分
 		if ($_ -is [string] -and $_.StartsWith("-")) {
 			return $_
@@ -210,8 +210,8 @@ function global:ls {
 			return $winPath
 		}
 		return $_
-	}
-	$linuxArgs = $_RemainingArguments | ForEach-Object {
+	})
+	$linuxArgs = @($_RemainingArguments | ForEach-Object {
 		if ($_ -is [string] -and $_.StartsWith("-")) {
 			return $_
 		}
@@ -221,10 +221,13 @@ function global:ls {
 		else {
 			$_
 		}
-	}
+	})
 	#若path满足%\w+%
 	$Path = HandleCmdPath $Path
 	$IsLinuxBin = !(Test-Call Get-ChildItem $WinArgs)
+	if ($_RemainingArguments -ccontains "--help") {
+		$IsLinuxBin = $true
+	}
 	# 特殊照顾下参数有-f|-R的情况 因为太常用了
 	if ($_RemainingArguments -ccontains "-f" -or $_RemainingArguments -ccontains "-R") {
 		if ($_RemainingArguments -ccontains "-f") {
@@ -243,9 +246,7 @@ function global:ls {
 	if ($IsLinuxBin) {
 		#若是linux的ls.exe
 		#则调用ls.exe
-		$linuxArgs = '"' + $linuxArgs -join '" "' + '"'
-		$linuxArgs = $linuxArgs.Trim()
-		ls.exe $linuxArgs
+		ls.exe @linuxArgs
 	}
 	else {
 		#否则调用Get-ChildItem
