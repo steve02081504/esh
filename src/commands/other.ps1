@@ -499,7 +499,7 @@ function global:where {
 	}
 	catch {
 		if (!$Inputs -and (!$($args | Where-Object { $_ -isnot [string] }).Count)) {
-			where.exe @args
+			AutoShortPath $(where.exe @args)
 		}
 		else { throw $_ }
 	}
