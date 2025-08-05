@@ -244,6 +244,7 @@ $EshellUI = ValueEx @{
 			promptBackup = $function:prompt
 			Errors = $Error
 			TabHandler = (Get-PSReadLineKeyHandler Tab).Function
+			PredictionViewStyle = (Get-PSReadLineOption).PredictionViewStyle
 			EnterHandler = (Get-PSReadLineKeyHandler Enter).Function
 			DefaultParameterValues = $PSDefaultParameterValues
 		}
@@ -295,6 +296,7 @@ $EshellUI = ValueEx @{
 		. $PSScriptRoot/system/UI/icon.ps1
 
 		Set-PSReadLineKeyHandler -Key Tab -Function MenuComplete
+		Set-PSReadLineOption -PredictionViewStyle ListView
 		if ($this.Im.WindowsTerminal) {
 			$WTPathreg = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\wt.exe"
 			$WindowsTerminalVersion = [regex]::match((Get-ItemProperty $WTPathreg).Path, "_(.*?)_").Groups[1].Value
@@ -450,6 +452,7 @@ $EshellUI = ValueEx @{
 		Set-PSReadLineKeyHandler Tab $this.OtherData.BeforeEshLoaded.TabHandler
 		Remove-PSReadLineKeyHandler Enter
 		Set-PSReadLineKeyHandler Enter $this.OtherData.BeforeEshLoaded.EnterHandler
+		Set-PSReadLineOption -PredictionViewStyle $this.OtherData.BeforeEshLoaded.PredictionViewStyle
 		$PSDefaultParameterValues = $this.OtherData.BeforeEshLoaded.DefaultParameterValues
 		$ExecutionContext.InvokeCommand.CommandNotFoundAction = $this.OtherData.BeforeEshLoaded.CommandNotFoundHandler
 		$this.State.Started = $false
