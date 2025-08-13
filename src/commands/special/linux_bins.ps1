@@ -197,31 +197,31 @@ function global:ls {
 	$_RemainingArguments = [System.Collections.ArrayList]$args
 	$IsLinuxBin = $false
 	$WinArgs = @($_RemainingArguments | ForEach-Object {
-		# 跳过参数部分
-		if ($_ -is [string] -and $_.StartsWith("-")) {
+			# 跳过参数部分
+			if ($_ -is [string] -and $_.StartsWith("-")) {
+				return $_
+			}
+			#若是有效的文件路径，保持原样
+			if ($_ -ne '/' -and (Test-Path $_)) {
+				return $_
+			}
+			$winPath = LinuxPathToWindowsPath $_
+			if (Test-Path $winPath) {
+				return $winPath
+			}
 			return $_
-		}
-		#若是有效的文件路径，保持原样
-		if ($_ -ne '/' -and (Test-Path $_)) {
-			return $_
-		}
-		$winPath = LinuxPathToWindowsPath $_
-		if (Test-Path $winPath) {
-			return $winPath
-		}
-		return $_
-	})
+		})
 	$linuxArgs = @($_RemainingArguments | ForEach-Object {
-		if ($_ -is [string] -and $_.StartsWith("-")) {
-			return $_
-		}
-		if (Test-Path $_) {
-			WindowsPathToLinuxPath $_
-		}
-		else {
-			$_
-		}
-	})
+			if ($_ -is [string] -and $_.StartsWith("-")) {
+				return $_
+			}
+			if (Test-Path $_) {
+				WindowsPathToLinuxPath $_
+			}
+			else {
+				$_
+			}
+		})
 	#若path满足%\w+%
 	$Path = HandleCmdPath $Path
 	$IsLinuxBin = !(Test-Call Get-ChildItem $WinArgs)
@@ -681,12 +681,19 @@ function global:cat {
 	}
 	if ($_RemainingArguments.Length -eq 0) {
 		#若RemainingArguments是空的
-		if (!(Test-Path $Path)) {
+		try {
+			$FileResult = if ($Path.startsWith("http")) {
+				Invoke-WebRequest $Path
+			}
+			else {
+				Get-Content $Path
+			}
+		}
+		catch {
 			"cat: $(AutoShortPath $Path): No such file or directory"
 			$LASTEXITCODE = 1
 			return
 		}
-		$FileResult = Get-Content $Path
 		#json文件
 		if ([System.IO.Path]::GetExtension($Path) -eq ".json") {
 			try {
@@ -708,8 +715,19 @@ function global:cat {
 		if ($expr_now.StartsWith("cat ")) {
 			# 无输出对象到控制台
 			$global:ans_array = [System.Collections.ArrayList]@($result ?? $FileResult) # 设置输出对象
+			if ($FileResult -is [Microsoft.PowerShell.Commands.WebResponseObject]) {
+				$FileHeader = $FileResult.RawContent.Substring(0, $FileResult.RawContent.Length - $FileResult.Content.Length)
+				if (Test-Command highlight) {
+					$FileHeader | highlight
+					$FileResult.Content | highlight
+					if ($LASTEXITCODE -eq 0) { return }
+				}
+				Write-Host $FileHeader
+				Write-Host $FileResult.Content
+				return
+			}
 			if (Test-Command highlight) {
-				highlight $Path
+				$FileResult | highlight
 				if ($LASTEXITCODE -eq 0) { return }
 			}
 			Write-Host $FileResult
