@@ -259,13 +259,13 @@ while (Test-Path Alias:rm) {
 	Remove-Item Alias:rm
 }
 function global:rm {
-	$_RemainingArguments = [System.Collections.ArrayList]$args
+	$_RemainingArguments = [System.Collections.ArrayList]($args + @($input))
 	#从RemainingArguments中提取Path
 	$Path = $null
 	for ($i = 0; $i -lt $_RemainingArguments.Count; $i++) {
 		$arg = $_RemainingArguments[$i]
 		if ($arg -is [System.IO.FileInfo]) {
-			$Path = $arg
+			$Path = $arg.FullName
 			$_RemainingArguments.RemoveAt($i)
 			break
 		}
@@ -304,6 +304,10 @@ function global:rm {
 		#则调用rm.exe
 		$Path = WindowsPathToLinuxPath $Path
 		$_RemainingArguments = $_RemainingArguments | ForEach-Object {
+			# 若是FileInfo对象，取其FullName属性
+			if ($_ -is [System.IO.FileInfo]) {
+				$_ = $_.FullName
+			}
 			#若是有效的文件路径
 			if (Test-Path $_) {
 				#则转换为linux路径
