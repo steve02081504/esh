@@ -686,6 +686,11 @@ function global:oct($num) {
 	[System.Convert]::ToString($num, 8)
 }
 
+function global:Set-AIPrompt($Value) {
+	Set-Clipboard -Value $Value
+	Set-Content -Path $HOME/Desktop/prompt.txt -Value $Value
+}
+
 function global:Get-Promptlized-Dir(
 	$Filter,
 	$Include,
@@ -723,7 +728,7 @@ function global:Get-Promptlized-Dir(
 		$content
 		$quote
 	}) -join "`n"
-	Set-Clipboard -Value $str
+	Set-AIPrompt -Value $str
 }
 
 function global:CleanUpComputer {
