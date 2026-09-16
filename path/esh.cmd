@@ -1,2 +1,2 @@
-@%~dp0\..\opt\run %*
+@"%~dp0..\opt\run.cmd" %*
 @exit /b %ERRORLEVEL%
