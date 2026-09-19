@@ -62,11 +62,21 @@ begin {
 	}
 }
 process {
-	ps12exe $PSScriptRoot/main.ps1 "$PSScriptRoot/build/esh.exe" -NoConsole `
-		-Minifyer { $_.Replace('$Script:','$').Replace('终止脚本','终止程序') | &$PSScriptRoot/tools/psminnifyer/psminnifyer.ps1 } `
-		-TempDir "$PSScriptRoot/build" -iconFile $PSScriptRoot/../img/esh.ico `
-		-title 'E-Shell' -description 'E-Shell' -version '1960.7.17.13' `
-		-company 'E-tek' -product 'E-Sh' -copyright '(c) E-tek Corporation. All rights reserved.'
+	ps12exe $PSScriptRoot/main.ps1 "$PSScriptRoot/build/esh.exe" `
+		-Build @{
+			Minify  = { $_.Replace('$Script:','$').Replace('终止脚本','终止程序') | &$PSScriptRoot/tools/psminnifyer/psminnifyer.ps1 }
+			TempDir = "$PSScriptRoot/build"
+		} `
+		-Resources @{
+			Icon        = "$PSScriptRoot/../img/esh.ico"
+			Title       = 'E-Shell'
+			Description = 'E-Shell'
+			Version     = '1960.7.17.13'
+			Company     = 'E-tek'
+			Product     = 'E-Sh'
+			Copyright   = '(c) E-tek Corporation. All rights reserved.'
+		} `
+		-App @{ Windowed = $true }
 
 	if($MpressFile){
 		$OutputLength = (Get-Item "$PSScriptRoot/build/esh.exe").Length
