@@ -26,32 +26,6 @@ $EshellUI.BackgroundJobs.Push(@(
 		$EshellUI.OtherData.PartsUsage.EndAdd('ls-view')
 	}
 	{
-		$EshellUI.OtherData.PartsUsage.BeginAdd('discord-rpc')
-		if (-not (Get-Module -ListAvailable discordrpc)) {
-			Install-Module discordrpc -Repository PSGallery -Force
-		}
-		Import-Module discordrpc
-		$params = @{
-			ApplicationID  = "1163063885725704192"
-			LargeImageKey  = "icon-full"
-			LargeImageText = "Version 1960.7.17"
-			Label          = "Popepo 🥔"
-			Url            = "https://youtu.be/dQw4w9WgXcQ"
-			Details        = "As a $($EshellUI.Im.Sudo ? "king 👑" : "peasant 🐜")"
-			State          = "At ``$(AutoShortPath $pwd)``"
-			TimerRefresh   = 10
-			Start          = "Now"
-			UpdateScript   = {
-				$params =@{
-					State = "At ``$(AutoShortPath $pwd)``"
-				}
-				Update-DSRichPresence @params
-			}
-		}
-		Start-DSClient @params
-		$EshellUI.OtherData.PartsUsage.EndAdd('discord-rpc')
-	}
-	{
 		# 若$env:Path中存在XXXX/app-XXX\resources\app\git\mingw64\bin
 		# 则试图更新版本号
 		$GitHubDesktopsGitPath = $env:Path -split ';' | Where-Object { $_.EndsWith('\resources\app\git\mingw64\bin') }
