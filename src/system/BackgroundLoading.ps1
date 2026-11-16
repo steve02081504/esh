@@ -26,13 +26,13 @@ $EshellUI.BackgroundJobs.Push(@(
 		$EshellUI.OtherData.PartsUsage.EndAdd('ls-view')
 	}
 	{
-		# 若$env:Path中存在XXXX/app-XXX\resources\app\git\mingw64\bin
+		# 若$env:Path中存在XXXX/app-XXX\resources\app\git\cmd
 		# 则试图更新版本号
-		$GitHubDesktopsGitPath = $env:Path -split ';' | Where-Object { $_.EndsWith('\resources\app\git\mingw64\bin') }
+		$GitHubDesktopsGitPath = $env:Path -split ';' | Where-Object { $_.EndsWith('\resources\app\git\cmd') }
 		if ($GitHubDesktopsGitPath -and -not (Test-Path $GitHubDesktopsGitPath)) {
-			$GitHubDesktopPath = Split-Path $GitHubDesktopsGitPath.TrimEnd('\resources\app\git\mingw64\bin')
+			$GitHubDesktopPath = Split-Path $GitHubDesktopsGitPath.TrimEnd('\resources\app\git\cmd')
 			$newVersion = Get-ChildItem $GitHubDesktopPath -Directory -Filter 'app-*' | Where-Object { Test-Path $_\resources } | Select-Object -First 1
-			$newPath = Join-Path $newVersion.FullName 'resources\app\git\mingw64\bin'
+			$newPath = Join-Path $newVersion.FullName 'resources\app\git\cmd'
 			$env:Path = $env:Path -replace [regex]::Escape($GitHubDesktopsGitPath), $newPath
 			# 将更新后的$env:Path写入系统
 			# 首先确定原path是由user还是machine提供的，更新回对应的user或machine环境变量
