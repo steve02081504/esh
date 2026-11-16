@@ -650,7 +650,6 @@ function global:fastfetch {
 		Disk = $Disks | ForEach-Object {
 			"$($_.VolumeName)($($_.UsedSpaceGB)gb/$($_.SizeGB)gb)"
 		} | Join-String -Separator "; "
-		"AI Assist" = $EshellUI.FountAssist
 	}
 
 	$logoMaxLength = $logo | ForEach-Object { $_.Length } | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum
